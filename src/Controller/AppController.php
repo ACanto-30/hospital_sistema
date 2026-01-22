@@ -43,6 +43,9 @@ class AppController extends Controller
         $this->loadComponent('RequestHandler');
         $this->loadComponent('Flash');
 
+        // Componente de autenticación
+        $this->loadComponent('Authentication.Authentication');
+
         /*
          * Enable the following component for recommended CakePHP form protection settings.
          * see https://book.cakephp.org/4/en/controllers/components/form-protection.html
@@ -53,4 +56,12 @@ class AppController extends Controller
         $this->loadComponent('Authentication.Authentication');
         $this->loadComponent('Authorization.Authorization');
     }
+    public function beforeFilter(\Cake\Event\EventInterface $event)
+{
+    parent::beforeFilter($event);
+
+    // Permite acceder al login sin estar autenticado
+    $this->Authentication->allowUnauthenticated(['login']);
+}
+
 }

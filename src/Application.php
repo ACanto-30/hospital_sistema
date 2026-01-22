@@ -27,6 +27,12 @@ use Cake\Http\MiddlewareQueue;
 use Cake\ORM\Locator\TableLocator;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
+use Authentication\AuthenticationService;
+use Authentication\AuthenticationServiceInterface;
+use Authentication\AuthenticationServiceProviderInterface;
+use Authentication\Identifier\IdentifierInterface;
+use Cake\Routing\Router;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Application setup class.
@@ -36,7 +42,7 @@ use Cake\Routing\Middleware\RoutingMiddleware;
  *
  * @extends \Cake\Http\BaseApplication<\App\Application>
  */
-class Application extends BaseApplication
+class Application extends BaseApplication implements AuthenticationServiceProviderInterface
 {
     /**
      * Load all the application configuration and bootstrap logic.
@@ -144,4 +150,64 @@ class Application extends BaseApplication
 
         // Load more plugins here
     }
+    /**
+ * Configuración del servicio de autenticación
+ * - Password/Form para login normal
+ * - JWT para autenticación por API
+ */
+public function getAuthenticationService(
+    ServerRequestInterface $request
+): AuthenticationServiceInterface {
+    $service = new AuthenticationService();
+
+    // Campos reales de la tabla users
+    $fields = [
+        IdentifierInterface::CREDENTIAL_USERNAME => 'correo',
+        IdentifierInterface::CREDENTIAL_PASSWORD => 'contrasena_hash',
+    ];
+
+    // Redirección cuando el usuario no está autenticado
+    $service->setConfig([
+        'unauthenticatedRedirect' => Router::url([
+            'controller' => 'Users',
+            'action' => 'login',
+        ]),
+        'queryParam' => 'redirect',
+    ]);
+
+    /*
+     * Autenticadores
+     */
+
+    // Mantiene la sesión del usuario (web)
+    $service->loadAuthenticator('Authentication.Session');
+
+    // Login por formulario (web)
+    $service->loadAuthenticator('Authentication.Form', [
+        'fields' => $fields,
+        'loginUrl' => [
+            'controller' => 'Users',
+            'action' => 'login',
+        ],
+    ]);
+
+    // Autenticación por JWT (API)
+    $service->loadAuthenticator('Authentication.Jwt', [
+        'secretKey' => Configure::read('JWT.key'),
+        'algorithm' => 'HS256',
+        'header' => 'Authorization',
+        'tokenPrefix' => 'Bearer',
+        'returnPayload' => true,
+    ]);
+
+    /*
+     * Identificador
+     * Se encarga de buscar y validar el usuario en la BD
+     */
+    $service->loadIdentifier('Authentication.Password', [
+        'fields' => $fields,
+    ]);
+
+    return $service;
+}
 }
