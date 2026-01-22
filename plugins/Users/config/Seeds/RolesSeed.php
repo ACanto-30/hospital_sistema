@@ -17,7 +17,7 @@ class RolesSeed extends BaseSeed
     {
         $data = [
             [
-                'id_rol'         => 1,
+                'id'         => 1,
                 'nombre_rol'     => 'Administrador',
                 'descripcion'   => 'Acceso total al sistema',
                 'nivel_acceso'  => 1,
@@ -25,7 +25,7 @@ class RolesSeed extends BaseSeed
                 'fecha_creacion'=> '2026-01-22 20:01:59',
             ],
             [
-                'id_rol'         => 2,
+                'id'         => 2,
                 'nombre_rol'     => 'Cajero',
                 'descripcion'   => 'Registro y validación de pagos',
                 'nivel_acceso'  => 2,
@@ -33,7 +33,7 @@ class RolesSeed extends BaseSeed
                 'fecha_creacion'=> '2026-01-22 20:01:59',
             ],
             [
-                'id_rol'         => 3,
+                'id'         => 3,
                 'nombre_rol'     => 'Médico',
                 'descripcion'   => 'Consulta de información clínica de asociados',
                 'nivel_acceso'  => 3,
@@ -41,7 +41,7 @@ class RolesSeed extends BaseSeed
                 'fecha_creacion'=> '2026-01-22 20:01:59',
             ],
             [
-                'id_rol'         => 4,
+                'id'         => 4,
                 'nombre_rol'     => 'Analista',
                 'descripcion'   => 'Generación de reportes y control estadístico',
                 'nivel_acceso'  => 4,
@@ -49,7 +49,7 @@ class RolesSeed extends BaseSeed
                 'fecha_creacion'=> '2026-01-22 20:01:59',
             ],
             [
-                'id_rol'         => 5,
+                'id'         => 5,
                 'nombre_rol'     => 'Auditor',
                 'descripcion'   => 'Revisión y supervisión de registros',
                 'nivel_acceso'  => 5,
