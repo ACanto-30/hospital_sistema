@@ -14,8 +14,27 @@ class CreateRoles extends BaseMigration
      * @return void
      */
     public function change(): void
-    {
-        $table = $this->table('roles');
-        $table->create();
-    }
+{
+    $table = $this->table('roles');
+    $table
+        ->addColumn('nombre_rol', 'string', [
+            'limit' => 50,
+            'null' => false,
+        ])
+        ->addColumn('descripcion', 'string', [
+            'limit' => 255,
+            'null' => false,
+        ])
+        ->addColumn('nivel_acceso', 'integer', [
+            'null' => false,
+        ])
+        ->addColumn('activo', 'boolean', [
+            'default' => true,
+            'null' => false,
+        ])
+        ->addColumn('fecha_creacion', 'datetime', [
+            'default' => 'CURRENT_TIMESTAMP',
+        ])
+        ->create();
+}
 }
