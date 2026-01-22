@@ -37,6 +37,18 @@ class Application extends BaseApplication
     {
     parent::bootstrap();
 
+        /**
+         * Lectura segura de la llave JWT
+         * Evita crash si el archivo no existe
+         */
+        $jwtKeyPath = CONFIG . 'jwt.key';
+
+        if (file_exists($jwtKeyPath)) {
+            Configure::write('JWT.key', file_get_contents($jwtKeyPath));
+        } else {
+            Configure::write('JWT.key', null);
+        }
+
         if (PHP_SAPI === 'cli') {
             $this->bootstrapCli();
         } else {

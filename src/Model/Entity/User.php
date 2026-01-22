@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Users\Model\Entity;
+namespace App\Model\Entity;
 
 use Cake\Auth\DefaultPasswordHasher;
 use Cake\ORM\Entity;
@@ -13,25 +13,24 @@ class User extends Entity
      */
     protected array $_accessible = [
         '*' => true,
-        'id_usuario' => false,
+        'id' => false,
     ];
 
     /**
-     * Campos ocultos en JSON / arrays
+     * Campos ocultos en respuestas JSON / arrays
      */
     protected array $_hidden = [
-        'contrasena_hash',
+        'password',
     ];
 
     /**
-     * Hasheo automático de la contraseña
-     * Permite asignar: $user->contrasena = '1234'
-     * y guarda en contrasena_hash
+     * Hasheo automático de contraseña
+     * Permite asignar: $user->password = '1234'
      */
-    protected function _setContrasena(string $contrasena): ?string
+    protected function _setPassword(string $password): ?string
     {
-        if (strlen($contrasena) > 0) {
-            return (new DefaultPasswordHasher())->hash($contrasena);
+        if (strlen($password) > 0) {
+            return (new DefaultPasswordHasher())->hash($password);
         }
 
         return null;
