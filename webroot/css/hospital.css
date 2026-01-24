@@ -1,0 +1,11 @@
+.dashboard {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f4f6f8;
+    border-radius: 8px;
+}
+
+.dashboard .role-error {
+    color: #b00020;
+    font-weight: bold;
+}

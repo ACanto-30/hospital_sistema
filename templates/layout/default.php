@@ -29,6 +29,9 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
 
     <?= $this->Html->css(['normalize.min', 'milligram.min', 'fonts', 'cake']) ?>
 
+    <!-- CSS global agregado para la tarea -->
+    <?= $this->Html->css('hospital') ?>
+
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
     <?= $this->fetch('script') ?>
