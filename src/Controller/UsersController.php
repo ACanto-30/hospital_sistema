@@ -9,44 +9,76 @@ use Cake\Http\Cookie\Cookie;
 class UsersController extends AppController
 {
     /**
-     * Registro de usuarios
+     * Registro de usuarios (PÚBLICO)
      */
     public function register()
     {
-        // 1) Crear una entidad vacía
+        // ✅ Evita excepción de Authorization en página pública
+        $this->Authorization->skipAuthorization();
+
+        // 🔒 Si ya está autenticado, no mostrar registro
+        if ($this->request->getAttribute('identity')) {
+            return $this->redirect(['action' => 'dashboard']);
+        }
+
         $user = $this->Users->newEmptyEntity();
 
-        // 2) Validar que sea un POST
-        if ($this->request->is('post')) {
-
-            // 3) Parchear la entidad con los datos del formulario
+         if ($this->request->is('post')) {
             $user = $this->Users->patchEntity(
                 $user,
                 $this->request->getData()
             );
 
-            // 4) Intentar guardar el usuario
-            if ($this->Users->save($user)) {
+             if ($this->Users->save($user)) {
                 $this->Flash->success(
                     'El usuario fue registrado correctamente.'
                 );
-
-                // Redirige al login después de registrarse
-                return $this->redirect(['action' => 'login']);
+                 return $this->redirect(['action' => 'login']);
             }
 
-            // 5) Si falla el guardado
-            $this->Flash->error(
+             $this->Flash->error(
                 'No se pudo registrar el usuario. Verifique los datos ingresados.'
             );
         }
 
-        // 6) Enviar la entidad a la vista
-        $this->set(compact('user'));
+         $this->set(compact('user'));
     }
 
     /**
-     * Dashboard del usuario autenticado
+     * Login de usuarios (PÚBLICO)
+     */
+    public function login()
+    {
+        // ✅ Evita excepción de Authorization en página pública
+        $this->Authorization->skipAuthorization();
+
+        // 🔒 Si ya está autenticado, no mostrar login
+        if ($this->request->getAttribute('identity')) {
+            return $this->redirect(['action' => 'dashboard']);
+        }
+
+        if ($this->request->is('post')) {
+
+            $result = $this->Authentication->getResult();
+
+            if ($result && $result->isValid()) {
+
+                $user = $this->request->getAttribute('identity');
+
+                // Crear cookie JWT
+                $this->_setJwtCookie($user);
+
+                return $this->redirect(['action' => 'dashboard']);
+            }
+
+            $this->Flash->error(
+                'Usuario o contraseña incorrectos.'
+            );
+        }
+    }
+
+    /**
+     * Dashboard del usuario autenticado (PROTEGIDO)
      */
     public function dashboard()
     {
@@ -64,14 +96,29 @@ class UsersController extends AppController
     }
 
     /**
+     * Logout (PÚBLICO)
+     */
+    public function logout()
+    {
+        // ✅ No requiere autorización explícita
+        $this->Authorization->skipAuthorization();
+
+        $this->Authentication->logout();
+
+        // Eliminar cookie JWT
+        $this->response = $this->response->withExpiredCookie('jwt');
+
+        return $this->redirect(['action' => 'login']);
+    }
+
+    /**
      * Genera y asigna la cookie JWT segura
      */
     private function _setJwtCookie($user): void
     {
         $keyPath = CONFIG . 'jwt.key';
 
-        // Lógica defensiva
-        if (!file_exists($keyPath)) {
+         if (!file_exists($keyPath)) {
             throw new \RuntimeException('Archivo jwt.key no encontrado');
         }
 
@@ -79,10 +126,10 @@ class UsersController extends AppController
 
         $payload = [
             'sub'   => $user->id,
-            'email'=> $user->email,
-            'role' => $user->role->name ?? null,
-            'iat'  => time(),
-            'exp'  => time() + 3600
+            'email' => $user->email,
+            'role'  => $user->role->name ?? null,
+            'iat'   => time(),
+            'exp'   => time() + 3600
         ];
 
         $jwt = JWT::encode($payload, $secretKey, 'HS256');
@@ -101,5 +148,4 @@ class UsersController extends AppController
 
         $this->response = $this->response->withCookie($cookie);
     }
-}
-
+ }
