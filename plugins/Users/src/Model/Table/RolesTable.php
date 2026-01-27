@@ -3,50 +3,41 @@ declare(strict_types=1);
 
 namespace Users\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
 /**
- * Roles Model
+ * Tabla Roles
  *
- * @method \Users\Model\Entity\Role newEmptyEntity()
- * @method \Users\Model\Entity\Role newEntity(array $data, array $options = [])
- * @method array<\Users\Model\Entity\Role> newEntities(array $data, array $options = [])
- * @method \Users\Model\Entity\Role get(mixed $primaryKey, array|string $finder = 'all', \Psr\SimpleCache\CacheInterface|string|null $cache = null, \Closure|string|null $cacheKey = null, mixed ...$args)
- * @method \Users\Model\Entity\Role findOrCreate($search, ?callable $callback = null, array $options = [])
- * @method \Users\Model\Entity\Role patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method array<\Users\Model\Entity\Role> patchEntities(iterable $entities, array $data, array $options = [])
- * @method \Users\Model\Entity\Role|false save(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method \Users\Model\Entity\Role saveOrFail(\Cake\Datasource\EntityInterface $entity, array $options = [])
- * @method iterable<\Users\Model\Entity\Role>|\Cake\Datasource\ResultSetInterface<\Users\Model\Entity\Role>|false saveMany(iterable $entities, array $options = [])
- * @method iterable<\Users\Model\Entity\Role>|\Cake\Datasource\ResultSetInterface<\Users\Model\Entity\Role> saveManyOrFail(iterable $entities, array $options = [])
- * @method iterable<\Users\Model\Entity\Role>|\Cake\Datasource\ResultSetInterface<\Users\Model\Entity\Role>|false deleteMany(iterable $entities, array $options = [])
- * @method iterable<\Users\Model\Entity\Role>|\Cake\Datasource\ResultSetInterface<\Users\Model\Entity\Role> deleteManyOrFail(iterable $entities, array $options = [])
+ * Maneja la tabla `roles` en la base de datos.
+ * Aquí se definen:
+ * - La tabla real en BD
+ * - La clave primaria
+ * - Validaciones
+ * - Reglas de integridad (como UNIQUE)
  */
 class RolesTable extends Table
 {
     /**
-     * Initialize method
-     *
-     * @param array<string, mixed> $config The configuration for the Table.
-     * @return void
+     * Configuración inicial de la tabla.
      */
     public function initialize(array $config): void
     {
         parent::initialize($config);
 
+        // Nombre exacto de la tabla en la BD
         $this->setTable('roles');
+
+        // Campo que se usará para mostrar el rol en listas
         $this->setDisplayField('nombre_rol');
-        $this->setPrimaryKey('id_rol');
+
+        // En la BD la PK se llama "id"
+        $this->setPrimaryKey('id');
     }
 
     /**
-     * Default validation rules.
-     *
-     * @param \Cake\Validation\Validator $validator Validator instance.
-     * @return \Cake\Validation\Validator
+     * Validaciones por defecto.
      */
     public function validationDefault(Validator $validator): Validator
     {
@@ -55,7 +46,10 @@ class RolesTable extends Table
             ->maxLength('nombre_rol', 50)
             ->requirePresence('nombre_rol', 'create')
             ->notEmptyString('nombre_rol')
-            ->add('nombre_rol', 'unique', ['rule' => 'validateUnique', 'provider' => 'table']);
+            ->add('nombre_rol', 'unique', [
+                'rule' => 'validateUnique',
+                'provider' => 'table'
+            ]);
 
         $validator
             ->scalar('descripcion')
@@ -78,15 +72,14 @@ class RolesTable extends Table
     }
 
     /**
-     * Returns a rules checker object that will be used for validating
-     * application integrity.
-     *
-     * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
-     * @return \Cake\ORM\RulesChecker
+     * Reglas de integridad (por ejemplo UNIQUE).
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->isUnique(['nombre_rol']), ['errorField' => 'nombre_rol']);
+        // Evita roles duplicados por nombre
+        $rules->add($rules->isUnique(['nombre_rol']), [
+            'errorField' => 'nombre_rol'
+        ]);
 
         return $rules;
     }

@@ -5,147 +5,164 @@ namespace Users\Controller;
 
 use App\Controller\AppController;
 
-/**
- * Users Controller
- */
 class UsersController extends AppController
 {
-    /**
-     * Initialize controller
-     */
     public function initialize(): void
     {
         parent::initialize();
 
-        // Permitir acceso sin autenticación al login
-        $this->Authentication->allowUnauthenticated(['login']);
+        $this->Authentication->allowUnauthenticated(['login', 'register']);
     }
 
-    /**
-     * Index method
-     */
     public function index()
     {
-        $query = $this->Users->find();
-        $users = $this->paginate($query);
-
+        $users = $this->paginate($this->Users->find()->contain(['Roles']));
         $this->set(compact('users'));
     }
 
-    /**
-     * View method
-     */
     public function view($id = null)
     {
-        $user = $this->Users->get($id, contain: []);
+        $user = $this->Users->get($id, [
+            'contain' => ['Roles'],
+        ]);
+
         $this->set(compact('user'));
     }
 
-    /**
-     * Add method
-     */
     public function add()
     {
         $user = $this->Users->newEmptyEntity();
+
+        $roles = $this->Users->Roles->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'nombre_rol',
+            'conditions' => ['Roles.activo' => 1],
+            'order' => ['Roles.nombre_rol' => 'ASC'],
+        ])->toArray();
+
         if ($this->request->is('post')) {
-            $user = $this->Users->patchEntity($user, $this->request->getData());
+            $data = $this->request->getData();
+
+            if (empty($data['estado_usuario'])) {
+                $data['estado_usuario'] = 'activo';
+            }
+
+            $user = $this->Users->patchEntity($user, $data);
+
             if ($this->Users->save($user)) {
-                $this->Flash->success(__('The user has been saved.'));
+                $this->Flash->success('El usuario se guardó correctamente.');
                 return $this->redirect(['action' => 'index']);
             }
-            $this->Flash->error(__('The user could not be saved. Please, try again.'));
+
+            $this->Flash->error('No se pudo guardar el usuario.');
         }
-        $this->set(compact('user'));
+
+        $this->set(compact('user', 'roles'));
     }
 
-    /**
-     * Edit method
-     */
     public function edit($id = null)
     {
-        $user = $this->Users->get($id, contain: []);
+        $user = $this->Users->get($id);
+
+        $roles = $this->Users->Roles->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'nombre_rol',
+            'conditions' => ['Roles.activo' => 1],
+            'order' => ['Roles.nombre_rol' => 'ASC'],
+        ])->toArray();
+
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $user = $this->Users->patchEntity($user, $this->request->getData());
+            $data = $this->request->getData();
+
+            if (empty($data['estado_usuario'])) {
+                $data['estado_usuario'] = 'activo';
+            }
+
+            $user = $this->Users->patchEntity($user, $data);
+
             if ($this->Users->save($user)) {
-                $this->Flash->success(__('The user has been saved.'));
+                $this->Flash->success('El usuario se actualizó correctamente.');
                 return $this->redirect(['action' => 'index']);
             }
-            $this->Flash->error(__('The user could not be saved. Please, try again.'));
+
+            $this->Flash->error('No se pudo actualizar el usuario.');
         }
-        $this->set(compact('user'));
+
+        $this->set(compact('user', 'roles'));
     }
 
-    /**
-     * Delete method
-     */
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
+
         $user = $this->Users->get($id);
+
         if ($this->Users->delete($user)) {
-            $this->Flash->success(__('The user has been deleted.'));
+            $this->Flash->success('El usuario fue eliminado.');
         } else {
-            $this->Flash->error(__('The user could not be deleted. Please, try again.'));
+            $this->Flash->error('No se pudo eliminar el usuario.');
         }
 
         return $this->redirect(['action' => 'index']);
     }
 
-    /**
-     * Login method
-     * Valida Authentication, obtiene el usuario y redirige
-     */
+    public function register()
+    {
+        $user = $this->Users->newEmptyEntity();
+
+        $roles = $this->Users->Roles->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'nombre_rol',
+            'conditions' => ['Roles.activo' => 1],
+            'order' => ['Roles.nombre_rol' => 'ASC'],
+        ])->toArray();
+
+        if ($this->request->is('post')) {
+            $data = $this->request->getData();
+
+            if (empty($data['estado_usuario'])) {
+                $data['estado_usuario'] = 'activo';
+            }
+
+            $user = $this->Users->patchEntity($user, $data);
+
+            if ($this->Users->save($user)) {
+                $this->Flash->success('Usuario registrado correctamente.');
+                return $this->redirect(['action' => 'login']);
+            }
+
+            $this->Flash->error('No se pudo registrar el usuario.');
+        }
+
+        $this->set(compact('user', 'roles'));
+    }
+
     public function login()
     {
         $this->request->allowMethod(['get', 'post']);
 
         if ($this->request->is('post')) {
-
-            // 1️⃣ Obtener resultado de Authentication
             $result = $this->Authentication->getResult();
 
-            // 2️⃣ Validar autenticación
             if ($result && $result->isValid()) {
-
-                // 3️⃣ Obtener usuario autenticado
-                $user = $this->Authentication->getIdentity();
-
-                // 4️⃣ Guardar usuario en sesión
-                $this->request->getSession()->write('Auth.User', $user);
-
-                // 5️⃣ Redirigir
-                $redirect = $this->Authentication->getLoginRedirect() ?? [
-                    'controller' => 'Pages',
-                    'action' => 'display',
-                    'home'
-                ];
-
-                return $this->redirect($redirect);
+                return $this->redirect(
+                    $this->Authentication->getLoginRedirect() ?? [
+                        'controller' => 'Pages',
+                        'action' => 'display',
+                        'home'
+                    ]
+                );
             }
 
-            // ❌ Credenciales incorrectas
-            $this->Flash->error(__('Invalid username or password'));
+            $this->Flash->error('Usuario o contraseña incorrectos.');
         }
     }
 
-    /**
-     * Logout method
-     * Destruye sesión y cookie
-     */
     public function logout()
     {
-        // 1️⃣ Cerrar sesión con Authentication
         $this->Authentication->logout();
-
-        // 2️⃣ Destruir sesión completamente
         $this->request->getSession()->destroy();
 
-        // 3️⃣ Eliminar cookie de autenticación (si existe)
-        if ($this->request->getCookie('Auth')) {
-            $this->response = $this->response->withExpiredCookie('Auth');
-        }
-
-        // 4️⃣ Redirigir al login
         return $this->redirect([
             'plugin' => 'Users',
             'controller' => 'Users',
