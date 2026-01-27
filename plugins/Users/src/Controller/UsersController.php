@@ -169,4 +169,9 @@ class UsersController extends AppController
             'action' => 'login'
         ]);
     }
+
+    public function dashboard()
+    {
+        $this->viewBuilder()->setLayout('dashboard');
+    }
 }

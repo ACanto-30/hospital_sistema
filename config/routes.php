@@ -15,23 +15,7 @@ return function (RouteBuilder $routes): void {
             ['controller' => 'Pages', 'action' => 'display', 'home']
         );
 
-        // Login (SRC)
-        $builder->connect(
-            '/login',
-            ['controller' => 'Users', 'action' => 'login']
-        );
 
-        // Register (SRC)
-        $builder->connect(
-            '/register',
-            ['controller' => 'Users', 'action' => 'register']
-        );
-
-        // Logout (SRC)
-        $builder->connect(
-            '/logout',
-            ['controller' => 'Users', 'action' => 'logout']
-        );
 
         // Si quieres CRUD de usuarios con URLs normales:
         // /users, /users/add, /users/edit/1, etc.

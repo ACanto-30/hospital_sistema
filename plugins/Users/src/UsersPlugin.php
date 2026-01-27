@@ -6,30 +6,14 @@ namespace Users;
 use Cake\Core\BasePlugin;
 use Cake\Routing\RouteBuilder;
 
-/**
- * Plugin Users
- *
- * Aquí se definen las rutas del plugin para el manejo de:
- * - login
- * - register
- * - logout
- *
- * Todas las rutas del plugin quedan bajo el prefijo:
- * /users
- */
 class UsersPlugin extends BasePlugin
 {
     /**
      * Rutas del plugin Users.
-     *
-     * - /users/login
-     * - /users/register
-     * - /users/logout
      */
     public function routes(RouteBuilder $routes): void
     {
-        $routes->plugin('Users', ['path' => '/users'], function (RouteBuilder $builder) {
-
+        $routes->plugin('Users', ['path' => '/'], function (RouteBuilder $builder) {
             // Login
             $builder->connect('/login', [
                 'controller' => 'Users',
@@ -48,11 +32,15 @@ class UsersPlugin extends BasePlugin
                 'action' => 'logout'
             ]);
 
-            // Rutas por defecto del plugin
+            // Dashboard
+            $builder->connect('/dashboard', [
+                'controller' => 'Users',
+                'action' => 'dashboard'
+            ]);
+
             $builder->fallbacks();
         });
 
         parent::routes($routes);
     }
 }
-

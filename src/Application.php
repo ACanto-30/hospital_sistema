@@ -53,7 +53,10 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             $this->addPlugin('DebugKit');
         }
 
-       
+        // Cargar Plugin de Usuarios
+        $this->addPlugin('Users', ['routes' => true]);
+
+
     }
 
     /**
@@ -114,6 +117,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
         // Si no está logueado, lo mando al login
         $service->setConfig([
             'unauthenticatedRedirect' => Router::url([
+                'plugin' => 'Users',
                 'controller' => 'Users',
                 'action' => 'login',
             ]),
@@ -127,6 +131,7 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
         $service->loadAuthenticator('Authentication.Form', [
             'fields' => $fields,
             'loginUrl' => [
+                'plugin' => 'Users',
                 'controller' => 'Users',
                 'action' => 'login',
             ],

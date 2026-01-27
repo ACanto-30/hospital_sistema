@@ -1,42 +1,29 @@
 <?php
 /**
- * @var \App\View\AppView $this
- * @var \App\Model\Entity\User $user
- * @var array $roles   // lista enviada desde el controlador
+ * Registro de usuarios
  */
 ?>
 
-<h1>Registro de Usuario</h1>
+<h1>Registro de usuario</h1>
+
+<?= $this->Flash->render() ?>
 
 <?= $this->Form->create($user) ?>
 
-<fieldset>
-    <legend>Crear cuenta</legend>
+    <?= $this->Form->control('nombre_completo') ?>
+    <?= $this->Form->control('nombre_usuario') ?>
+    <?= $this->Form->control('correo') ?>
 
-    <?= $this->Form->control('name', [
-        'label' => 'Nombre completo',
-        'required' => true
+    <?= $this->Form->control('contrasena_hash', [
+        'type' => 'password',
+        'label' => 'Contraseña'
     ]) ?>
 
-    <?= $this->Form->control('email', [
-        'label' => 'Correo electrónico',
-        'required' => true
-    ]) ?>
-
-    <?= $this->Form->control('password', [
-        'label' => 'Contraseña',
-        'required' => true
-    ]) ?>
-
-    <?= $this->Form->control('role_id', [
-        'label'   => 'Rol',
-        'type'    => 'select',
+    <?= $this->Form->control('id_rol', [
+        'type' => 'select',
         'options' => $roles,
-        'empty'   => 'Seleccione un rol',
-        'required'=> true
+        'label' => 'Rol'
     ]) ?>
-</fieldset>
 
-<?= $this->Form->button('Registrarse') ?>
-
+    <?= $this->Form->button('Registrarse') ?>
 <?= $this->Form->end() ?>

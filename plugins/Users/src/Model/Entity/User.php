@@ -3,34 +3,34 @@ declare(strict_types=1);
 
 namespace Users\Model\Entity;
 
-use Cake\Auth\DefaultPasswordHasher;
+use Authentication\PasswordHasher\DefaultPasswordHasher;
 use Cake\ORM\Entity;
 
 /**
  * Entidad User
  *
- * Representa un usuario del sistema (tabla `usuarios`).
- * Aquí se define qué campos se pueden asignar con patchEntity()
- * y cómo se genera el hash de la contraseña.
+ * Representa un registro de la tabla `usuarios`.
+ * Aquí se controla qué campos se pueden asignar con patchEntity()
+ * y se genera el hash de la contraseña.
  */
 class User extends Entity
 {
     /**
      * Campos permitidos para asignación masiva.
-     * (Evito usar '*' => true por seguridad)
+     * Evito '*' => true por seguridad.
      */
     protected array $_accessible = [
         'id_rol' => true,
         'nombre_completo' => true,
         'nombre_usuario' => true,
         'correo' => true,
-        'contrasena_hash' => true, // aquí entra la contraseña en texto plano y se hashea con el setter
+        'contrasena_hash' => true,   // aquí entra la contraseña en texto plano y se hashea con el setter
         'estado_usuario' => true,
         'fecha_creacion' => true,
     ];
 
     /**
-     * Campos ocultos (no se deben exponer al convertir en array/json)
+     * Campos ocultos al convertir a array/json.
      */
     protected array $_hidden = [
         'contrasena_hash',
@@ -38,11 +38,7 @@ class User extends Entity
 
     /**
      * Setter automático:
-     * Cada vez que se asigne "contrasena_hash", se guarda hasheada.
-     *
-     * Ejemplo:
-     * $user = $this->Users->patchEntity($user, ['contrasena_hash' => '1234']);
-     * -> se guardará el hash en BD.
+     * Cuando se asigna contrasena_hash, se guarda hasheado.
      */
     protected function _setContrasenaHash(?string $value): ?string
     {
@@ -53,4 +49,3 @@ class User extends Entity
         return (new DefaultPasswordHasher())->hash($value);
     }
 }
-
