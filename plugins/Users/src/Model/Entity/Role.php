@@ -6,25 +6,26 @@ namespace Users\Model\Entity;
 use Cake\ORM\Entity;
 
 /**
- * Role Entity
+ * Entidad Role
  *
- * @property int $id_rol
- * @property string $nombre_rol
- * @property string|null $descripcion
- * @property int|null $nivel_acceso
- * @property bool|null $activo
- * @property \Cake\I18n\DateTime|null $fecha_creacion
+ * Representa un registro de la tabla `roles`.
+ * Contiene la información del rol del usuario dentro del sistema.
+ *
+ * Campos principales:
+ * - id: identificador único del rol
+ * - nombre_rol: nombre del rol
+ * - descripcion: descripción del rol
+ * - nivel_acceso: nivel de permisos del rol
+ * - activo: indica si el rol está activo
+ * - fecha_creacion: fecha en la que se creó el rol
  */
 class Role extends Entity
 {
     /**
-     * Fields that can be mass assigned using newEntity() or patchEntity().
+     * Campos que pueden asignarse de forma masiva usando
+     * newEntity() o patchEntity().
      *
-     * Note that when '*' is set to true, this allows all unspecified fields to
-     * be mass assigned. For security purposes, it is advised to set '*' to false
-     * (or remove it), and explicitly make individual fields accessible as needed.
-     *
-     * @var array<string, bool>
+     * Por seguridad, el campo id no es asignable.
      */
     protected array $_accessible = [
         'nombre_rol' => true,

@@ -3,149 +3,188 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use Firebase\JWT\JWT;
-use Cake\Http\Cookie\Cookie;
-
+/**
+ * UsersController (App)
+ *
+ * Maneja:
+ * - CRUD de usuarios
+ * - register
+ * - login
+ * - logout
+ */
 class UsersController extends AppController
 {
-    /**
-     * Registro de usuarios (PÚBLICO)
-     */
-    public function register()
+    public function initialize(): void
     {
-        // ✅ Evita excepción de Authorization en página pública
-        $this->Authorization->skipAuthorization();
+        parent::initialize();
 
-        // 🔒 Si ya está autenticado, no mostrar registro
-        if ($this->request->getAttribute('identity')) {
-            return $this->redirect(['action' => 'dashboard']);
-        }
-
-        $user = $this->Users->newEmptyEntity();
-
-         if ($this->request->is('post')) {
-            $user = $this->Users->patchEntity(
-                $user,
-                $this->request->getData()
-            );
-
-             if ($this->Users->save($user)) {
-                $this->Flash->success(
-                    'El usuario fue registrado correctamente.'
-                );
-                 return $this->redirect(['action' => 'login']);
-            }
-
-             $this->Flash->error(
-                'No se pudo registrar el usuario. Verifique los datos ingresados.'
-            );
-        }
-
-         $this->set(compact('user'));
+        // Permite acceso sin login a estas acciones
+        $this->Authentication->allowUnauthenticated(['login', 'register']);
     }
 
-    /**
-     * Login de usuarios (PÚBLICO)
-     */
-    public function login()
+    public function index()
     {
-        // ✅ Evita excepción de Authorization en página pública
-        $this->Authorization->skipAuthorization();
+        $users = $this->paginate(
+            $this->Users->find()->contain(['Roles'])
+        );
 
-        // 🔒 Si ya está autenticado, no mostrar login
-        if ($this->request->getAttribute('identity')) {
-            return $this->redirect(['action' => 'dashboard']);
-        }
-
-        if ($this->request->is('post')) {
-
-            $result = $this->Authentication->getResult();
-
-            if ($result && $result->isValid()) {
-
-                $user = $this->request->getAttribute('identity');
-
-                // Crear cookie JWT
-                $this->_setJwtCookie($user);
-
-                return $this->redirect(['action' => 'dashboard']);
-            }
-
-            $this->Flash->error(
-                'Usuario o contraseña incorrectos.'
-            );
-        }
+        $this->set(compact('users'));
     }
 
-    /**
-     * Dashboard del usuario autenticado (PROTEGIDO)
-     */
-    public function dashboard()
+    public function view($id = null)
     {
-        $identity = $this->request->getAttribute('identity');
-
-        if (!$identity) {
-            return $this->redirect(['action' => 'login']);
-        }
-
-        $user = $this->Users->get($identity->id, [
-            'contain' => ['Roles']
+        $user = $this->Users->get($id, [
+            'contain' => ['Roles'],
         ]);
 
         $this->set(compact('user'));
     }
 
-    /**
-     * Logout (PÚBLICO)
-     */
-    public function logout()
+    public function add()
     {
-        // ✅ No requiere autorización explícita
-        $this->Authorization->skipAuthorization();
+        $user = $this->Users->newEmptyEntity();
 
-        $this->Authentication->logout();
+        $roles = $this->Users->Roles->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'nombre_rol',
+            'conditions' => ['Roles.activo' => 1],
+            'order' => ['Roles.nombre_rol' => 'ASC'],
+        ])->toArray();
 
-        // Eliminar cookie JWT
-        $this->response = $this->response->withExpiredCookie('jwt');
+        if ($this->request->is('post')) {
+            $data = $this->request->getData();
 
-        return $this->redirect(['action' => 'login']);
-    }
+            if (empty($data['estado_usuario'])) {
+                $data['estado_usuario'] = 'activo';
+            }
 
-    /**
-     * Genera y asigna la cookie JWT segura
-     */
-    private function _setJwtCookie($user): void
-    {
-        $keyPath = CONFIG . 'jwt.key';
+            $user = $this->Users->patchEntity($user, $data);
 
-         if (!file_exists($keyPath)) {
-            throw new \RuntimeException('Archivo jwt.key no encontrado');
+            if ($this->Users->save($user)) {
+                $this->Flash->success('El usuario se guardó correctamente.');
+                return $this->redirect(['action' => 'index']);
+            }
+
+            $this->Flash->error('No se pudo guardar el usuario.');
         }
 
-        $secretKey = file_get_contents($keyPath);
-
-        $payload = [
-            'sub'   => $user->id,
-            'email' => $user->email,
-            'role'  => $user->role->name ?? null,
-            'iat'   => time(),
-            'exp'   => time() + 3600
-        ];
-
-        $jwt = JWT::encode($payload, $secretKey, 'HS256');
-
-        $cookie = new Cookie(
-            'jwt',
-            $jwt,
-            time() + 3600,
-            '/',
-            null,
-            true,   // secure
-            true,   // httpOnly
-            false,
-            Cookie::SAMESITE_STRICT
-        );
-
-        $this->response = $this->response->withCookie($cookie);
+        $this->set(compact('user', 'roles'));
     }
- }
+
+    public function edit($id = null)
+    {
+        $user = $this->Users->get($id);
+
+        $roles = $this->Users->Roles->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'nombre_rol',
+            'conditions' => ['Roles.activo' => 1],
+            'order' => ['Roles.nombre_rol' => 'ASC'],
+        ])->toArray();
+
+        if ($this->request->is(['patch', 'post', 'put'])) {
+            $data = $this->request->getData();
+
+            if (empty($data['estado_usuario'])) {
+                $data['estado_usuario'] = 'activo';
+            }
+
+            $user = $this->Users->patchEntity($user, $data);
+
+            if ($this->Users->save($user)) {
+                $this->Flash->success('El usuario se actualizó correctamente.');
+                return $this->redirect(['action' => 'index']);
+            }
+
+            $this->Flash->error('No se pudo actualizar el usuario.');
+        }
+
+        $this->set(compact('user', 'roles'));
+    }
+
+    public function delete($id = null)
+    {
+        $this->request->allowMethod(['post', 'delete']);
+
+        $user = $this->Users->get($id);
+
+        if ($this->Users->delete($user)) {
+            $this->Flash->success('El usuario fue eliminado.');
+        } else {
+            $this->Flash->error('No se pudo eliminar el usuario.');
+        }
+
+        return $this->redirect(['action' => 'index']);
+    }
+
+    /**
+     * Register
+     *
+     * Cumple la consigna:
+     * - validar POST
+     * - crear entidad vacía
+     * - patchEntity
+     * - save
+     * - Flash error si falla
+     */
+    public function register()
+    {
+        $user = $this->Users->newEmptyEntity();
+
+        $roles = $this->Users->Roles->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'nombre_rol',
+            'conditions' => ['Roles.activo' => 1],
+            'order' => ['Roles.nombre_rol' => 'ASC'],
+        ])->toArray();
+
+        if ($this->request->is('post')) {
+            $data = $this->request->getData();
+
+            if (empty($data['estado_usuario'])) {
+                $data['estado_usuario'] = 'activo';
+            }
+
+            $user = $this->Users->patchEntity($user, $data);
+
+            if ($this->Users->save($user)) {
+                $this->Flash->success('Usuario registrado correctamente.');
+                return $this->redirect(['action' => 'login']);
+            }
+
+            $this->Flash->error('No se pudo registrar el usuario.');
+        }
+
+        $this->set(compact('user', 'roles'));
+    }
+
+    public function login()
+    {
+        $this->request->allowMethod(['get', 'post']);
+
+        if ($this->request->is('post')) {
+            $result = $this->Authentication->getResult();
+
+            if ($result && $result->isValid()) {
+                return $this->redirect([
+                    'controller' => 'Pages',
+                    'action' => 'display',
+                    'home'
+                ]);
+            }
+
+            $this->Flash->error('Usuario o contraseña incorrectos.');
+        }
+    }
+
+    public function logout()
+    {
+        $this->Authentication->logout();
+        $this->request->getSession()->destroy();
+
+        return $this->redirect([
+            'controller' => 'Users',
+            'action' => 'login'
+        ]);
+    }
+}

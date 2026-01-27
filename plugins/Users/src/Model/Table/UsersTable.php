@@ -3,23 +3,38 @@ declare(strict_types=1);
 
 namespace Users\Model\Table;
 
+use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
-use Cake\ORM\RulesChecker;
 
+/**
+ * Tabla Usuarios
+ *
+ * Maneja la tabla `usuarios` en la base de datos.
+ * Aquí se definen:
+ * - Tabla real en BD
+ * - Clave primaria
+ * - Campo de visualización
+ * - Relaciones (Usuarios pertenece a Roles)
+ * - Validaciones
+ * - Reglas de integridad (unique y FK)
+ */
 class UsersTable extends Table
 {
     public function initialize(array $config): void
     {
         parent::initialize($config);
 
-        $this->setTable('users');
-        $this->setPrimaryKey('id_usuario');
+        // Tabla exacta en la BD
+        $this->setTable('usuarios');
+
+        // PK
+        $this->setPrimaryKey('id');
+
+        // Campo que se usa para mostrar el usuario en listados
         $this->setDisplayField('nombre_usuario');
 
-        /**
-         * Relación con Roles
-         */
+        // Relación: cada usuario pertenece a un rol
         $this->belongsTo('Roles', [
             'foreignKey' => 'id_rol',
             'joinType' => 'INNER',
@@ -27,37 +42,35 @@ class UsersTable extends Table
         ]);
     }
 
-    /**
-     * Validaciones
-     */
     public function validationDefault(Validator $validator): Validator
     {
         $validator
-            ->integer('id_usuario')
-            ->allowEmptyString('id_usuario', null, 'create');
+            ->integer('id')
+            ->allowEmptyString('id', null, 'create');
 
         $validator
             ->integer('id_rol')
-            ->notEmptyString('id_rol', 'El rol es obligatorio');
+            ->notEmptyString('id_rol');
 
         $validator
             ->scalar('nombre_completo')
-            ->maxLength('nombre_completo', 150)
+            ->maxLength('nombre_completo', 100)
             ->notEmptyString('nombre_completo');
 
         $validator
             ->scalar('nombre_usuario')
-            ->maxLength('nombre_usuario', 100)
+            ->maxLength('nombre_usuario', 50)
             ->notEmptyString('nombre_usuario');
 
         $validator
             ->email('correo')
-            ->maxLength('correo', 150)
+            ->maxLength('correo', 100)
             ->notEmptyString('correo');
 
+        // En este proyecto guardo el hash en contrasena_hash.
+        // El hash se genera en la Entity usando el setter _setContrasenaHash().
         $validator
             ->scalar('contrasena_hash')
-            ->maxLength('contrasena_hash', 255)
             ->notEmptyString('contrasena_hash');
 
         $validator
@@ -67,31 +80,19 @@ class UsersTable extends Table
 
         $validator
             ->dateTime('fecha_creacion')
-            ->notEmptyDateTime('fecha_creacion');
+            ->allowEmptyDateTime('fecha_creacion');
 
         return $validator;
     }
 
-    /**
-     * Reglas de integridad
-     */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->isUnique(
-            ['nombre_usuario'],
-            'El nombre de usuario ya existe'
-        ));
+        // Correo y nombre de usuario únicos
+        $rules->add($rules->isUnique(['correo']), ['errorField' => 'correo']);
+        $rules->add($rules->isUnique(['nombre_usuario']), ['errorField' => 'nombre_usuario']);
 
-        $rules->add($rules->isUnique(
-            ['correo'],
-            'El correo ya está registrado'
-        ));
-
-        $rules->add($rules->existsIn(
-            ['id_rol'],
-            'Roles',
-            'El rol seleccionado no existe'
-        ));
+        // FK: id_rol debe existir en la tabla roles
+        $rules->add($rules->existsIn(['id_rol'], 'Roles'), ['errorField' => 'id_rol']);
 
         return $rules;
     }
