@@ -1,0 +1,93 @@
+:root{
+  --bg:#f6f7fb;
+  --card:#fff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --primary:#0c7b47;
+  --danger:#dc2626;
+  --radius:14px;
+  --shadow:0 10px 30px rgba(0,0,0,.10);
+}
+
+*{ box-sizing:border-box; }
+body{
+  margin:0;
+  color:var(--text);
+  font-family:"Segoe UI", Arial, sans-serif;
+  background:var(--bg);
+}
+
+/* Reutilizables */
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:22px;
+}
+.page-title{ margin:0 0 14px 0; font-size:1.6rem; }
+
+/* Botones */
+.btn{
+  border:0;
+  padding:12px;
+  border-radius:12px;
+  font-weight:800;
+  cursor:pointer;
+
+  /* ayuda a centrar texto/íconos */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+
+  width:100%;
+}
+.btn-primary{ background:var(--primary); color:#fff; }
+.btn-primary:hover{ filter:brightness(.95); }
+
+/* Links */
+.link{ color:var(--primary); text-decoration:none; font-weight:800; }
+.link:hover{ text-decoration:underline; }
+
+/* Mensajes */
+.help{ color:var(--muted); font-size:.92rem; }
+.help-error{ color:var(--danger); font-size:.92rem; margin-top:6px; }
+
+/* Inputs (soporta input, select, textarea) */
+.input-group{ position:relative; margin-bottom:14px; }
+
+.input-group input,
+.input-group select,
+.input-group textarea{
+  width:100%;
+  padding:12px 44px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,.15);
+  outline:none;
+  font-size:14px;
+}
+
+.input-group textarea{
+  padding:12px 14px;
+  min-height:110px;
+  resize:vertical;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus{
+  border-color: rgba(12,123,71,.55);
+  box-shadow: 0 0 0 4px rgba(12,123,71,.12);
+}
+
+/* Iconos */
+.icon{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:18px;
+  height:18px;
+  color:rgba(0,0,0,.55);
+}
+.icon.left{ left:14px; }
+.icon.right{ right:14px; cursor:pointer; }

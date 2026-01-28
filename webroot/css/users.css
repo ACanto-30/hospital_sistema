@@ -1,20 +1,24 @@
-/* ===== USERS: LOGIN & REGISTER ===== */
+/* ===== USERS: LOGIN & REGISTER (AUTH ONLY) ===== */
 
-*{
-    box-sizing:border-box;
-    font-family:"Segoe UI", Arial, sans-serif;
-}
-
+/* Fondo exclusivo del login / register */
 body{
     margin:0;
     min-height:100vh;
     background:
-        linear-gradient(160deg,#0c7b47 0%, #1fa463 55%, #f2c200 55%, #f2c200 60%, #ffffff 60%);
+        linear-gradient(
+            160deg,
+            #0c7b47 0%,
+            #1fa463 55%,
+            #f2c200 55%,
+            #f2c200 60%,
+            #ffffff 60%
+        );
     display:flex;
     justify-content:center;
     align-items:center;
 }
 
+/* Contenedor */
 .wrapper{
     width:100%;
     max-width:430px;
@@ -35,9 +39,8 @@ body{
     margin-right:12px;
 }
 
-/* CARD */
+/* CARD (solo refinamiento visual, estructura en app.css) */
 .card{
-    background:#ffffff;
     border-radius:22px;
     padding:30px 26px;
     box-shadow:0 22px 45px rgba(0,0,0,.18);
@@ -55,69 +58,37 @@ body{
     font-size:14px;
 }
 
-/* INPUTS */
-.input-group{
-    position:relative;
-    margin-bottom:14px;
-}
-
+/* INPUTS (solo refinamiento visual) */
 .input-group input,
 .input-group select{
-    width:100%;
     padding:14px 44px;
     border-radius:14px;
-    border:1px solid #e1e1e1;
     font-size:14px;
-    outline:none;
 }
-
 .input-group input::placeholder{
     color:#9a9a9a;
 }
-
 .input-group select{
     appearance:none;
 }
 
+/* Iconos */
 .input-group .icon{
-    position:absolute;
-    top:50%;
-    transform:translateY(-50%);
-    width:18px;
-    height:18px;
     color:#0c7b47;
 }
 
-.input-group .left{
-    left:14px;
-}
-
-.input-group .right{
-    right:14px;
-    cursor:pointer;
-}
-
-/* BUTTON */
-button{
-    width:100%;
+/* BOTÓN AUTH (override del btn global) */
+.btn-primary{
     margin-top:12px;
     padding:16px;
-    border:none;
     border-radius:16px;
-    background:linear-gradient(180deg,#1fa463,#0c7b47);
-    color:#fff;
     font-size:18px;
     font-weight:600;
-    cursor:pointer;
+    background:linear-gradient(180deg,#1fa463,#0c7b47);
     box-shadow:0 8px 18px rgba(0,0,0,.18);
-
-    /* CENTRADO PERFECTO DEL TEXTO */
-    display:flex;
-    align-items:center;
-    justify-content:center;
 }
 
-/* TEXTS */
+/* Textos inferiores */
 .forgot,
 .terms,
 .login{
@@ -128,7 +99,6 @@ button{
 }
 
 .forgot a,
-.register a,
 .login a{
     color:#f2b705;
     font-weight:600;

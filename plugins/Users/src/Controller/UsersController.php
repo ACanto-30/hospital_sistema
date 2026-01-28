@@ -108,6 +108,9 @@ class UsersController extends AppController
 
     public function register()
     {
+        // Layout de autenticación para aplicar tus estilos globales y de users
+        $this->viewBuilder()->setLayout('auth');
+
         $user = $this->Users->newEmptyEntity();
 
         $roles = $this->Users->Roles->find('list', [
@@ -139,17 +142,21 @@ class UsersController extends AppController
 
     public function login()
     {
+        // Layout de autenticación para aplicar estilos
+        $this->viewBuilder()->setLayout('auth');
+
         $this->request->allowMethod(['get', 'post']);
 
         if ($this->request->is('post')) {
             $result = $this->Authentication->getResult();
 
             if ($result && $result->isValid()) {
+                // Si hay redirect guardado por Auth, se usa si no se manda al dashboard
                 return $this->redirect(
                     $this->Authentication->getLoginRedirect() ?? [
-                        'controller' => 'Pages',
-                        'action' => 'display',
-                        'home'
+                        'plugin' => 'Users',
+                        'controller' => 'Users',
+                        'action' => 'dashboard'
                     ]
                 );
             }
