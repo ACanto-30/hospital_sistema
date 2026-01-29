@@ -1,19 +1,6 @@
 <?php
 declare(strict_types=1);
 
-/**
- * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- *
- * Licensed under The MIT License
- * For full copyright and license information, please see the LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
- * @link      https://cakephp.org CakePHP(tm) Project
- * @since     3.3.0
- * @license   https://opensource.org/licenses/mit-license.php MIT License
- */
 namespace App;
 
 use Cake\Core\Configure;
@@ -27,45 +14,31 @@ use Cake\Http\MiddlewareQueue;
 use Cake\ORM\Locator\TableLocator;
 use Cake\Routing\Middleware\AssetMiddleware;
 use Cake\Routing\Middleware\RoutingMiddleware;
-use Authentication\AuthenticationService;
-use Authentication\AuthenticationServiceInterface;
-use Authentication\AuthenticationServiceProviderInterface;
-use Authentication\Identifier\IdentifierInterface;
 use Cake\Routing\Router;
 use Psr\Http\Message\ServerRequestInterface;
 
-/**
- * Application setup class.
- *
- * This defines the bootstrapping logic and middleware layers you
- * want to use in your application.
- *
- * @extends \Cake\Http\BaseApplication<\App\Application>
- */
+use Authentication\AuthenticationService;
+use Authentication\AuthenticationServiceInterface;
+use Authentication\AuthenticationServiceProviderInterface;
+use Authentication\Middleware\AuthenticationMiddleware;
+
 class Application extends BaseApplication implements AuthenticationServiceProviderInterface
 {
     /**
-     * Load all the application configuration and bootstrap logic.
-     *
-     * @return void
+     * Bootstrap general de la aplicación
      */
     public function bootstrap(): void
     {
-        // Call parent to load bootstrap from files.
         parent::bootstrap();
 
-        /**
-         * Lectura segura de la llave JWT
-         * Evita crash si el archivo no existe
-         */
+        // JWT (opcional, por si luego uso API)
         $jwtKeyPath = CONFIG . 'jwt.key';
+        Configure::write(
+            'JWT.key',
+            file_exists($jwtKeyPath) ? file_get_contents($jwtKeyPath) : null
+        );
 
-        if (file_exists($jwtKeyPath)) {
-            Configure::write('JWT.key', file_get_contents($jwtKeyPath));
-        } else {
-            Configure::write('JWT.key', null);
-        }
-
+        // Configuración del ORM
         if (PHP_SAPI === 'cli') {
             $this->bootstrapCli();
         } else {
@@ -75,48 +48,33 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             );
         }
 
-        /*
-         * Only try to load DebugKit in development mode
-         * Debug Kit should not be installed on a production system
-         */
+        // DebugKit solo en modo debug
         if (Configure::read('debug')) {
             $this->addPlugin('DebugKit');
         }
 
-        // Load more plugins here
+        // Cargar Plugin de Usuarios
+        $this->addPlugin('Users', ['routes' => true]);
+
+
     }
 
     /**
-     * Setup the middleware queue your application will use.
-     *
-     * @param \Cake\Http\MiddlewareQueue $middlewareQueue The middleware queue to setup.
-     * @return \Cake\Http\MiddlewareQueue The updated middleware queue.
+     * Middleware de la aplicación
      */
     public function middleware(MiddlewareQueue $middlewareQueue): MiddlewareQueue
     {
         $middlewareQueue
-            // Catch any exceptions in the lower layers,
-            // and make an error page/response
             ->add(new ErrorHandlerMiddleware(Configure::read('Error'), $this))
-
-            // Handle plugin/theme assets like CakePHP normally does.
             ->add(new AssetMiddleware([
                 'cacheTime' => Configure::read('Asset.cacheTime'),
             ]))
-
-            // Add routing middleware.
-            // If you have a large number of routes connected, turning on routes
-            // caching in production could improve performance.
-            // See https://github.com/CakeDC/cakephp-cached-routing
             ->add(new RoutingMiddleware($this))
 
-            // Parse various types of encoded request bodies so that they are
-            // available as array through $request->getData()
-            // https://book.cakephp.org/4/en/controllers/middleware.html#body-parser-middleware
-            ->add(new BodyParserMiddleware())
+            // Middleware de Authentication
+            ->add(new AuthenticationMiddleware($this))
 
-            // Cross Site Request Forgery (CSRF) Protection Middleware
-            // https://book.cakephp.org/4/en/security/csrf.html#cross-site-request-forgery-csrf-middleware
+            ->add(new BodyParserMiddleware())
             ->add(new CsrfProtectionMiddleware([
                 'httponly' => true,
             ]));
@@ -124,90 +82,75 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
         return $middlewareQueue;
     }
 
-    /**
-     * Register application container services.
-     *
-     * @param \Cake\Core\ContainerInterface $container The Container to update.
-     * @return void
-     * @link https://book.cakephp.org/4/en/development/dependency-injection.html#dependency-injection
-     */
     public function services(ContainerInterface $container): void
     {
     }
 
-    /**
-     * Bootstrapping for CLI application.
-     *
-     * That is when running commands.
-     *
-     * @return void
-     */
     protected function bootstrapCli(): void
     {
         $this->addOptionalPlugin('Bake');
-
         $this->addPlugin('Migrations');
-
-        // Load more plugins here
     }
+
     /**
- * Configuración del servicio de autenticación
- * - Password/Form para login normal
- * - JWT para autenticación por API
- */
-public function getAuthenticationService(
-    ServerRequestInterface $request
-): AuthenticationServiceInterface {
-    $service = new AuthenticationService();
-
-    // Campos reales de la tabla users
-    $fields = [
-        IdentifierInterface::CREDENTIAL_USERNAME => 'correo',
-        IdentifierInterface::CREDENTIAL_PASSWORD => 'contrasena_hash',
-    ];
-
-    // Redirección cuando el usuario no está autenticado
-    $service->setConfig([
-        'unauthenticatedRedirect' => Router::url([
-            'controller' => 'Users',
-            'action' => 'login',
-        ]),
-        'queryParam' => 'redirect',
-    ]);
-
-    /*
-     * Autenticadores
+     * Configuración del sistema de autenticación
      */
+    public function getAuthenticationService(
+        ServerRequestInterface $request
+    ): AuthenticationServiceInterface {
+        $service = new AuthenticationService();
 
-    // Mantiene la sesión del usuario (web)
-    $service->loadAuthenticator('Authentication.Session');
+        /**
+         * Mi tabla `usuarios` usa:
+         * - correo como usuario
+         * - contrasena_hash como contraseña (hash en BD)
+         *
+         * En el formulario:
+         * - correo
+         * - contrasena_hash (texto plano)
+         */
+        $fields = [
+            'username' => 'correo',
+            'password' => 'contrasena_hash',
+        ];
 
-    // Login por formulario (web)
-    $service->loadAuthenticator('Authentication.Form', [
-        'fields' => $fields,
-        'loginUrl' => [
-            'controller' => 'Users',
-            'action' => 'login',
-        ],
-    ]);
+        // Si no está logueado, lo mando al login
+        $service->setConfig([
+            'unauthenticatedRedirect' => Router::url([
+                'plugin' => 'Users',
+                'controller' => 'Users',
+                'action' => 'login',
+            ]),
+            'queryParam' => 'redirect',
+        ]);
 
-    // Autenticación por JWT (API)
-    $service->loadAuthenticator('Authentication.Jwt', [
-        'secretKey' => Configure::read('JWT.key'),
-        'algorithm' => 'HS256',
-        'header' => 'Authorization',
-        'tokenPrefix' => 'Bearer',
-        'returnPayload' => true,
-    ]);
+        // Autenticación por sesión
+        $service->loadAuthenticator('Authentication.Session');
 
-    /*
-     * Identificador
-     * Se encarga de buscar y validar el usuario en la BD
-     */
-    $service->loadIdentifier('Authentication.Password', [
-        'fields' => $fields,
-    ]);
+        // Autenticación por formulario
+        $service->loadAuthenticator('Authentication.Form', [
+            'fields' => $fields,
+            'loginUrl' => [
+                'plugin' => 'Users',
+                'controller' => 'Users',
+                'action' => 'login',
+            ],
+        ]);
 
-    return $service;
-}
+        // JWT (opcional, para API)
+        $service->loadAuthenticator('Authentication.Jwt', [
+            'secretKey' => Configure::read('JWT.key'),
+            'algorithm' => 'HS256',
+            'header' => 'Authorization',
+            'tokenPrefix' => 'Bearer',
+            'returnPayload' => true,
+        ]);
+
+        // Identifier de password
+        $service->loadIdentifier('Authentication.Password', [
+            'fields' => $fields,
+        ]);
+
+        return $service;
+    }
 }

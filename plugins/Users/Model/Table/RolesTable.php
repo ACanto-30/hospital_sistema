@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Users\Model\Table;
+namespace App\Model\Table;
 
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -25,7 +25,6 @@ class RolesTable extends Table
         // Un rol tiene muchos usuarios
         $this->hasMany('Users', [
             'foreignKey' => 'id_rol',
-            'className' => 'Users.Users',
         ]);
     }
 
