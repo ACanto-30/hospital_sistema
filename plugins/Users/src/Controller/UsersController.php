@@ -108,6 +108,11 @@ class UsersController extends AppController
 
     public function register()
     {
+        // Si ya está logueado, redirigir al dashboard
+        if ($this->Authentication->getIdentity()) {
+            return $this->redirect(['action' => 'dashboard']);
+        }
+
         // Layout de autenticación para aplicar tus estilos globales y de users
         $this->viewBuilder()->setLayout('auth');
 
@@ -142,6 +147,11 @@ class UsersController extends AppController
 
     public function login()
     {
+        // Si ya está logueado, redirigir al dashboard
+        if ($this->Authentication->getIdentity()) {
+            return $this->redirect(['action' => 'dashboard']);
+        }
+
         // Layout de autenticación para aplicar estilos
         $this->viewBuilder()->setLayout('auth');
 
@@ -159,6 +169,25 @@ class UsersController extends AppController
                         'action' => 'dashboard'
                     ]
                 );
+            }
+
+            // FALLBACK MANUAL: Si falla la config automática, verificamos a mano
+            $correo = $this->request->getData('correo');
+            $pass = $this->request->getData('contrasena_hash');
+
+            if ($correo && $pass) {
+                $user = $this->Users->find()->where(['correo' => $correo])->first();
+                if ($user) {
+                    $hasher = new \Authentication\PasswordHasher\DefaultPasswordHasher();
+                    if ($hasher->check($pass, $user->contrasena_hash)) {
+                        $this->Authentication->setIdentity($user);
+                        return $this->redirect([
+                            'plugin' => 'Users',
+                            'controller' => 'Users',
+                            'action' => 'dashboard'
+                        ]);
+                    }
+                }
             }
 
             $this->Flash->error('Usuario o contraseña incorrectos.');
@@ -180,5 +209,12 @@ class UsersController extends AppController
     public function dashboard()
     {
         $this->viewBuilder()->setLayout('dashboard');
+
+        // Obtener el usuario actual con su Rol para mostrar el nombre del rol dinámicamente
+        $identity = $this->Authentication->getIdentity();
+        if ($identity) {
+            $user = $this->Users->get($identity->getIdentifier(), ['contain' => ['Roles']]);
+            $this->set(compact('user'));
+        }
     }
 }

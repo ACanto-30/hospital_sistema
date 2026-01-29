@@ -2,4 +2,5 @@
 
 return [
     'Authentication' => [],
+    'Associates' => [],
 ];

@@ -45,4 +45,8 @@ class PaymentsController extends AppController
 
         $this->viewBuilder()->setOption('serialize', true);
     }
+    public function pay()
+    {
+        // Renderiza templates/Payments/pay.php
+    }
 }

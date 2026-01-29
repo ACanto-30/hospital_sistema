@@ -149,6 +149,10 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
         // Identifier de password
         $service->loadIdentifier('Authentication.Password', [
             'fields' => $fields,
+            'resolver' => [
+                'className' => 'Authentication.Orm',
+                'userModel' => 'Users.Users',
+            ],
         ]);
 
         return $service;
