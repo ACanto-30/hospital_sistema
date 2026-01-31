@@ -13,10 +13,10 @@ $this->assign('title', 'Hospital Privado X | Crear Cuenta');
   <!-- LOGO -->
   <div class="logo">
     <svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">
-      <rect x="20" y="4" width="24" height="56" rx="6" fill="#fff"/>
-      <rect x="4" y="20" width="56" height="24" rx="6" fill="#fff"/>
-      <path d="M18 34h6l4-8 6 16 4-8h8" fill="none" stroke="#0b8f55" stroke-width="3"/>
-      <path d="M32 44c-8-6-12-10-12-15a7 7 0 0 1 12-5a7 7 0 0 1 12 5c0 5-4 9-12 15z" fill="#0b8f55"/>
+      <rect x="20" y="4" width="24" height="56" rx="6" fill="#fff" />
+      <rect x="4" y="20" width="56" height="24" rx="6" fill="#fff" />
+      <path d="M18 34h6l4-8 6 16 4-8h8" fill="none" stroke="#0b8f55" stroke-width="3" />
+      <path d="M32 44c-8-6-12-10-12-15a7 7 0 0 1 12-5a7 7 0 0 1 12 5c0 5-4 9-12 15z" fill="#0b8f55" />
     </svg>
     Hospital Privado X
   </div>
@@ -30,61 +30,80 @@ $this->assign('title', 'Hospital Privado X | Crear Cuenta');
 
     <?= $this->Form->create($user, ['novalidate' => true, 'autocomplete' => 'off']) ?>
 
-      <!-- Nombre completo -->
-      <div class="input-group">
-        <span class="icon left" aria-hidden="true">👤</span>
-        <?= $this->Form->control('nombre_completo', [
-          'label' => false,
-          'required' => true,
-          'placeholder' => 'Nombre completo'
-        ]) ?>
-      </div>
+    <!-- Nombre completo -->
+    <div class="input-group">
+      <span class="icon left" aria-hidden="true">👤</span>
+      <?= $this->Form->control('nombre_completo', [
+        'label' => false,
+        'required' => true,
+        'placeholder' => 'Nombre completo'
+      ]) ?>
+    </div>
 
-      <!-- Nombre de usuario -->
-      <div class="input-group">
-        <span class="icon left" aria-hidden="true">🆔</span>
-        <?= $this->Form->control('nombre_usuario', [
-          'label' => false,
-          'required' => true,
-          'placeholder' => 'Nombre de usuario'
-        ]) ?>
-      </div>
+    <!-- Nombre de usuario -->
+    <div class="input-group">
+      <span class="icon left" aria-hidden="true">🆔</span>
+      <?= $this->Form->control('nombre_usuario', [
+        'label' => false,
+        'required' => true,
+        'placeholder' => 'Nombre de usuario'
+      ]) ?>
+    </div>
 
-      <!-- Correo -->
-      <div class="input-group">
-        <span class="icon left" aria-hidden="true">📧</span>
-        <?= $this->Form->control('correo', [
-          'label' => false,
-          'required' => true,
-          'type' => 'email',
-          'placeholder' => 'Correo electrónico'
-        ]) ?>
-      </div>
+    <!-- Correo -->
+    <div class="input-group">
+      <span class="icon left" aria-hidden="true">📧</span>
+      <?= $this->Form->control('correo', [
+        'label' => false,
+        'required' => true,
+        'type' => 'email',
+        'placeholder' => 'Correo electrónico'
+      ]) ?>
+    </div>
 
-      <!-- Contraseña (se envía en este campo; luego se hashea al guardar) -->
-      <div class="input-group">
-        <span class="icon left" aria-hidden="true">🔒</span>
-        <?= $this->Form->control('contrasena_hash', [
-          'label' => false,
-          'required' => true,
-          'type' => 'password',
-          'placeholder' => 'Contraseña'
-        ]) ?>
-      </div>
+    <!-- Contraseña (se envía en este campo; luego se hashea al guardar) -->
+    <div class="input-group">
+      <span class="icon left" aria-hidden="true">🔒</span>
+      <?= $this->Form->control('contrasena_hash', [
+        'label' => false,
+        'required' => true,
+        'type' => 'password',
+        'placeholder' => 'Contraseña',
+        'id' => 'password-input'
+      ]) ?>
 
-      <!-- Rol -->
-      <div class="input-group">
-        <span class="icon left" aria-hidden="true">🧩</span>
-        <?= $this->Form->control('id_rol', [
-          'label' => false,
-          'type' => 'select',
-          'required' => true,
-          'options' => $roles,
-          'empty' => 'Seleccione un rol'
-        ]) ?>
-      </div>
+      <span class="icon right" aria-hidden="true" id="toggle-password" style="cursor: pointer;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      </span>
+    </div>
 
-      <?= $this->Form->button('Registrarse', ['class' => 'btn btn-primary']) ?>
+    <script>
+      document.getElementById('toggle-password').addEventListener('click', function () {
+        var passwordInput = document.getElementById('password-input');
+        if (passwordInput.type === 'password') {
+          passwordInput.type = 'text';
+        } else {
+          passwordInput.type = 'password';
+        }
+      });
+    </script>
+
+    <!-- Rol -->
+    <div class="input-group">
+      <span class="icon left" aria-hidden="true">🧩</span>
+      <?= $this->Form->control('id_rol', [
+        'label' => false,
+        'type' => 'select',
+        'required' => true,
+        'options' => $roles,
+        'empty' => 'Seleccione un rol'
+      ]) ?>
+    </div>
+
+    <?= $this->Form->button('Registrarse', ['class' => 'btn btn-primary']) ?>
 
     <?= $this->Form->end() ?>
 
