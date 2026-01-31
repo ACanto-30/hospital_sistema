@@ -17,28 +17,42 @@ use Cake\Routing\Middleware\RoutingMiddleware;
 use Cake\Routing\Router;
 use Psr\Http\Message\ServerRequestInterface;
 
+// Authentication
 use Authentication\AuthenticationService;
 use Authentication\AuthenticationServiceInterface;
 use Authentication\AuthenticationServiceProviderInterface;
 use Authentication\Middleware\AuthenticationMiddleware;
 
-class Application extends BaseApplication implements AuthenticationServiceProviderInterface
+// Authorization
+use Authorization\AuthorizationService;
+use Authorization\AuthorizationServiceInterface;
+use Authorization\AuthorizationServiceProviderInterface;
+use Authorization\Middleware\AuthorizationMiddleware;
+use Authorization\Middleware\RequestAuthorizationMiddleware;
+use Authorization\Policy\MapResolver;
+use Authorization\Policy\OrmResolver;
+use Authorization\Policy\ResolverCollection;
+
+// Para mapear Request -> RequestPolicy
+use Cake\Http\ServerRequest;
+
+class Application extends BaseApplication implements
+    AuthenticationServiceProviderInterface,
+    AuthorizationServiceProviderInterface
 {
-    /**
-     * Bootstrap general de la aplicación
-     */
+    
     public function bootstrap(): void
     {
         parent::bootstrap();
 
-        // JWT (opcional, por si luego uso API)
+        // JWT (opcional)
         $jwtKeyPath = CONFIG . 'jwt.key';
         Configure::write(
             'JWT.key',
             file_exists($jwtKeyPath) ? file_get_contents($jwtKeyPath) : null
         );
 
-        // Configuración del ORM
+        // Configuración del ORM / TableLocator
         if (PHP_SAPI === 'cli') {
             $this->bootstrapCli();
         } else {
@@ -48,20 +62,19 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             );
         }
 
-        // DebugKit solo en modo debug
+        // DebugKit solo cuando debug=true
         if (Configure::read('debug')) {
             $this->addPlugin('DebugKit');
         }
 
-        // Cargar Plugin de Usuarios
+        // Plugin de Usuarios (con rutas)
         $this->addPlugin('Users', ['routes' => true]);
 
-
+        // Plugin Authorization (permisos)
+        $this->addPlugin('Authorization');
     }
 
-    /**
-     * Middleware de la aplicación
-     */
+   
     public function middleware(MiddlewareQueue $middlewareQueue): MiddlewareQueue
     {
         $middlewareQueue
@@ -71,10 +84,17 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             ]))
             ->add(new RoutingMiddleware($this))
 
-            // Middleware de Authentication
+            // 1) Authentication: identifica al usuario (session/form/jwt)
             ->add(new AuthenticationMiddleware($this))
 
+            // 2) Authorization: valida permisos (policies)
+            ->add(new AuthorizationMiddleware($this))
+            ->add(new RequestAuthorizationMiddleware())
+
+            // Request body (JSON, form, etc.)
             ->add(new BodyParserMiddleware())
+
+            // CSRF para formularios
             ->add(new CsrfProtectionMiddleware([
                 'httponly' => true,
             ]));
@@ -82,39 +102,30 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
         return $middlewareQueue;
     }
 
+    
     public function services(ContainerInterface $container): void
     {
     }
 
+    
     protected function bootstrapCli(): void
     {
         $this->addOptionalPlugin('Bake');
         $this->addPlugin('Migrations');
     }
 
-    /**
-     * Configuración del sistema de autenticación
-     */
+    
     public function getAuthenticationService(
         ServerRequestInterface $request
     ): AuthenticationServiceInterface {
         $service = new AuthenticationService();
 
-        /**
-         * Mi tabla `usuarios` usa:
-         * - correo como usuario
-         * - contrasena_hash como contraseña (hash en BD)
-         *
-         * En el formulario:
-         * - correo
-         * - contrasena_hash (texto plano)
-         */
         $fields = [
             'username' => 'correo',
             'password' => 'contrasena_hash',
         ];
 
-        // Si no está logueado, lo mando al login
+    
         $service->setConfig([
             'unauthenticatedRedirect' => Router::url([
                 'plugin' => 'Users',
@@ -124,10 +135,10 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             'queryParam' => 'redirect',
         ]);
 
-        // Autenticación por sesión
+       
         $service->loadAuthenticator('Authentication.Session');
 
-        // Autenticación por formulario
+        
         $service->loadAuthenticator('Authentication.Form', [
             'fields' => $fields,
             'loginUrl' => [
@@ -146,15 +157,35 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             'returnPayload' => true,
         ]);
 
-        // Identifier de password
+        // Identifier: valida el password contra la BD
         $service->loadIdentifier('Authentication.Password', [
             'fields' => $fields,
             'resolver' => [
-                'className' => 'Authentication.Orm',
-                'userModel' => 'Users.Users',
-            ],
-        ]);
+            'className' => 'Authentication.Orm',
+            'userModel' => 'Users.Users',
+    ],
+]);
+
+
+        
 
         return $service;
+    }
+
+  
+    public function getAuthorizationService(
+        ServerRequestInterface $request
+    ): AuthorizationServiceInterface {
+        // Request -> RequestPolicy
+        $mapResolver = new MapResolver();
+        $mapResolver->map(ServerRequest::class, \App\Policy\RequestPolicy::class);
+
+        // Entidades ORM
+        $ormResolver = new OrmResolver();
+
+        // Primero intenta MapResolver, luego OrmResolver
+        $resolver = new ResolverCollection([$mapResolver, $ormResolver]);
+
+        return new AuthorizationService($resolver);
     }
 }

@@ -9,17 +9,12 @@ return function (RouteBuilder $routes): void {
 
     $routes->scope('/', function (RouteBuilder $builder): void {
 
-        // Página principal
+        // Página principal -> Login del plugin Users
         $builder->connect(
             '/',
-            ['controller' => 'Pages', 'action' => 'display', 'home']
+            ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'login']
         );
 
-
-
-        // Si quieres CRUD de usuarios con URLs normales:
-        // /users, /users/add, /users/edit/1, etc.
         $builder->fallbacks();
     });
 };
-
