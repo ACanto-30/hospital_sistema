@@ -126,6 +126,7 @@ class Application extends BaseApplication implements
             ],
         ]);
 
+        // JWT opcional
         $service->loadAuthenticator('Authentication.Jwt', [
             'secretKey' => Configure::read('JWT.key'),
             'algorithm' => 'HS256',
@@ -134,6 +135,7 @@ class Application extends BaseApplication implements
             'returnPayload' => true,
         ]);
 
+        // IDENTIFIER (aquí estaba el conflicto)
         $service->loadIdentifier('Authentication.Password', [
             'fields' => $fields,
             'resolver' => [
@@ -152,6 +154,7 @@ class Application extends BaseApplication implements
         $mapResolver->map(ServerRequest::class, \App\Policy\RequestPolicy::class);
 
         $ormResolver = new OrmResolver();
+
         $resolver = new ResolverCollection([$mapResolver, $ormResolver]);
 
         return new AuthorizationService($resolver);
