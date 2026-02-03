@@ -35,6 +35,9 @@ use Authorization\Policy\ResolverCollection;
 
 use Cake\Http\ServerRequest;
 
+// 👉 Middleware de control por rol
+use App\Middleware\RoleAccessMiddleware;
+
 class Application extends BaseApplication implements
     AuthenticationServiceProviderInterface,
     AuthorizationServiceProviderInterface
@@ -75,9 +78,18 @@ class Application extends BaseApplication implements
                 'cacheTime' => Configure::read('Asset.cacheTime'),
             ]))
             ->add(new RoutingMiddleware($this))
+
+            // Autenticación (crea identity)
             ->add(new AuthenticationMiddleware($this))
+
+            // Middleware de control de acceso por rol (DASHBOARDS)
+            ->add(new RoleAccessMiddleware())
+
+            // Autorización
             ->add(new AuthorizationMiddleware($this))
             ->add(new RequestAuthorizationMiddleware())
+
+            // Otros
             ->add(new BodyParserMiddleware())
             ->add(new CsrfProtectionMiddleware([
                 'httponly' => true,
@@ -135,7 +147,7 @@ class Application extends BaseApplication implements
             'returnPayload' => true,
         ]);
 
-        // IDENTIFIER (aquí estaba el conflicto)
+        // IDENTIFIER
         $service->loadIdentifier('Authentication.Password', [
             'fields' => $fields,
             'resolver' => [

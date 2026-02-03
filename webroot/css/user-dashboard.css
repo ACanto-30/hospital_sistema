@@ -3,119 +3,157 @@
    ================================ */
 
 .dashboard{
-    background-color: #f3fdf7;
-    font-family: Arial, sans-serif;
+  background-color: #f3fdf7;
+  font-family: Arial, sans-serif;
+  min-height: 100vh;          
 }
 
-/* Header */
+
+.dashboard .dashboard-page{
+  padding: 24px;
+}
+
+
 .dashboard .dashboard-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:24px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:24px;
 }
+
 .dashboard .dashboard-title{
-    color:#157347;
-    margin:0;
+  color:#157347;
+  margin:0;
 }
+
 .dashboard .dashboard-subtitle{
-    color:#6b7280;
-    margin-top:4px;
+  color:#6b7280;
+  margin-top:4px;
 }
 
-/* Summary Cards */
-.dashboard .summary-grid{
-    display:grid;
-    grid-template-columns:repeat(3, 1fr);
-    gap:16px;
-    margin-bottom:24px;
-}
-.dashboard .summary-card{
-    /* reutiliza .card del app.css*/
-    background:#ffffff;
-    padding:18px;
-    border-radius:14px;
+.dashboard .dashboard-meta{
+  text-align:right;
 }
 
-.dashboard .summary-green{
-    border-left:6px solid #1f9d55;
-}
-.dashboard .summary-yellow{
-    border-left:6px solid #facc15;
-}
-
-/* Main Layout */
-.dashboard .dashboard-content{
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    gap:20px;
-}
-
-/* Status badge */
-.dashboard .status-active{
-    background:#1f9d55;
-    color:#ffffff;
-    padding:6px 14px;
-    border-radius:20px;
-    font-size:13px;
-    display:inline-block;
-}
-
-/* Progress bar */
-.dashboard .progress-bar{
-    background:#e6f4ec;
-    height:10px;
-    border-radius:10px;
-    margin-top:6px;
-}
-.dashboard .progress-fill{
-    width:25%;
-    background:#1f9d55;
-    height:10px;
-    border-radius:10px;
-}
-
-
-.dashboard .btn-primary{
-    background:#157347;
-    border-radius:10px;
-    padding:10px;
-}
-
-/* Botón outline */
-.dashboard .btn-outline{
-    background:#ffffff;
-    border:1px solid #1f9d55;
-    color:#157347;
-    padding:10px;
-    width:100%;
-    border-radius:10px;
-    cursor:pointer;
-    font-weight:800;
-}
-
-/* Notifications */
-.dashboard .notification{
-    background:#fff7cc;
-    padding:14px;
-    border-radius:12px;
-}
-
-/* Benefits */
-.dashboard .benefits-box{
-    background:#e6f4ec;
-    padding:18px;
-    border-radius:14px;
-    margin-top:20px;
-}
-
-.dashboard .dashboard-page{ padding:24px; }
-
-.dashboard .dashboard-meta{ text-align:right; }
 .dashboard .dashboard-meta-title{ color:#157347; }
 .dashboard .dashboard-meta-code{ color:#6b7280; }
 
 .dashboard .muted{ color:#6b7280; }
+
+
+.dashboard .summary-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:16px;
+  margin-bottom:24px;
+}
+
+.dashboard .summary-card{
+
+  background:#ffffff;
+  padding:18px;
+  border-radius:14px;
+}
+
+.dashboard .summary-green{ border-left:6px solid #1f9d55; }
+.dashboard .summary-yellow{ border-left:6px solid #facc15; }
+
+
+.dashboard .dashboard-content{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:20px;
+}
+
+
+.dashboard .side-col{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+
+.dashboard .status-active{
+  background:#1f9d55;
+  color:#ffffff;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:13px;
+  display:inline-block;
+}
+
+
+.dashboard .progress-wrap{ margin-top:24px; }
+
+.dashboard .progress-bar{
+  background:#e6f4ec;
+  height:10px;
+  border-radius:10px;
+  margin-top:6px;
+}
+
+.dashboard .progress-fill{
+  width:25%;
+  background:#1f9d55;
+  height:10px;
+  border-radius:10px;
+}
+
+
+.dashboard .btn-primary{
+  background:#157347;
+  border-radius:10px;
+  padding:10px;
+}
+
+
+.dashboard a.btn-primary,
+.dashboard a.btn-logout{
+  color:#fff;
+  text-decoration:none;
+}
+.dashboard a.btn-primary:hover,
+.dashboard a.btn-logout:hover{
+  color:#fff;
+  text-decoration:none;
+}
+
+.dashboard .btn-outline{
+  background:#ffffff;
+  border:1px solid #1f9d55;
+  color:#157347;
+  padding:10px;
+  width:100%;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:800;
+}
+
+
+.dashboard .notification{
+  background:#fff7cc;
+  padding:14px;
+  border-radius:12px;
+}
+
+.dashboard .notification-text{
+  margin-top:6px;
+}
+
+
+.dashboard .benefits-box{
+  background:#e6f4ec;
+  padding:18px;
+  border-radius:14px;
+  margin-top:20px;
+}
+
+.dashboard .benefits-title{ color:#157347; }
+.dashboard .benefits-list{ margin-top:10px; }
+
+.dashboard .dashboard-actions{
+  margin-top:14px;
+}
 
 .dashboard .card-header{
   display:flex;
@@ -135,17 +173,6 @@
   gap:16px;
 }
 
-.dashboard .progress-wrap{ margin-top:24px; }
-
-.dashboard .section-title{ margin:0; color:#157347; }
-.dashboard .section-subtitle{ color:#6b7280; margin-top:4px; }
-
-.dashboard .side-col{
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-}
-
 .dashboard .pay-box{
   border:1px solid #e5e7eb;
   padding:14px;
@@ -153,5 +180,145 @@
   margin-bottom:14px;
 }
 
-.dashboard .benefits-title{ color:#157347; }
-.dashboard .benefits-list{ margin-top:10px; }
+.dashboard .section-title{ margin:0; color:#157347; }
+.dashboard .section-subtitle{ color:#6b7280; margin-top:4px; }
+
+/* ===== Dashboard UI Pro (layout + fondo + card) ===== */
+
+.dashboard{
+  min-height: 100vh;
+  /* Fondo más bonito */
+  background: linear-gradient(180deg, #138a52 0%, #0f6b40 65%, #0b5b36 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Banda amarilla diagonal tipo tu login */
+.dashboard::after{
+  content:"";
+  position:absolute;
+  right:-220px;
+  top:180px;
+  width:700px;
+  height:140px;
+  background:#facc15;
+  transform: rotate(-18deg);
+  opacity: .95;
+  z-index: 0;
+}
+
+/* Topbar */
+.dash-topbar{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 18px 20px 10px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:#fff;
+  position: relative;
+  z-index: 1;
+}
+.dash-brand{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  font-weight:800;
+}
+.dash-brand-text{
+  font-size: 18px;
+}
+.dash-logo{
+  font-size: 22px;
+}
+
+.dash-container{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px 24px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+
+.dash-card{
+  background:#fff;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 18px 45px rgba(0,0,0,.22);
+}
+
+
+.dashboard{
+  font-family: Arial, sans-serif;
+}
+
+
+.dashboard a.btn-primary,
+.dashboard a.btn-logout{
+  color:#fff;
+  text-decoration:none;
+}
+
+
+.dash-table{
+  width:100%;
+  border-collapse: collapse;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.dash-table thead th{
+  text-align:left;
+  background:#f3faf6;
+  color:#157347;
+  font-size: 13px;
+  padding: 12px;
+  border-bottom: 1px solid #d7efe2;
+}
+
+.dash-table tbody td{
+  padding: 12px;
+  border-bottom: 1px solid #eef5f0;
+  font-size: 14px;
+}
+
+.dash-table tbody tr:hover{
+  background:#f8fcfa;
+}
+
+.dash-badge{
+  display:inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.dash-badge--ok{ background:#e9fbf1; color:#0f6b40; }
+.dash-badge--off{ background:#fdecec; color:#a01818; }
+
+.pagination{
+  list-style:none;
+  padding:0;
+  margin: 12px 0 0 0;
+  display:flex;
+  gap:8px;
+  flex-wrap: wrap;
+}
+
+.pagination a, .pagination span{
+  display:inline-block;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  text-decoration:none;
+  color:#157347;
+  font-weight:700;
+  background:#fff;
+}
+
+.pagination .current{
+  background:#157347;
+  color:#fff;
+  border-color:#157347;
+}
