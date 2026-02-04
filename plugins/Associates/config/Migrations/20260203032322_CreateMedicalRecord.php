@@ -16,7 +16,7 @@ class CreateMedicalRecord extends BaseMigration
     public function change(): void
 {
     $table = $this->table('medical_records');
-
+    
     $table
         ->addColumn('associate_id', 'integer', [
             'null' => false,
@@ -34,7 +34,7 @@ class CreateMedicalRecord extends BaseMigration
             'null' => false,
         ])
 
-        ->addForeignKey('associate_id', 'associates', 'id')
+        ->addForeignKey('associate_id', 'members', 'member_id')
         ->addForeignKey('doctor_id', 'usuarios', 'id')
 
         ->create();

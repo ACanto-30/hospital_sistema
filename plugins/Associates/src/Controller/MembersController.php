@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Pay\Controller;
+namespace Associates\Controller;
 
-use Pay\Controller\AppController;
+use Associates\Controller\AppController;
 
 /**
- * Payments Controller
+ * Members Controller
  *
- * @property \Pay\Model\Table\PaymentsTable $Payments
+ * @property \Associates\Model\Table\MembersTable $Members
  * @property \Authorization\Controller\Component\AuthorizationComponent $Authorization
  */
-class PaymentsController extends AppController
+class MembersController extends AppController
 {
     /**
      * Initialize controller
@@ -32,25 +32,25 @@ class PaymentsController extends AppController
      */
     public function index()
     {
-        $query = $this->Payments->find();
+        $query = $this->Members->find();
         $query = $this->Authorization->applyScope($query);
-        $payments = $this->paginate($query);
+        $members = $this->paginate($query);
 
-        $this->set(compact('payments'));
+        $this->set(compact('members'));
     }
 
     /**
      * View method
      *
-     * @param string|null $id Payment id.
+     * @param string|null $id Member id.
      * @return \Cake\Http\Response|null|void Renders view
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
     public function view($id = null)
     {
-        $payment = $this->Payments->get($id, contain: []);
-        $this->Authorization->authorize($payment);
-        $this->set(compact('payment'));
+        $member = $this->Members->get($id, contain: []);
+        $this->Authorization->authorize($member);
+        $this->set(compact('member'));
     }
 
     /**
@@ -60,59 +60,59 @@ class PaymentsController extends AppController
      */
     public function add()
     {
-        $payment = $this->Payments->newEmptyEntity();
-        $this->Authorization->authorize($payment);
+        $member = $this->Members->newEmptyEntity();
+        $this->Authorization->authorize($member);
         if ($this->request->is('post')) {
-            $payment = $this->Payments->patchEntity($payment, $this->request->getData());
-            if ($this->Payments->save($payment)) {
-                $this->Flash->success(__('The payment has been saved.'));
+            $member = $this->Members->patchEntity($member, $this->request->getData());
+            if ($this->Members->save($member)) {
+                $this->Flash->success(__('The member has been saved.'));
 
                 return $this->redirect(['action' => 'index']);
             }
-            $this->Flash->error(__('The payment could not be saved. Please, try again.'));
+            $this->Flash->error(__('The member could not be saved. Please, try again.'));
         }
-        $this->set(compact('payment'));
+        $this->set(compact('member'));
     }
 
     /**
      * Edit method
      *
-     * @param string|null $id Payment id.
+     * @param string|null $id Member id.
      * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
     public function edit($id = null)
     {
-        $payment = $this->Payments->get($id, contain: []);
-        $this->Authorization->authorize($payment);
+        $member = $this->Members->get($id, contain: []);
+        $this->Authorization->authorize($member);
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $payment = $this->Payments->patchEntity($payment, $this->request->getData());
-            if ($this->Payments->save($payment)) {
-                $this->Flash->success(__('The payment has been saved.'));
+            $member = $this->Members->patchEntity($member, $this->request->getData());
+            if ($this->Members->save($member)) {
+                $this->Flash->success(__('The member has been saved.'));
 
                 return $this->redirect(['action' => 'index']);
             }
-            $this->Flash->error(__('The payment could not be saved. Please, try again.'));
+            $this->Flash->error(__('The member could not be saved. Please, try again.'));
         }
-        $this->set(compact('payment'));
+        $this->set(compact('member'));
     }
 
     /**
      * Delete method
      *
-     * @param string|null $id Payment id.
+     * @param string|null $id Member id.
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
-        $payment = $this->Payments->get($id);
-        $this->Authorization->authorize($payment);
-        if ($this->Payments->delete($payment)) {
-            $this->Flash->success(__('The payment has been deleted.'));
+        $member = $this->Members->get($id);
+        $this->Authorization->authorize($member);
+        if ($this->Members->delete($member)) {
+            $this->Flash->success(__('The member has been deleted.'));
         } else {
-            $this->Flash->error(__('The payment could not be deleted. Please, try again.'));
+            $this->Flash->error(__('The member could not be deleted. Please, try again.'));
         }
 
         return $this->redirect(['action' => 'index']);

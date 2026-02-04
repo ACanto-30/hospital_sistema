@@ -43,7 +43,7 @@ class CreatePayments extends BaseMigration
             'null' => false,
         ])
 
-        ->addForeignKey('associate_id', 'associates', 'id')
+        ->addForeignKey('associate_id', 'members', 'member_id')
         ->addForeignKey('processed_by_user_id', 'usuarios', 'id')
         ->addForeignKey('payment_method_id', 'payment_methods', 'id')
         ->addForeignKey('payment_status_id', 'payment_statuses', 'id')
