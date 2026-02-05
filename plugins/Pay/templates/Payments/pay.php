@@ -1,143 +1,190 @@
-<div style="
-    max-width: 420px;
-    margin: 0 auto;
-    font-family: Arial, sans-serif;
-    background: #f5f7fa;
-    min-height: 100vh;
-">
+<?php
+declare(strict_types=1);
 
-    <!-- Header -->
-    <div style="
-        background: linear-gradient(135deg, #6b7c93, #4e637d);
-        color: white;
-        padding: 20px;
-        border-bottom-left-radius: 20px;
-        border-bottom-right-radius: 20px;
-    ">
-        <div style="display:flex; align-items:center;">
-            <span style="font-size:20px; margin-right:10px;">←</span>
-            <h2 style="margin:0; font-size:18px;">Pagar</h2>
-        </div>
+$this->assign('title', 'Registrar pago - Envío de comprobante');
 
-        <div style="margin-top:20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <strong>Métodos de pago</strong>
-                <span style="font-size:14px;">Ver todos →</span>
-            </div>
+$user = $this->getRequest()->getAttribute('identity') ?? null;
 
-            <div style="
-                display:flex;
-                gap:10px;
-                margin-top:15px;
-            ">
-                <div style="background:white; padding:10px; border-radius:10px;">
-                    <strong>VISA</strong>
-                </div>
-                <div style="background:white; padding:10px; border-radius:10px;">
-                    MasterCard
-                </div>
-                <div style="background:white; padding:10px; border-radius:10px;">
-                    AmEx
-                </div>
-                <div style="background:white; padding:10px; border-radius:10px;">
-                    PayPal
-                </div>
-            </div>
-        </div>
+$nombreRol = 'Cajero';
+$nombreUsuario = 'Usuario';
+
+if (!empty($user)) {
+    $nombreUsuario = $user->get('nombre_completo') ?? $user->get('nombre_usuario') ?? 'Usuario';
+}
+?>
+
+<style>
+/* Solo para esta vista*/
+.pay-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:16px;
+  margin-top: 14px;
+}
+.pay-grid .full{ grid-column: 1 / -1; }
+
+.pay-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top: 16px;
+}
+
+.pay-hint{
+  font-size:12px;
+  color:#6b7280;
+  margin-top:6px;
+}
+
+.pay-info{
+  margin-top: 14px;
+  background:#f3faf6;
+  border:1px solid #d7efe2;
+  color:#157347;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+}
+
+@media (max-width: 768px){
+  .pay-grid{ grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="dashboard-page dashboard-cashier">
+
+  <div class="dashboard-header">
+    <div>
+      <h2 class="dashboard-title">Registrar pago</h2>
+      <p class="dashboard-subtitle">
+        Envío de comprobante para verificación manual • <?= h($nombreUsuario) ?>
+      </p>
     </div>
 
-    <!-- Formulario -->
-    <div style="padding:20px;">
+    <div class="dashboard-meta">
+      <?= $this->Html->link(
+          'Volver al dashboard',
+          ['plugin' => 'Pay', 'controller' => 'Payments', 'action' => 'dashboardCashier'],
+          ['class' => 'btn btn-primary']
+      ) ?>
 
-        <h3 style="font-size:16px; margin-bottom:15px;">
-            Tus datos de pago
-        </h3>
+      <?= $this->Html->link(
+          'Cerrar sesión',
+          ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'logout'],
+          ['class' => 'btn btn-primary btn-logout']
+      ) ?>
+    </div>
+  </div>
 
-        <!-- Titular -->
-        <label style="font-size:14px;">Titular de la tarjeta</label>
-        <input type="text" style="
-            width:100%;
-            padding:10px;
-            margin-top:5px;
-            margin-bottom:15px;
-            border-radius:8px;
-            border:1px solid #ccc;
-        ">
+  <hr class="divider">
 
-        <!-- Número -->
-        <label style="font-size:14px;">Número de la tarjeta</label>
-        <input type="text" placeholder="XXXX XXXX XXXX XXXX" style="
-            width:100%;
-            padding:10px;
-            margin-top:5px;
-            margin-bottom:15px;
-            border-radius:8px;
-            border:1px solid #ccc;
-        ">
+  <div class="dashboard-content">
 
-        <!-- Fecha y CVV -->
-        <div style="display:flex; gap:10px;">
-            <div style="flex:1;">
-                <label style="font-size:14px;">Fecha de vencimiento</label>
-                <input type="text" placeholder="MM/YYYY" style="
-                    width:100%;
-                    padding:10px;
-                    margin-top:5px;
-                    border-radius:8px;
-                    border:1px solid #ccc;
-                ">
-            </div>
+    <div class="summary-card" style="max-width:980px;width:100%;">
+      <h3 class="section-title">Envío de comprobante</h3>
+      <p class="muted" style="margin-top:6px;">
+        Complete el formulario y adjunte el comprobante. Este pago será verificado manualmente por el cajero.
+      </p>
 
-            <div style="flex:1;">
-                <label style="font-size:14px;">
-                    CVV <span title="Código de seguridad">ⓘ</span>
-                </label>
-                <input type="text" placeholder="Ej. 123" style="
-                    width:100%;
-                    padding:10px;
-                    margin-top:5px;
-                    border-radius:8px;
-                    border:1px solid #ccc;
-                ">
-            </div>
+      <?= $this->Form->create(null, ['type' => 'file', 'autocomplete' => 'off']) ?>
+
+      <div class="pay-grid">
+
+        <div class="full">
+          <?= $this->Form->control('nombre_completo', [
+              'label' => 'Nombre completo',
+              'required' => true
+          ]) ?>
         </div>
 
-        <!-- Monto -->
-        <div style="
-            margin-top:20px;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-        ">
-            <strong>Monto total</strong>
-            <span style="font-size:14px;">Ver detalles →</span>
+        <div>
+          <?= $this->Form->control('cedula', [
+              'label' => 'Cédula',
+              'placeholder' => '8-888-888',
+              'required' => true
+          ]) ?>
         </div>
 
-        <div style="margin-top:10px;">
-            <strong style="font-size:18px;">$ USD</strong>
+        <div>
+          <?= $this->Form->control('celular', [
+              'label' => 'Teléfono',
+              'placeholder' => '6XXX-XXXX',
+              'required' => true
+          ]) ?>
         </div>
 
-        <!-- Checkbox -->
-        <div style="margin-top:15px;">
-            <label style="font-size:14px;">
-                <input type="checkbox"> Guardar datos para futuras compras
-            </label>
+        <div class="full">
+          <?= $this->Form->control('correo', [
+              'label' => 'Correo electrónico',
+              'type' => 'email',
+              'required' => true
+          ]) ?>
         </div>
 
-        <!-- Botón -->
-        <button style="
-            width:100%;
-            margin-top:20px;
-            padding:14px;
-            background:#4e637d;
-            color:white;
-            border:none;
-            border-radius:10px;
-            font-size:16px;
-            cursor:pointer;
-        ">
-            🔒 Pagar ahora
-        </button>
+        <div class="full">
+          <?= $this->Form->control('concepto', [
+              'label' => 'Concepto del pago',
+              'type' => 'textarea',
+              'rows' => 3,
+              'required' => true
+          ]) ?>
+        </div>
+
+        <div>
+          <?= $this->Form->control('monto', [
+              'label' => 'Monto pagado (B/.)',
+              'type' => 'number',
+              'step' => '0.01',
+              'min' => '0',
+              'required' => true
+          ]) ?>
+        </div>
+
+        <div>
+          <?= $this->Form->control('metodo', [
+              'label' => 'Método de pago',
+              'type' => 'select',
+              'options' => [
+                  'Transferencia' => 'Transferencia',
+                  'Depósito' => 'Depósito',
+                  'Yappy' => 'Yappy',
+                  'Efectivo (caja)' => 'Efectivo (caja)',
+              ],
+              'empty' => 'Seleccione',
+              'required' => true
+          ]) ?>
+          <div class="pay-hint">No se aceptan pagos con tarjeta.</div>
+        </div>
+
+        <div class="full">
+          <?= $this->Form->control('comprobante', [
+              'label' => 'Adjuntar comprobante',
+              'type' => 'file',
+              'accept' => '.jpg,.jpeg,.png',
+              'required' => true
+          ]) ?>
+          <div class="pay-hint">Formatos permitidos: JPG / PNG. Tamaño máximo: 5MB.</div>
+        </div>
+
+      </div>
+
+      <div class="pay-info">
+        Importante: este sistema solo recibe el comprobante. El estado (Pendiente / Pagado) se define manualmente.
+      </div>
+
+      <div class="pay-actions">
+        <?= $this->Form->button('Enviar comprobante', ['class' => 'btn btn-primary']) ?>
+
+        <?= $this->Html->link(
+            'Cancelar',
+            ['plugin' => 'Pay', 'controller' => 'Payments', 'action' => 'dashboardCashier'],
+            ['class' => 'btn btn-primary btn-logout']
+        ) ?>
+      </div>
+
+      <?= $this->Form->end() ?>
 
     </div>
+
+  </div>
 </div>

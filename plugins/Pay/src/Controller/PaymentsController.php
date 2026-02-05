@@ -5,12 +5,6 @@ namespace Pay\Controller;
 
 use Pay\Controller\AppController;
 
-/**
- * Payments Controller
- *
- * @property \Pay\Model\Table\PaymentsTable $Payments
- * @property \Authorization\Controller\Component\AuthorizationComponent $Authorization
- */
 class PaymentsController extends AppController
 {
     public function initialize(): void
@@ -42,10 +36,7 @@ class PaymentsController extends AppController
         $this->Authorization->authorize($payment);
 
         if ($this->request->is('post')) {
-            $payment = $this->Payments->patchEntity(
-                $payment,
-                $this->request->getData()
-            );
+            $payment = $this->Payments->patchEntity($payment, $this->request->getData());
 
             if ($this->Payments->save($payment)) {
                 $this->Flash->success(__('The payment has been saved.'));
@@ -64,10 +55,7 @@ class PaymentsController extends AppController
         $this->Authorization->authorize($payment);
 
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $payment = $this->Payments->patchEntity(
-                $payment,
-                $this->request->getData()
-            );
+            $payment = $this->Payments->patchEntity($payment, $this->request->getData());
 
             if ($this->Payments->save($payment)) {
                 $this->Flash->success(__('The payment has been saved.'));
@@ -94,6 +82,67 @@ class PaymentsController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+
+ 
+    public function pay()
+    {
+    
+        $this->Authorization->skipAuthorization();
+        $this->viewBuilder()->setLayout('dashboard');
+        $identity = $this->request->getAttribute('identity');
+        if (!$identity) {
+            $this->Flash->error('Debe iniciar sesión.');
+            return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'login']);
+        }
+
+       
+        if (!$this->request->is('post')) {
+            return;
+        }
+
+        $data = (array)$this->request->getData();
+        $file = $data['comprobante'] ?? null;
+
+        if (!$file || $file->getError() !== UPLOAD_ERR_OK) {
+            $this->Flash->error('No se pudo leer el comprobante. Intente nuevamente.');
+            return;
+        }
+
+      
+        $maxBytes = 5 * 1024 * 1024;
+        if ($file->getSize() > $maxBytes) {
+            $this->Flash->error('El comprobante excede 5MB.');
+            return;
+        }
+
+        $clientName = (string)$file->getClientFilename();
+        $ext = strtolower(pathinfo($clientName, PATHINFO_EXTENSION));
+        $allowed = ['png', 'jpg', 'jpeg'];
+
+        if (!in_array($ext, $allowed, true)) {
+            $this->Flash->error('Formato no permitido. Use .png, .jpg o .jpeg.');
+            return;
+        }
+
+        $targetDir = WWW_ROOT . 'uploads' . DS . 'comprobantes' . DS;
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0775, true);
+        }
+
+      
+        $safeName = date('Ymd_His') . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
+        $targetPath = $targetDir . $safeName;
+
+        try {
+            $file->moveTo($targetPath);
+        } catch (\Throwable $e) {
+            $this->Flash->error('No se pudo guardar el comprobante.');
+            return;
+        }
+
+        $this->Flash->success('Comprobante enviado. Será verificado manualmente.');
+        return $this->redirect(['action' => 'dashboardCashier']);
     }
 
     public function dashboardCashier()
@@ -124,7 +173,7 @@ class PaymentsController extends AppController
                 'miembro' => 'María González',
                 'concepto' => 'Consulta General',
                 'monto' => 20.00,
-                'metodo' => 'Tarjeta',
+                'metodo' => 'Transferencia',
                 'estado' => 'Pendiente',
                 'fecha' => '2026-02-03',
             ],

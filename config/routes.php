@@ -10,11 +10,12 @@ return function (RouteBuilder $routes): void {
 
     $routes->scope('/', function (RouteBuilder $builder): void {
 
-        // Página principal -> Login del plugin Users
+       
         $builder->connect(
             '/',
             ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'login']
         );
+
         
         $builder->connect(
             '/payments-dashboard',
@@ -24,6 +25,12 @@ return function (RouteBuilder $routes): void {
         $builder->connect(
             '/dashboard-cajero',
             ['plugin' => 'Pay', 'controller' => 'Payments', 'action' => 'dashboardCashier']
+        );
+
+        
+        $builder->connect(
+            '/registrar-pago',
+            ['plugin' => 'Pay', 'controller' => 'Payments', 'action' => 'pay']
         );
 
         $builder->fallbacks();
