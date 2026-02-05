@@ -16,72 +16,52 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 class RoleAccessMiddleware implements MiddlewareInterface
 {
-    // Ajusta estos IDs según tu tabla roles
-    private const ROLE_ADMIN   = 1;
-    private const ROLE_PAGOS   = 2; // placeholder
-    private const ROLE_CAJERO  = 3; // placeholder
-    private const ROLE_MEDICO  = 4; // placeholder
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $path = $request->getUri()->getPath();
-
-        // Identity lo agrega AuthenticationMiddleware
         $identity = $request->getAttribute('identity');
 
-        // Si NO hay sesión y quiere entrar a algún dashboard, mando a login
         if (!$identity) {
-            if ($this->isDashboardPath($path)) {
-                return (new Response())
-                    ->withHeader('Location', '/login')
-                    ->withStatus(302);
-            }
-
             return $handler->handle($request);
         }
 
         $user = $identity->getOriginalData();
-        $roleId = (int)($user->id_rol ?? 0);
+        $role_name = $identity->role_name ?? ($user->role_name ?? ($user->role->name ?? null));
 
-        // Mapa rol -> dashboard permitido
-        $roleToDashboard = [
-            self::ROLE_ADMIN  => '/administrator-dashboard',
-            self::ROLE_PAGOS  => '/payments-dashboard',
-            self::ROLE_CAJERO => '/cashier-dashboard',
-            self::ROLE_MEDICO => '/doctor-dashboard',
+        // Mapeo Maestro
+        $roleDashboards = [
+            'Administrador' => '/administrator-dashboard',
+            'Cajero' => '/dashboard-cashier',
+            'Medico' => '/doctor-dashboard',
+            'Asociado' => '/associate-dashboard'
         ];
 
-        $allowedDashboard = $roleToDashboard[$roleId] ?? '/dashboard';
+        // Obtenemos el role_name de la identidad
+        $role_name = $identity->role_name ?? null;
+        $target = $roleDashboards[$role_name] ?? null;
 
-        // Si entra a /dashboard, lo mando al dashboard real por rol
-        if ($path === '/dashboard' && $allowedDashboard !== '/dashboard') {
-            return (new Response())
-                ->withHeader('Location', $allowedDashboard)
-                ->withStatus(302);
+        // Si estamos en la raíz y ya hay sesión, mandarlo a su dashboard si lo tiene
+        $basePaths = ['/', '/dashboard'];
+
+        if (in_array($path, $basePaths) && $target) {
+            if ($path !== $target) {
+                return (new Response())
+                    ->withHeader('Location', $target)
+                    ->withStatus(302);
+            }
         }
 
-        // Si intenta entrar a un dashboard que no le toca, lo redirijo
-        if ($this->isSpecificDashboardPath($path) && $path !== $allowedDashboard) {
-            return (new Response())
-                ->withHeader('Location', $allowedDashboard)
-                ->withStatus(302);
+        // Protección contra acceso a otros dashboards
+        $allDashboards = array_values($roleDashboards);
+        if (in_array($path, $allDashboards) && $target) {
+            if ($path !== $target) {
+                return (new Response())
+                    ->withHeader('Location', $target)
+                    ->withStatus(302);
+            }
         }
 
         return $handler->handle($request);
-    }
-
-    private function isDashboardPath(string $path): bool
-    {
-        return $path === '/dashboard' || $this->isSpecificDashboardPath($path);
-    }
-
-    private function isSpecificDashboardPath(string $path): bool
-    {
-        return in_array($path, [
-            '/administrator-dashboard',
-            '/payments-dashboard',
-            '/cashier-dashboard',
-            '/doctor-dashboard',
-        ], true);
     }
 }

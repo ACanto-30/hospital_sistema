@@ -1,7 +1,7 @@
 <?php
 $this->assign('title', 'Dashboard - Administrador');
 
-$adminNombre = $currentUser->nombre_completo ?? $currentUser->nombre_usuario ?? 'Administrador';
+$adminNombre = $currentUser->full_name ?? $currentUser->username ?? 'Administrador';
 ?>
 
 <div class="dashboard-page">
@@ -10,7 +10,7 @@ $adminNombre = $currentUser->nombre_completo ?? $currentUser->nombre_usuario ?? 
     <div>
       <h2 class="dashboard-title">Dashboard Administrador</h2>
       <p class="dashboard-subtitle">
-        Bienvenido, <?= h($adminNombre) ?> (<?= h($currentUser->role->nombre_rol ?? 'Administrador') ?>)
+        Bienvenido, <?= h($adminNombre) ?> (<?= h($currentUser->role->name ?? 'Administrador') ?>)
       </p>
     </div>
   </div>
@@ -47,12 +47,12 @@ $adminNombre = $currentUser->nombre_completo ?? $currentUser->nombre_usuario ?? 
         <thead>
           <tr>
             <th><?= $this->Paginator->sort('id', 'ID') ?></th>
-            <th><?= $this->Paginator->sort('nombre_usuario', 'Usuario') ?></th>
-            <th><?= $this->Paginator->sort('nombre_completo', 'Nombre completo') ?></th>
-            <th><?= $this->Paginator->sort('correo', 'Correo') ?></th>
+            <th><?= $this->Paginator->sort('username', 'Usuario') ?></th>
+            <th><?= $this->Paginator->sort('full_name', 'Nombre completo') ?></th>
+            <th><?= $this->Paginator->sort('email', 'Correo') ?></th>
             <th>Rol</th>
-            <th><?= $this->Paginator->sort('estado_usuario', 'Estado') ?></th>
-            <th><?= $this->Paginator->sort('fecha_creacion', 'Fecha creación') ?></th>
+            <th><?= $this->Paginator->sort('status', 'Estado') ?></th>
+            <th><?= $this->Paginator->sort('created_at', 'Fecha creación') ?></th>
           </tr>
         </thead>
 
@@ -60,18 +60,18 @@ $adminNombre = $currentUser->nombre_completo ?? $currentUser->nombre_usuario ?? 
           <?php foreach ($users as $u): ?>
             <tr>
               <td><?= h($u->id) ?></td>
-              <td><?= h($u->nombre_usuario) ?></td>
-              <td><?= h($u->nombre_completo) ?></td>
-              <td><?= h($u->correo) ?></td>
-              <td><?= h($u->role->nombre_rol ?? 'Sin rol') ?></td>
+              <td><?= h($u->username) ?></td>
+              <td><?= h($u->full_name) ?></td>
+              <td><?= h($u->email) ?></td>
+              <td><?= h($u->role->name ?? 'Sin rol') ?></td>
               <td>
-                <?php if (($u->estado_usuario ?? '') === 'activo'): ?>
+                <?php if (($u->status ?? '') === 'activo'): ?>
                   <span class="dash-badge dash-badge--ok">activo</span>
                 <?php else: ?>
-                  <span class="dash-badge dash-badge--off"><?= h($u->estado_usuario ?? 'N/A') ?></span>
+                  <span class="dash-badge dash-badge--off"><?= h($u->status ?? 'N/A') ?></span>
                 <?php endif; ?>
               </td>
-              <td><?= h($u->fecha_creacion) ?></td>
+              <td><?= $u->created_at ? $u->created_at->format('d/m/Y H:i') : 'N/A' ?></td>
             </tr>
           <?php endforeach; ?>
         </tbody>

@@ -13,25 +13,36 @@ use Authentication\PasswordHasher\DefaultPasswordHasher;
 class User extends Entity
 {
     protected array $_accessible = [
-        'id_rol' => true,
-        'nombre_completo' => true,
-        'nombre_usuario' => true,
-        'correo' => true,
-        'contrasena_hash' => true,
-        'estado_usuario' => true,
-        'fecha_creacion' => true,
+        'role_id' => true,
+        'full_name' => true,
+        'username' => true,
+        'email' => true,
+        'password' => true,
+        'status' => true,
+        'created_at' => true,
     ];
 
     protected array $_hidden = [
-        'contrasena_hash',
+        'password',
     ];
 
-    protected function _setContrasenaHash(?string $value): ?string
+    protected function _setPassword(?string $value): ?string
     {
         if ($value === null || $value === '') {
             return null;
         }
 
         return (new DefaultPasswordHasher())->hash($value);
+    }
+
+    /**
+     * Virtual property for role_name
+     */
+    protected function _getRoleName(): ?string
+    {
+        if (isset($this->role) && isset($this->role->name)) {
+            return $this->role->name;
+        }
+        return null;
     }
 }

@@ -17,11 +17,11 @@ class Role extends Entity
      * Por seguridad, NO habilito el id.
      */
     protected array $_accessible = [
-        'nombre_rol' => true,
-        'descripcion' => true,
-        'nivel_acceso' => true,
-        'activo' => true,
-        'fecha_creacion' => true,
+        'name' => true,
+        'description' => true,
+        'access_level' => true,
+        'active' => true,
+        'created_at' => true,
     ];
 
     /**

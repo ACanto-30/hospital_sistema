@@ -20,11 +20,12 @@ class RolesTable extends Table
 
         $this->setTable('roles');
         $this->setPrimaryKey('id');          // ✅ PK real en la BD
-        $this->setDisplayField('nombre_rol');
+        $this->setDisplayField('name');
 
         // Un rol tiene muchos usuarios
         $this->hasMany('Users', [
-            'foreignKey' => 'id_rol',
+            'foreignKey' => 'id',
+            'className' => 'Users.Users',
         ]);
     }
 
@@ -35,27 +36,27 @@ class RolesTable extends Table
             ->allowEmptyString('id', null, 'create');
 
         $validator
-            ->scalar('nombre_rol')
-            ->maxLength('nombre_rol', 50)
-            ->requirePresence('nombre_rol', 'create')
-            ->notEmptyString('nombre_rol');
+            ->scalar('name')
+            ->maxLength('name', 50)
+            ->requirePresence('name', 'create')
+            ->notEmptyString('name');
 
         $validator
-            ->scalar('descripcion')
-            ->maxLength('descripcion', 255)
-            ->allowEmptyString('descripcion');
+            ->scalar('description')
+            ->maxLength('description', 255)
+            ->allowEmptyString('description');
 
         $validator
-            ->integer('nivel_acceso')
-            ->allowEmptyString('nivel_acceso');
+            ->integer('access_level')
+            ->allowEmptyString('access_level');
 
         $validator
-            ->boolean('activo')
-            ->allowEmptyString('activo');
+            ->boolean('active')
+            ->allowEmptyString('active');
 
         $validator
-            ->dateTime('fecha_creacion')
-            ->allowEmptyDateTime('fecha_creacion');
+            ->dateTime('created_at')
+            ->allowEmptyDateTime('created_at');
 
         return $validator;
     }

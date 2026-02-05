@@ -35,8 +35,10 @@ use Authorization\Policy\ResolverCollection;
 
 use Cake\Http\ServerRequest;
 
-// 👉 Middleware de control por rol
+// Middleware
 use App\Middleware\RoleAccessMiddleware;
+
+
 
 class Application extends BaseApplication implements
     AuthenticationServiceProviderInterface,
@@ -61,13 +63,6 @@ class Application extends BaseApplication implements
                 (new TableLocator())->allowFallbackClass(false)
             );
         }
-
-        if (Configure::read('debug')) {
-            $this->addPlugin('DebugKit');
-        }
-
-        $this->addPlugin('Users', ['routes' => true]);
-        $this->addPlugin('Authorization');
     }
 
     public function middleware(MiddlewareQueue $middlewareQueue): MiddlewareQueue
@@ -82,8 +77,10 @@ class Application extends BaseApplication implements
             // Autenticación (crea identity)
             ->add(new AuthenticationMiddleware($this))
 
-            // Middleware de control de acceso por rol (DASHBOARDS)
             ->add(new RoleAccessMiddleware())
+
+            // Catch Forbidden and redirect
+            ->add(new \App\Middleware\UnauthorizedRedirectMiddleware())
 
             // Autorización
             ->add(new AuthorizationMiddleware($this))
@@ -104,8 +101,6 @@ class Application extends BaseApplication implements
 
     protected function bootstrapCli(): void
     {
-        $this->addOptionalPlugin('Bake');
-        $this->addPlugin('Migrations');
     }
 
     public function getAuthenticationService(
@@ -114,8 +109,8 @@ class Application extends BaseApplication implements
         $service = new AuthenticationService();
 
         $fields = [
-            'username' => 'correo',
-            'password' => 'contrasena_hash',
+            'username' => 'email',
+            'password' => 'password',
         ];
 
         $service->setConfig([
@@ -131,11 +126,11 @@ class Application extends BaseApplication implements
 
         $service->loadAuthenticator('Authentication.Form', [
             'fields' => $fields,
-            'loginUrl' => [
+            'loginUrl' => \Cake\Routing\Router::url([
                 'plugin' => 'Users',
                 'controller' => 'Users',
                 'action' => 'login',
-            ],
+            ]),
         ]);
 
         // JWT opcional
@@ -153,6 +148,7 @@ class Application extends BaseApplication implements
             'resolver' => [
                 'className' => 'Authentication.Orm',
                 'userModel' => 'Users.Users',
+                'finder' => 'auth',
             ],
         ]);
 

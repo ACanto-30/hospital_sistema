@@ -38,20 +38,7 @@ class AssociatesPlugin extends BasePlugin
      * @param \Cake\Routing\RouteBuilder $routes The route builder to update.
      * @return void
      */
-    public function routes(RouteBuilder $routes): void
-    {
-        // remove this method hook if you don't need it
-        $routes->plugin(
-            'Associates',
-            ['path' => '/associates'],
-            function (RouteBuilder $builder) {
-                // Add custom routes here
 
-                $builder->fallbacks();
-            }
-        );
-        parent::routes($routes);
-    }
 
     /**
      * Add middleware for the plugin.

@@ -40,11 +40,11 @@ class UsersController extends AppController
         $user = $this->Users->newEmptyEntity();
 
         // Roles activos para el select
-        $roles = $this->Users->Roles->find('list', [
-            'keyField'   => 'id',
-            'valueField' => 'nombre_rol',
-            'conditions' => ['Roles.activo' => 1],
-            'order'      => ['Roles.nombre_rol' => 'ASC'],
+        $roles = $this->fetchTable('Users.Roles')->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'name',
+            'conditions' => ['Roles.active' => 1],
+            'order' => ['Roles.name' => 'ASC'],
         ])->toArray();
 
         if ($this->request->is('post')) {
@@ -72,11 +72,11 @@ class UsersController extends AppController
     {
         $user = $this->Users->get($id);
 
-        $roles = $this->Users->Roles->find('list', [
-            'keyField'   => 'id',
-            'valueField' => 'nombre_rol',
-            'conditions' => ['Roles.activo' => 1],
-            'order'      => ['Roles.nombre_rol' => 'ASC'],
+        $roles = $this->fetchTable('Users.Roles')->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'name',
+            'conditions' => ['Roles.active' => 1],
+            'order' => ['Roles.name' => 'ASC'],
         ])->toArray();
 
         if ($this->request->is(['patch', 'post', 'put'])) {
@@ -125,76 +125,113 @@ class UsersController extends AppController
 
         $user = $this->Users->newEmptyEntity();
 
-        $roles = $this->Users->Roles->find('list', [
-            'keyField'   => 'id',
-            'valueField' => 'nombre_rol',
-            'conditions' => ['Roles.activo' => 1],
-            'order'      => ['Roles.nombre_rol' => 'ASC'],
+        $roles = $this->fetchTable('Users.Roles')->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'name',
+            'conditions' => ['Roles.active' => 1],
+            'order' => ['Roles.name' => 'ASC'],
+        ])->toArray();
+
+        // Cargar Planes de Seguro para el dropdown
+        $insurancePlans = $this->fetchTable('Associates.InsurancePlans')->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'name',
         ])->toArray();
 
         if ($this->request->is('post')) {
             $data = $this->request->getData();
 
-            if (empty($data['estado_usuario'])) {
-                $data['estado_usuario'] = 'activo';
+            if (empty($data['status'])) {
+                $data['status'] = 'active';
             }
 
             $user = $this->Users->patchEntity($user, $data);
 
-            if ($this->Users->save($user)) {
-                $this->Flash->success('Usuario registrado correctamente.');
-                return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'login']);
-            }
+            try {
+                $result = $this->Users->getConnection()->transactional(function () use ($user, $data) {
+                    if (!$this->Users->save($user)) {
+                        return false;
+                    }
 
-            $this->Flash->error('No se pudo registrar el usuario.');
+                    // Si el rol es 'Asociado' (ID 4), guardamos en la tabla associates
+                    if ((int) $user->role_id === 4) {
+                        $associatesTable = $this->fetchTable('Associates.Associates');
+                        $associate = $associatesTable->newEmptyEntity();
+
+                        $associateData = [
+                            'user_id' => $user->id,
+                            'id_card' => $data['id_card'] ?? '',
+                            'first_name' => $data['first_name'] ?? '',
+                            'last_name' => $data['last_name'] ?? '',
+                            'phone' => $data['phone'] ?? null,
+                            'email' => $user->email, // Usamos el mismo email del usuario por consistencia
+                            'address' => $data['address'] ?? null,
+                            'plan_id' => $data['plan_id'] ?? null,
+                            'member_status' => 'active',
+                        ];
+
+                        $associate = $associatesTable->patchEntity($associate, $associateData);
+                        if (!$associatesTable->save($associate)) {
+                            // Si falla el guardado del asociado, lanzamos error para el rollback
+                            $errors = $associate->getErrors();
+                            throw new \Exception('Error al guardar datos del asociado: ' . json_encode($errors));
+                        }
+                    }
+
+                    return true;
+                });
+
+                if ($result) {
+                    $this->Flash->success('Usuario registrado correctamente.');
+                    return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'login']);
+                } else {
+                    $this->Flash->error('No se pudo registrar el usuario. Por favor, verifique los datos.');
+                }
+
+            } catch (\Exception $e) {
+                \Cake\Log\Log::error('Register Error: ' . $e->getMessage());
+                $this->Flash->error('Error durante el registro: ' . $e->getMessage());
+            }
         }
 
-        $this->set(compact('user', 'roles'));
+        $this->set(compact('user', 'roles', 'insurancePlans'));
     }
 
     public function login()
     {
-        // Si ya está logueado, lo mando al dashboard
-        if ($this->Authentication->getIdentity()) {
-            return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'dashboard']);
-        }
-
         $this->viewBuilder()->setLayout('auth');
-
         $this->request->allowMethod(['get', 'post']);
 
         if ($this->request->is('post')) {
-            $result = $this->Authentication->getResult();
+            $data = $this->request->getData();
+            \Cake\Log\Log::info('Login Attempt for: ' . ($data['email'] ?? 'NO EMAIL'));
+        }
 
-            if ($result && $result->isValid()) {
-                return $this->redirect(
-                    $this->Authentication->getLoginRedirect() ?? [
-                        'plugin' => 'Users',
-                        'controller' => 'Users',
-                        'action' => 'dashboard'
-                    ]
-                );
-            }
-            
-            $correo = $this->request->getData('correo');
-            $pass   = $this->request->getData('contrasena_hash');
+        $result = $this->Authentication->getResult();
 
-            if ($correo && $pass) {
-                $user = $this->Users->find()->where(['correo' => $correo])->first();
+        // Si el usuario ya está autenticado (vía Form o Session), redirigir
+        if ($result && $result->isValid()) {
+            \Cake\Log\Log::info('Login Success for: ' . ($this->Authentication->getIdentity()->email ?? 'unknown'));
+            $redirect = $this->Authentication->getLoginRedirect() ?? '/dashboard';
 
-                if ($user) {
-                    $hasher = new \Authentication\PasswordHasher\DefaultPasswordHasher();
+            return $this->redirect($redirect);
+        }
 
-                    if ($hasher->check($pass, $user->contrasena_hash)) {
-                        $this->Authentication->setIdentity($user);
+        if ($this->request->is('post') && !$result->isValid()) {
+            \Cake\Log\Log::error('Login Failed Status: ' . $result->getStatus());
 
-                        return $this->redirect([
-                            'plugin' => 'Users',
-                            'controller' => 'Users',
-                            'action' => 'dashboard'
-                        ]);
-                    }
-                }
+            // PRUEBA MANUAL DE DIAGNÓSTICO
+            $email = $this->request->getData('email');
+            $pass = $this->request->getData('password');
+            $testUser = $this->Users->find()->where(['email' => $email])->first();
+
+            if ($testUser) {
+                $hasher = new \Authentication\PasswordHasher\DefaultPasswordHasher();
+                $match = $hasher->check($pass, $testUser->password);
+                \Cake\Log\Log::debug("[LoginDebug] Manual check for $email: " . ($match ? 'MATCHES!' : 'NO MATCH'));
+                \Cake\Log\Log::debug("[LoginDebug] DB Hash: " . substr($testUser->password, 0, 10) . "...");
+            } else {
+                \Cake\Log\Log::debug("[LoginDebug] Manual check could not find user $email");
             }
 
             $this->Flash->error('Usuario o contraseña incorrectos.');
@@ -216,27 +253,9 @@ class UsersController extends AppController
     public function dashboard()
     {
         /**
-         * Dashboard general.
+         * Dashboard general / punto de redirección
          */
         $this->viewBuilder()->setLayout('dashboard');
-
-        $identity = $this->Authentication->getIdentity();
-        if (!$identity) {
-            return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'login']);
-        }
-
-        $user = $this->Users->get($identity->getIdentifier(), ['contain' => ['Roles']]);
-
-        // Ajusta el 1 si tu rol admin tiene otro ID
-        if (!empty($user->id_rol) && ((string)$user->id_rol === '1')) {
-            return $this->redirect([
-                'plugin' => 'Users',
-                'controller' => 'Users',
-                'action' => 'administratorDashboard'
-            ]);
-        }
-
-        $this->set(compact('user'));
     }
 
     public function administratorDashboard()
@@ -255,7 +274,7 @@ class UsersController extends AppController
         $currentUser = $this->Users->get($identity->getIdentifier(), ['contain' => ['Roles']]);
 
         // Seguridad extra: si no es admin, lo mando al dashboard normal
-        if (empty($currentUser->id_rol) || ((string)$currentUser->id_rol !== '1')) {
+        if (empty($currentUser->role_id) || ((int) $currentUser->role_id !== 1)) {
             $this->Flash->error('No tienes permisos para entrar a este módulo.');
             return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'dashboard']);
         }
@@ -263,7 +282,7 @@ class UsersController extends AppController
         // Listado de usuarios con roles, ordenados por fecha de creación
         $query = $this->Users->find()
             ->contain(['Roles'])
-            ->orderBy(['Users.fecha_creacion' => 'DESC']);
+            ->orderBy(['Users.created_at' => 'DESC']);
 
         $users = $this->paginate($query, [
             'limit' => 10,

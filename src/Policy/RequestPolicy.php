@@ -9,59 +9,47 @@ class RequestPolicy
 {
     public function canAccess($identity, ServerRequestInterface $request): bool
     {
-      
-        $params = (array)$request->getAttribute('params', []);
+        $params = $request->getAttribute('params');
         $plugin = $params['plugin'] ?? null;
         $controller = $params['controller'] ?? null;
         $action = $params['action'] ?? null;
-
-       
         $path = $request->getUri()->getPath();
 
-        
-        if (in_array($controller, ['Pages', 'Error'], true)) {
+        // 1. Rutas públicas base
+        if ($path === '/' || ($plugin === 'Users' && $controller === 'Users' && in_array($action, ['login', 'register', 'logout'], true))) {
             return true;
         }
 
-        if (
-            $plugin === 'Users' &&
-            $controller === 'Users' &&
-            in_array($action, ['login', 'register'], true)
-        ) {
-            return true;
-        }
-
-       
+        // Si no hay identidad después de las rutas públicas, denegar
         if (!$identity) {
             return false;
         }
 
-       
-        if ($plugin === 'Users' && $controller === 'Users' && $action === 'logout') {
+        // 2. LÓGICA DE USUARIOS AUTENTICADOS
+        // Obtenemos el role_name de la identidad (usando la propiedad virtual)
+        $roleName = $identity->role_name ?? null;
+
+        // Administrador: Acceso Total
+        if ($roleName === 'Administrador') {
             return true;
         }
 
-       
-        $idRol = (int)$identity->get('id_rol');
-
-    
-        if ($idRol === 1) {
+        // Permitir acceso general al plugin Users para cualquier logueado (excepto dashboard de admin)
+        if ($plugin === 'Users') {
+            if ($action === 'administratorDashboard') {
+                return false;
+            }
             return true;
         }
 
-    
-        if ($idRol === 2) {
+        // 3. ZONAS POR PLUGIN
+        $zoneAccess = [
+            'Payments' => ['Cajero', 'Asociado'],
+            'Associates' => ['Asociado', 'Medico']
+        ];
 
-            
-            if ($controller === 'Payments' && in_array($action, ['dashboardCashier', 'pay'], true)) {
-                return true;
-            }
-
-            
-            if (in_array($path, ['/payments-dashboard', '/dashboard-cajero', '/registrar-pago'], true)) {
-                return true;
-            }
-
+        if (isset($zoneAccess[$plugin]) && in_array($roleName, $zoneAccess[$plugin])) {
+            return true;
         }
 
         return false;

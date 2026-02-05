@@ -10,27 +10,29 @@ return function (RouteBuilder $routes): void {
 
     $routes->scope('/', function (RouteBuilder $builder): void {
 
-       
+
         $builder->connect(
             '/',
             ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'login']
         );
 
-        
+        $builder->connect('/dashboard', ['controller' => 'Pages', 'action' => 'dashboard']);
+
+
         $builder->connect(
             '/payments-dashboard',
-            ['plugin' => 'Pay', 'controller' => 'Payments', 'action' => 'dashboardCashier']
+            ['plugin' => 'Payments', 'controller' => 'Payments', 'action' => 'dashboardCashier']
         );
 
         $builder->connect(
             '/dashboard-cajero',
-            ['plugin' => 'Pay', 'controller' => 'Payments', 'action' => 'dashboardCashier']
+            ['plugin' => 'Payments', 'controller' => 'Payments', 'action' => 'dashboardCashier']
         );
 
-        
+
         $builder->connect(
             '/registrar-pago',
-            ['plugin' => 'Pay', 'controller' => 'Payments', 'action' => 'pay']
+            ['plugin' => 'Payments', 'controller' => 'Payments', 'action' => 'pay']
         );
 
         $builder->fallbacks();

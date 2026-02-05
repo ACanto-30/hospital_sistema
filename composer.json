@@ -28,7 +28,10 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "src/"
+            "App\\": "src/",
+            "Associates\\": "plugins/Associates/src/",
+            "Payments\\": "plugins/Payments/src/",
+            "Users\\": "plugins/Users/src/"
         }
     },
     "autoload-dev": {

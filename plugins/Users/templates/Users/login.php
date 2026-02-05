@@ -30,7 +30,7 @@ $this->assign('title', 'Hospital Privado X | Iniciar Sesión');
         </svg>
       </span>
 
-      <?= $this->Form->control('correo', [
+      <?= $this->Form->control('email', [
         'label' => false,
         'required' => true,
         'placeholder' => 'Correo',
@@ -46,7 +46,7 @@ $this->assign('title', 'Hospital Privado X | Iniciar Sesión');
         </svg>
       </span>
 
-      <?= $this->Form->control('contrasena_hash', [
+      <?= $this->Form->control('password', [
         'label' => false,
         'required' => true,
         'placeholder' => 'Contraseña',

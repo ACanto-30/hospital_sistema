@@ -2,5 +2,11 @@
 
 return [
     'Authentication' => [],
-    'Associates' => [],
+    'Authorization' => [],
+    'Users' => ['routes' => true],
+    'Associates' => ['routes' => true],
+    'Payments' => ['routes' => true],
+    'Migrations' => [],
+    'Bake' => [],
+    'DebugKit' => [],
 ];

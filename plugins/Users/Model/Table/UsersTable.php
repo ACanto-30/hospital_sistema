@@ -18,13 +18,13 @@ class UsersTable extends Table
     {
         parent::initialize($config);
 
-        $this->setTable('usuarios');
+        $this->setTable('users');
         $this->setPrimaryKey('id');
-        $this->setDisplayField('nombre_usuario');
+        $this->setDisplayField('username');
 
         // Cada usuario pertenece a un rol
         $this->belongsTo('Roles', [
-            'foreignKey' => 'id_rol',
+            'foreignKey' => 'id',
             'joinType' => 'INNER',
         ]);
     }
@@ -34,58 +34,65 @@ class UsersTable extends Table
         $validator
             ->integer('id')
             ->allowEmptyString('id', null, 'create');
+        $validator->scalar('username')
+            ->maxLength('username', 50)
+            ->requirePresence('username', 'create')
+            ->notEmptyString('username');
+        $validator
+            ->integer('id')
+            ->requirePresence('id', 'create')
+            ->notEmptyString('id');
 
         $validator
-            ->integer('id_rol')
-            ->requirePresence('id_rol', 'create')
-            ->notEmptyString('id_rol');
+            ->scalar('full_name')
+            ->maxLength('full_name', 100)
+            ->requirePresence('full_name', 'create')
+            ->notEmptyString('full_name');
+        $validator
+            ->scalar('username')
+            ->maxLength('username', 50)
+            ->requirePresence('username', 'create')
+            ->notEmptyString('username');
 
         $validator
-            ->scalar('nombre_completo')
-            ->maxLength('nombre_completo', 100)
-            ->requirePresence('nombre_completo', 'create')
-            ->notEmptyString('nombre_completo');
-
-        $validator
-            ->scalar('nombre_usuario')
-            ->maxLength('nombre_usuario', 50)
-            ->requirePresence('nombre_usuario', 'create')
-            ->notEmptyString('nombre_usuario');
-
-        $validator
-            ->email('correo')
-            ->maxLength('correo', 100)
-            ->requirePresence('correo', 'create')
-            ->notEmptyString('correo');
+            ->email('email')
+            ->maxLength('email', 100)
+            ->requirePresence('email', 'create')
+            ->notEmptyString('email');
 
         // Nota: aquí llega la contraseña (texto plano) y se hashea en la Entity con _setContrasenaHash()
         $validator
-            ->scalar('contrasena_hash')
-            ->maxLength('contrasena_hash', 255)
-            ->requirePresence('contrasena_hash', 'create')
-            ->notEmptyString('contrasena_hash')
-            ->minLength('contrasena_hash', 6);
+            ->scalar('password_hash')
+            ->maxLength('password_hash', 255)
+            ->requirePresence('password_hash', 'create')
+            ->notEmptyString('password_hash')
+            ->minLength('password_hash', 6);
 
         $validator
-            ->scalar('estado_usuario')
-            ->maxLength('estado_usuario', 20)
-            ->requirePresence('estado_usuario', 'create')
-            ->notEmptyString('estado_usuario');
+            ->scalar('status')
+            ->maxLength('status', 20)
+            ->requirePresence('status', 'create')
+            ->notEmptyString('status');
 
         // fecha_creacion tiene default en BD
         $validator
-            ->dateTime('fecha_creacion')
-            ->allowEmptyDateTime('fecha_creacion');
+            ->dateTime('created_at')
+            ->allowEmptyDateTime('created_at');
 
         return $validator;
     }
 
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->isUnique(['correo']), ['errorField' => 'correo']);
-        $rules->add($rules->isUnique(['nombre_usuario']), ['errorField' => 'nombre_usuario']);
-        $rules->add($rules->existsIn(['id_rol'], 'Roles'), ['errorField' => 'id_rol']);
+        $rules->add($rules->isUnique(['email']), ['errorField' => 'email']);
+        $rules->add($rules->isUnique(['username']), ['errorField' => 'username']);
+        $rules->add($rules->existsIn(['id'], 'Roles'), ['errorField' => 'id']);
 
         return $rules;
+    }
+
+    public function findAuth(\Cake\ORM\Query\SelectQuery $query, array $options)
+    {
+        return $query->contain(['Roles']);
     }
 }

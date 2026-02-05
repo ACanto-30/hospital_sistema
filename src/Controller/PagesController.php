@@ -70,4 +70,12 @@ class PagesController extends AppController
             throw new NotFoundException();
         }
     }
+
+    /**
+     * Dashboard genérico que sirve como punto de redirección.
+     */
+    public function dashboard(): void
+    {
+        // El RoleAccessMiddleware interceptará esta petición y redirigirá según el rol.
+    }
 }

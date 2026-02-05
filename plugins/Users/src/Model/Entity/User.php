@@ -20,32 +20,43 @@ class User extends Entity
      * Evito '*' => true por seguridad.
      */
     protected array $_accessible = [
-        'id_rol' => true,
-        'nombre_completo' => true,
-        'nombre_usuario' => true,
-        'correo' => true,
-        'contrasena_hash' => true,   // aquí entra la contraseña en texto plano y se hashea con el setter
-        'estado_usuario' => true,
-        'fecha_creacion' => true,
+        'role_id' => true,
+        'full_name' => true,
+        'username' => true,
+        'email' => true,
+        'password' => true,   // aquí entra la contraseña en texto plano y se hashea con el setter
+        'status' => true,
+        'created_at' => true,
     ];
 
     /**
      * Campos ocultos al convertir a array/json.
      */
     protected array $_hidden = [
-        'contrasena_hash',
+        'password',
     ];
 
     /**
      * Setter automático:
-     * Cuando se asigna contrasena_hash, se guarda hasheado.
+     * Cuando se asigna password, se guarda hasheado.
      */
-    protected function _setContrasenaHash(?string $value): ?string
+    protected function _setPassword(?string $value): ?string
     {
         if ($value === null || $value === '') {
             return null;
         }
 
+        \Cake\Log\Log::debug('Hashing password for user entity...');
         return (new DefaultPasswordHasher())->hash($value);
+    }
+    /**
+     * Propiedad virtual para obtener el nombre del rol fácilmente
+     */
+    protected function _getRoleName(): ?string
+    {
+        if (isset($this->role) && isset($this->role->name)) {
+            return $this->role->name;
+        }
+        return null;
     }
 }

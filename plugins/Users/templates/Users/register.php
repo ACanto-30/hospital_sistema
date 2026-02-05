@@ -33,7 +33,7 @@ $this->assign('title', 'Hospital Privado X | Crear Cuenta');
     <!-- Nombre completo -->
     <div class="input-group">
       <span class="icon left" aria-hidden="true">👤</span>
-      <?= $this->Form->control('nombre_completo', [
+      <?= $this->Form->control('full_name', [
         'label' => false,
         'required' => true,
         'placeholder' => 'Nombre completo'
@@ -43,7 +43,7 @@ $this->assign('title', 'Hospital Privado X | Crear Cuenta');
     <!-- Nombre de usuario -->
     <div class="input-group">
       <span class="icon left" aria-hidden="true">🆔</span>
-      <?= $this->Form->control('nombre_usuario', [
+      <?= $this->Form->control('username', [
         'label' => false,
         'required' => true,
         'placeholder' => 'Nombre de usuario'
@@ -53,7 +53,7 @@ $this->assign('title', 'Hospital Privado X | Crear Cuenta');
     <!-- Correo -->
     <div class="input-group">
       <span class="icon left" aria-hidden="true">📧</span>
-      <?= $this->Form->control('correo', [
+      <?= $this->Form->control('email', [
         'label' => false,
         'required' => true,
         'type' => 'email',
@@ -64,7 +64,7 @@ $this->assign('title', 'Hospital Privado X | Crear Cuenta');
     <!-- Contraseña (se envía en este campo; luego se hashea al guardar) -->
     <div class="input-group">
       <span class="icon left" aria-hidden="true">🔒</span>
-      <?= $this->Form->control('contrasena_hash', [
+      <?= $this->Form->control('password', [
         'label' => false,
         'required' => true,
         'type' => 'password',
@@ -94,14 +94,94 @@ $this->assign('title', 'Hospital Privado X | Crear Cuenta');
     <!-- Rol -->
     <div class="input-group">
       <span class="icon left" aria-hidden="true">🧩</span>
-      <?= $this->Form->control('id_rol', [
+      <?= $this->Form->control('role_id', [
         'label' => false,
         'type' => 'select',
         'required' => true,
         'options' => $roles,
-        'empty' => 'Seleccione un rol'
+        'empty' => 'Seleccione un rol',
+        'id' => 'role-selector'
       ]) ?>
     </div>
+
+    <!-- Campos extra para Asociado (Se muestran dinámicamente) -->
+    <div id="associate-fields" style="display: none; border-top: 1px solid #eee; padding-top: 15px; margin-top: 5px;">
+      <p style="font-size: 0.85em; color: #666; margin-bottom: 10px;">Información de Asociado</p>
+
+      <div class="input-group">
+        <span class="icon left" aria-hidden="true">🪪</span>
+        <?= $this->Form->control('id_card', [
+          'label' => false,
+          'placeholder' => 'Número de Cédula'
+        ]) ?>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="input-group">
+          <?= $this->Form->control('first_name', [
+            'label' => false,
+            'placeholder' => 'Nombre'
+          ]) ?>
+        </div>
+        <div class="input-group">
+          <?= $this->Form->control('last_name', [
+            'label' => false,
+            'placeholder' => 'Apellido'
+          ]) ?>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <span class="icon left" aria-hidden="true">📞</span>
+        <?= $this->Form->control('phone', [
+          'label' => false,
+          'placeholder' => 'Teléfono (opcional)'
+        ]) ?>
+      </div>
+
+      <div class="input-group">
+        <span class="icon left" aria-hidden="true">📍</span>
+        <?= $this->Form->control('address', [
+          'label' => false,
+          'placeholder' => 'Dirección (opcional)',
+          'type' => 'textarea',
+          'rows' => 2
+        ]) ?>
+      </div>
+
+      <div class="input-group">
+        <span class="icon left" aria-hidden="true">🏥</span>
+        <?= $this->Form->control('plan_id', [
+          'label' => false,
+          'type' => 'select',
+          'options' => $insurancePlans,
+          'empty' => 'Seleccione un Plan de Seguro'
+        ]) ?>
+      </div>
+    </div>
+
+    <script>
+      // Lógica para mostrar/ocultar campos de asociado
+      document.getElementById('role-selector').addEventListener('change', function () {
+        const associateFields = document.getElementById('associate-fields');
+        // El ID 4 corresponde a 'Asociado' según el seed
+        if (this.value == '4') {
+          associateFields.style.display = 'block';
+          // Hacer campos requeridos si es asociado
+          document.getElementsByName('id_card')[0].required = true;
+          document.getElementsByName('first_name')[0].required = true;
+          document.getElementsByName('last_name')[0].required = true;
+          document.getElementsByName('plan_id')[0].required = true;
+        } else {
+          associateFields.style.display = 'none';
+          // Quitar obligatoriedad
+          document.getElementsByName('id_card')[0].required = false;
+          document.getElementsByName('first_name')[0].required = false;
+          document.getElementsByName('last_name')[0].required = false;
+          document.getElementsByName('plan_id')[0].required = false;
+        }
+      });
+    </script>
 
     <?= $this->Form->button('Registrarse', ['class' => 'btn btn-primary']) ?>
 
@@ -115,5 +195,6 @@ $this->assign('title', 'Hospital Privado X | Crear Cuenta');
       ¿Ya tiene una cuenta?
       <?= $this->Html->link('Inicie Sesión', ['action' => 'login'], ['class' => 'link']) ?>
     </div>
+
   </div>
 </div>

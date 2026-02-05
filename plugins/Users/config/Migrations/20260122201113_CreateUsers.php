@@ -15,35 +15,35 @@ class CreateUsers extends BaseMigration
      */
     public function change(): void
 {
-    $table = $this->table('usuarios');
+    $table = $this->table('users');
     $table
-        ->addColumn('id_rol', 'integer', [
+        ->addColumn('role_id', 'integer', [
             'null' => false,
         ])
-        ->addColumn('nombre_completo', 'string', [
+        ->addColumn('full_name', 'string', [
             'limit' => 100,
             'null' => false,
         ])
-        ->addColumn('nombre_usuario', 'string', [
+        ->addColumn('username', 'string', [
             'limit' => 50,
             'null' => false,
         ])
-        ->addColumn('correo', 'string', [
+        ->addColumn('email', 'string', [
             'limit' => 100,
             'null' => false,
         ])
-        ->addColumn('contrasena_hash', 'string', [
+        ->addColumn('password', 'string', [
             'limit' => 255,
             'null' => false,
         ])
-        ->addColumn('estado_usuario', 'string', [
+        ->addColumn('status', 'string', [
             'limit' => 20,
             'null' => false,
         ])
-        ->addColumn('fecha_creacion', 'datetime', [
+        ->addColumn('created_at', 'datetime', [
             'default' => 'CURRENT_TIMESTAMP',
         ])
-        ->addForeignKey('id_rol', 'roles', 'id', [
+        ->addForeignKey('role_id', 'roles', 'id', [
             'delete' => 'RESTRICT',
             'update' => 'CASCADE',
         ])

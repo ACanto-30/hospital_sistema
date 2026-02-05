@@ -18,15 +18,25 @@ class UsersTable extends Table
     {
         parent::initialize($config);
 
-        $this->setTable('usuarios');
+        $this->setTable('users');
+        $this->setEntityClass('Users\Model\Entity\User');
         $this->setPrimaryKey('id');
-        $this->setDisplayField('nombre_usuario');
+        $this->setDisplayField('username');
 
         // Cada usuario pertenece a un rol
         $this->belongsTo('Roles', [
-            'foreignKey' => 'id_rol',
+            'foreignKey' => 'role_id', // Nombre de la FK
             'joinType' => 'INNER',
             'className' => 'Users.Roles',
+        ]);
+
+        // Manejo automático de created_at
+        $this->addBehavior('Timestamp', [
+            'events' => [
+                'Model.beforeSave' => [
+                    'created_at' => 'new',
+                ]
+            ]
         ]);
     }
 
@@ -37,56 +47,76 @@ class UsersTable extends Table
             ->allowEmptyString('id', null, 'create');
 
         $validator
-            ->integer('id_rol')
-            ->requirePresence('id_rol', 'create')
-            ->notEmptyString('id_rol');
+            ->integer('role_id')
+            ->requirePresence('role_id', 'create')
+            ->notEmptyString('role_id');
 
         $validator
-            ->scalar('nombre_completo')
-            ->maxLength('nombre_completo', 100)
-            ->requirePresence('nombre_completo', 'create')
-            ->notEmptyString('nombre_completo');
+            ->scalar('full_name') // nombre_completo -> full_name
+            ->maxLength('full_name', 100)
+            ->requirePresence('full_name', 'create')
+            ->notEmptyString('full_name');
 
         $validator
-            ->scalar('nombre_usuario')
-            ->maxLength('nombre_usuario', 50)
-            ->requirePresence('nombre_usuario', 'create')
-            ->notEmptyString('nombre_usuario');
+            ->scalar('username') // nombre_usuario -> username
+            ->maxLength('username', 50)
+            ->requirePresence('username', 'create')
+            ->notEmptyString('username');
 
         $validator
-            ->email('correo')
-            ->maxLength('correo', 100)
-            ->requirePresence('correo', 'create')
-            ->notEmptyString('correo');
+            ->email('email') // correo -> email
+            ->maxLength('email', 100)
+            ->requirePresence('email', 'create')
+            ->notEmptyString('email');
 
-        // Nota: aquí llega la contraseña (texto plano) y se hashea en la Entity con _setContrasenaHash()
+        // Validamos 'password' que viene del Form
         $validator
-            ->scalar('contrasena_hash')
-            ->maxLength('contrasena_hash', 255)
-            ->requirePresence('contrasena_hash', 'create')
-            ->notEmptyString('contrasena_hash')
-            ->minLength('contrasena_hash', 6);
+            ->scalar('password')
+            ->maxLength('password', 255)
+            ->requirePresence('password', 'create')
+            ->notEmptyString('password')
+            ->minLength('password', 6);
 
         $validator
-            ->scalar('estado_usuario')
-            ->maxLength('estado_usuario', 20)
-            ->requirePresence('estado_usuario', 'create')
-            ->notEmptyString('estado_usuario');
+            ->scalar('status') // estado_usuario -> status
+            ->maxLength('status', 20)
+            ->requirePresence('status', 'create')
+            ->notEmptyString('status');
 
-        // fecha_creacion tiene default en BD
         $validator
-            ->dateTime('fecha_creacion')
-            ->allowEmptyDateTime('fecha_creacion');
+            ->dateTime('created_at') // fecha_creacion -> created_at
+            ->allowEmptyDateTime('created_at');
 
         return $validator;
     }
 
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->isUnique(['correo']), ['errorField' => 'correo']);
-        $rules->add($rules->isUnique(['nombre_usuario']), ['errorField' => 'nombre_usuario']);
-        $rules->add($rules->existsIn(['id_rol'], 'Roles'), ['errorField' => 'id_rol']);
+        $rules->add($rules->isUnique(['email']), ['errorField' => 'email']);
+        $rules->add($rules->isUnique(['username']), ['errorField' => 'username']);
+        $rules->add($rules->existsIn(['role_id'], 'Roles'), ['errorField' => 'role_id']);
 
         return $rules;
+    }
+
+    public function findAuth(\Cake\ORM\Query\SelectQuery $query, array $options)
+    {
+        \Cake\Log\Log::debug('[UsersTable] findAuth executing...');
+
+        $query->contain(['Roles']);
+
+        // Log para ver si el campo password está en el objeto resultante tras la consulta
+        $query->formatResults(function ($results) {
+            return $results->map(function ($row) {
+                \Cake\Log\Log::debug('[UsersTable] User found in DB: ' . ($row->email ?? 'no email'));
+                \Cake\Log\Log::debug('[UsersTable] Password field present: ' . (isset($row->password) ? 'YES' : 'NO'));
+                if (isset($row->password)) {
+                    \Cake\Log\Log::debug('[UsersTable] Password prefix: ' . substr($row->password, 0, 4));
+                }
+                return $row;
+            });
+        });
+
+        return $query;
     }
 }

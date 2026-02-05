@@ -18,6 +18,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <?= $this->Html->charset() ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,7 +36,15 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
     <?= $this->fetch('script') ?>
+    <style>
+        .logout-link {
+            font-weight: bold;
+            color: #d33c44 !important;
+            margin-left: 15px;
+        }
+    </style>
 </head>
+
 <body>
     <nav class="top-nav">
         <div class="top-nav-title">
@@ -44,6 +53,9 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
         <div class="top-nav-links">
             <a target="_blank" rel="noopener" href="https://book.cakephp.org/5/">Documentation</a>
             <a target="_blank" rel="noopener" href="https://api.cakephp.org/">API</a>
+            <?php if ($this->request->getAttribute('identity')): ?>
+                <?= $this->Html->link('Cerrar Sesión', ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'logout'], ['class' => 'logout-link']) ?>
+            <?php endif; ?>
         </div>
     </nav>
     <main class="main">
@@ -55,4 +67,5 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
     <footer>
     </footer>
 </body>
+
 </html>

@@ -17,22 +17,22 @@ class CreateRoles extends BaseMigration
 {
     $table = $this->table('roles');
     $table
-        ->addColumn('nombre_rol', 'string', [
+        ->addColumn('name', 'string', [
             'limit' => 50,
             'null' => false,
         ])
-        ->addColumn('descripcion', 'string', [
+        ->addColumn('description', 'string', [
             'limit' => 255,
             'null' => false,
         ])
-        ->addColumn('nivel_acceso', 'integer', [
+        ->addColumn('access_level', 'integer', [
             'null' => false,
         ])
-        ->addColumn('activo', 'boolean', [
+        ->addColumn('active', 'boolean', [
             'default' => true,
             'null' => false,
         ])
-        ->addColumn('fecha_creacion', 'datetime', [
+        ->addColumn('created_at', 'datetime', [
             'default' => 'CURRENT_TIMESTAMP',
         ])
         ->create();
