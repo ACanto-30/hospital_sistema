@@ -286,3 +286,187 @@
 .flash-btn:hover{
     opacity: .9;
 }
+/* ================================
+   Pagos - Formulario (Cajero)
+   ================================ */
+
+.dashboard .pay-card{
+  max-width: 980px;
+  width: 100%;
+}
+
+.dashboard .pay-card-head{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.dashboard .pay-lead{
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+
+.dashboard .pay-badge{
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  background: #ecfdf3;
+  color: #157347;
+  border: 1px solid #d7efe2;
+  margin-left: 6px;
+}
+
+.dashboard .pay-badge-soft{
+  background: #f3f4f6;
+  color: #374151;
+  border-color: #e5e7eb;
+}
+
+/* Mini card lateral */
+.dashboard .pay-card-mini{
+  min-width: 160px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.04);
+}
+
+.dashboard .pay-mini-label{
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.dashboard .pay-mini-value{
+  font-size: 14px;
+  color: #111827;
+  font-weight: 900;
+}
+
+/* Grid */
+.dashboard .pay-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.dashboard .pay-grid .full{
+  grid-column: 1 / -1;
+}
+
+/* Field / Label */
+.dashboard .pay-field{}
+
+/* CakePHP form wrapper*/
+.dashboard .pay-field .input,
+.dashboard .pay-field .select,
+.dashboard .pay-field .file{
+  margin-bottom: 0;
+}
+
+.dashboard .pay-label{
+  display: block;
+  font-weight: 900;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+/* Inputs */
+.dashboard .pay-input{
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+/* File */
+.dashboard .pay-file{
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1.5px dashed #cbd5e1;
+  background: #f8fcfa;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.dashboard .pay-input:focus,
+.dashboard .pay-file:focus{
+  border-color: #157347;
+  box-shadow: 0 0 0 4px rgba(21, 115, 71, 0.15);
+}
+
+/* Hint */
+.dashboard .pay-hint{
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+/* Info box */
+.dashboard .pay-info{
+  margin-top: 14px;
+  background: #f3faf6;
+  border: 1px solid #d7efe2;
+  color: #157347;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+}
+
+/* Actions */
+.dashboard .pay-actions{
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+/* Errores CakePHP */
+.dashboard .error-message{
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 900;
+  color: #b42318;
+}
+
+.dashboard .form-error,
+.dashboard input.form-error,
+.dashboard select.form-error{
+  border-color: #b42318 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px){
+  .dashboard .pay-grid{
+    grid-template-columns: 1fr;
+  }
+  .dashboard .pay-card-head{
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dashboard .pay-card-mini{
+    width: 100%;
+  }
+  .dashboard .pay-actions{
+    justify-content: stretch;
+  }
+  .dashboard .pay-actions .btn{
+    width: 100%;
+  }
+}
+.dashboard .dashboard-title{
+  color:#157347;
+}
+

@@ -30,7 +30,7 @@ $this->assign('title', 'Dashboard de Usuario Mejorado');
   <!-- Header -->
   <div class="dashboard-header" style="display:flex; justify-content: space-between; align-items:center; margin-bottom:20px;">
     <div>
-      <h2 class="dashboard-title" style="margin:0; font-size:1.8rem; font-weight:600;">Panel de Control</h2>
+      <h2 class="dashboard-title">Panel de Control</h2>
       <p class="dashboard-subtitle" style="margin:4px 0 0; color:#555;">
         Bienvenido, <?= h(($associate->first_name ?? 'Usuario') . ' ' . ($associate->last_name ?? '')) ?>
       </p>
