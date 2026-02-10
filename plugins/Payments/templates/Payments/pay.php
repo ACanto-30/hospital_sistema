@@ -5,56 +5,11 @@ $this->assign('title', 'Registrar pago - Envío de comprobante');
 
 $user = $this->getRequest()->getAttribute('identity') ?? null;
 
-$nombreRol = 'Cajero';
 $nombreUsuario = 'Usuario';
-
 if (!empty($user)) {
-  $nombreUsuario = $user->get('nombre_completo') ?? $user->get('nombre_usuario') ?? 'Usuario';
+    $nombreUsuario = $user->get('nombre_completo') ?? $user->get('nombre_usuario') ?? 'Usuario';
 }
 ?>
-
-<style>
-  /* Solo para esta vista*/
-  .pay-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 14px;
-  }
-
-  .pay-grid .full {
-    grid-column: 1 / -1;
-  }
-
-  .pay-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 16px;
-  }
-
-  .pay-hint {
-    font-size: 12px;
-    color: #6b7280;
-    margin-top: 6px;
-  }
-
-  .pay-info {
-    margin-top: 14px;
-    background: #f3faf6;
-    border: 1px solid #d7efe2;
-    color: #157347;
-    padding: 12px 14px;
-    border-radius: 14px;
-    font-size: 13px;
-  }
-
-  @media (max-width: 768px) {
-    .pay-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>
 
 <div class="dashboard-page dashboard-cashier">
 
@@ -67,11 +22,7 @@ if (!empty($user)) {
     </div>
 
     <div class="dashboard-meta">
-      <?= $this->Html->link(
-        'Volver al dashboard',
-        '/dashboard',
-        ['class' => 'btn btn-primary']
-      ) ?>
+      <?= $this->Html->link('Volver al dashboard', '/dashboard', ['class' => 'btn btn-primary']) ?>
 
       <?= $this->Html->link(
         'Cerrar sesión',
@@ -85,44 +36,63 @@ if (!empty($user)) {
 
   <div class="dashboard-content">
 
-    <div class="summary-card" style="max-width:980px;width:100%;">
-      <h3 class="section-title">Envío de comprobante</h3>
-      <p class="muted" style="margin-top:6px;">
-        Asociado: <strong><?= h($associate->first_name . ' ' . $associate->last_name) ?></strong> (<?= h($associate->id_card) ?>)<br>
-        Complete el formulario y adjunte el comprobante.
-      </p>
+    <div class="summary-card pay-card">
+      <div class="pay-card-head">
+        <div>
+          <h3 class="section-title">Envío de comprobante</h3>
+          <p class="muted pay-lead">
+            Asociado:
+            <span class="pay-badge">
+              <?= h($associate->first_name . ' ' . $associate->last_name) ?>
+            </span>
+            <span class="pay-badge pay-badge-soft">
+              <?= h($associate->id_card) ?>
+            </span>
+          </p>
+        </div>
+
+        <div class="pay-card-mini">
+          <div class="pay-mini-label">Estado</div>
+          <div class="pay-mini-value">Pendiente</div>
+        </div>
+      </div>
 
       <?= $this->Form->create($payment, ['type' => 'file', 'autocomplete' => 'off']) ?>
 
       <div class="pay-grid">
 
-        <div>
+        <div class="pay-field">
           <?= $this->Form->control('amount', [
-            'label' => 'Monto pagado (B/.)',
+            'label' => ['text' => 'Monto pagado (B/.)', 'class' => 'pay-label'],
             'type' => 'number',
             'step' => '0.01',
             'min' => '0',
-            'required' => true
+            'required' => true,
+            'class' => 'pay-input',
+            'placeholder' => 'Ej: 25.00',
           ]) ?>
+          <div class="pay-hint">Ingrese el monto exacto del comprobante.</div>
         </div>
 
-        <div>
+        <div class="pay-field">
           <?= $this->Form->control('payment_method_id', [
-            'label' => 'Método de pago',
+            'label' => ['text' => 'Método de pago', 'class' => 'pay-label'],
             'type' => 'select',
             'options' => $paymentMethods,
             'empty' => 'Seleccione',
-            'required' => true
+            'required' => true,
+            'class' => 'pay-input',
           ]) ?>
           <div class="pay-hint">Seleccione el método utilizado.</div>
         </div>
 
-        <div class="full">
+        <div class="pay-field full">
           <?= $this->Form->control('comprobante', [
-            'label' => 'Adjuntar comprobante',
+            'label' => ['text' => 'Adjuntar comprobante', 'class' => 'pay-label'],
             'type' => 'file',
             'accept' => '.jpg,.jpeg,.png,.pdf',
-            'required' => true
+            'required' => true,
+            'class' => 'pay-file',
           ]) ?>
           <div class="pay-hint">Formatos permitidos: JPG, PNG, PDF. Tamaño máximo: 5MB.</div>
         </div>
@@ -130,21 +100,16 @@ if (!empty($user)) {
       </div>
 
       <div class="pay-info">
-        Importante: este sistema solo recibe el comprobante. El estado (Pendiente / Pagado) se define manualmente.
+        Importante: el sistema solo recibe el comprobante. El estado (Pendiente / Pagado) se define manualmente.
       </div>
 
       <div class="pay-actions">
         <?= $this->Form->button('Enviar comprobante', ['class' => 'btn btn-primary']) ?>
 
-        <?= $this->Html->link(
-          'Cancelar',
-          '/dashboard',
-          ['class' => 'btn btn-primary btn-logout']
-        ) ?>
+        <?= $this->Html->link('Cancelar', '/dashboard', ['class' => 'btn btn-primary btn-logout']) ?>
       </div>
 
       <?= $this->Form->end() ?>
-
     </div>
 
   </div>
