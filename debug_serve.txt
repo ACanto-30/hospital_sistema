@@ -1,0 +1,306 @@
+[2026-02-10 04:02:05] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  AUTHORIZATION FAILED: Identity is not authorized to perform `seeReceipt` on `Payments\Model\Entity\Payment`.
+[2026-02-10 04:02:05] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  AUTHORIZATION FAILED: Identity is not authorized to perform `seeReceipt` on `Payments\Model\Entity\Payment`.
+[2026-02-10 04:02:05] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  AUTHORIZATION FAILED: Identity is not authorized to perform `seeReceipt` on `Payments\Model\Entity\Payment`.
+[2026-02-10 04:02:54] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  AUTHORIZATION FAILED: Identity is not authorized to perform `seeReceipt` on `Payments\Model\Entity\Payment`.
+[2026-02-10 04:02:54] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  AUTHORIZATION FAILED: Identity is not authorized to perform `seeReceipt` on `Payments\Model\Entity\Payment`.
+[2026-02-10 04:02:54] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  AUTHORIZATION FAILED: Identity is not authorized to perform `seeReceipt` on `Payments\Model\Entity\Payment`.
+[2026-02-10 04:02:56] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  AUTHORIZATION FAILED: Identity is not authorized to perform `seeReceipt` on `Payments\Model\Entity\Payment`.
+[2026-02-10 04:03:00] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  AUTHORIZATION FAILED: Identity is not authorized to perform `seeReceipt` on `Payments\Model\Entity\Payment`.
+[2026-02-10 04:03:02] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  AUTHORIZATION FAILED: Identity is not authorized to perform `seeReceipt` on `Payments\Model\Entity\Payment`.
+[2026-02-10 04:07:21] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:07:22] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\webroot\uploads\receipts\20260210_035341_b5b8e3c5.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\webroot\uploads\receipts\20260210_035341_b5b8e3c5.png
+[2026-02-10 04:07:22] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:07:31] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:07:33] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:07:37] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\webroot\uploads\receipts\20260210_035341_b5b8e3c5.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\webroot\uploads\receipts\20260210_035341_b5b8e3c5.png
+[2026-02-10 04:07:41] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\webroot\uploads\receipts\20260210_035341_b5b8e3c5.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\webroot\uploads\receipts\20260210_035341_b5b8e3c5.png
+[2026-02-10 04:07:44] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:07:58] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:07:58] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\webroot\uploads\receipts\20260210_035341_b5b8e3c5.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\webroot\uploads\receipts\20260210_035341_b5b8e3c5.png
+[2026-02-10 04:07:58] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:08:37] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:08:37] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\webroot\uploads\receipts\20260210_035341_b5b8e3c5.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\webroot\uploads\receipts\20260210_035341_b5b8e3c5.png
+[2026-02-10 04:08:37] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:28:41] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:28:41] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\webroot\uploads\receipts\20260210_035341_b5b8e3c5.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\webroot\uploads\receipts\20260210_035341_b5b8e3c5.png
+[2026-02-10 04:28:41] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:29:06] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:29:06] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:29:06] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:30:27] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:30:27] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:30:28] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:30:29] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:30:29] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:30:29] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:35:12] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:35:12] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:35:12] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:42:40] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:42:40] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:42:40] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:42:46] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:42:46] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:42:46] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:43:00] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:43:00] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:43:00] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:43:05] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:43:05] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:43:06] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:43:07] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:43:07] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:43:07] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:46:58] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:46:58] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:46:58] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:46:59] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:46:59] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:46:59] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:47:00] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:47:00] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:47:00] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:47:05] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:47:05] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:47:05] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:48:24] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:48:24] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:48:24] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:48:29] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:48:29] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:48:29] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:48:41] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:48:41] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:48:41] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:48:42] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:48:42] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:48:42] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:50:27] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:50:27] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:50:27] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:50:35] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:50:35] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:50:35] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:50:38] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:50:38] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:50:38] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:53:46] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:53:46] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:53:46] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:53:51] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:53:51] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:53:53] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:54:24] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:54:24] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:54:24] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:59:01] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:59:01] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:59:01] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:59:11] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:59:11] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png
+[2026-02-10 04:59:13] Request ID: 3 - DB Path: resources/receipts/20260210_035815_0f238e65.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035815_0f238e65.png
+[2026-02-10 04:59:14] Request ID: 2 - DB Path: uploads/receipts/20260210_035341_b5b8e3c5.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_035341_b5b8e3c5.png - NOT FOUND
+  ERROR: File not found on disk
+[2026-02-10 04:59:14] Request ID: 1 - DB Path: resources/receipts/20260210_030001_26085449.png
+  Checking: F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png - EXISTS
+  SUCCESS: Serving F:\UTP\Verano 2026\git\remote\hospital_sistema\resources\receipts\20260210_030001_26085449.png

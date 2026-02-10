@@ -20,7 +20,7 @@ $this->assign('title', 'Hospital Privado X | Iniciar Sesión');
 
     <?= $this->Flash->render() ?>
 
-    <?= $this->Form->create(null, ['autocomplete' => 'off']) ?>
+    <?= $this->Form->create(null, ['url' => '/login', 'autocomplete' => 'off']) ?>
 
     <div class="input-group">
       <span class="icon left" aria-hidden="true">

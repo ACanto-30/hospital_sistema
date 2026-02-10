@@ -40,6 +40,23 @@ class UsersTable extends Table
         ]);
     }
 
+    /**
+     * Limpieza de datos antes de validar/guardar
+     */
+    public function beforeMarshal(\Cake\Event\EventInterface $event, \ArrayObject $data, \ArrayObject $options): void
+    {
+        if (isset($data['email'])) {
+            $data['email'] = strtolower(trim($data['email']));
+        }
+        if (isset($data['username'])) {
+            $data['username'] = trim($data['username']);
+        }
+        // Estandarizar estado a 'activo' si viene como 'active' o vacío
+        if (isset($data['status']) && ($data['status'] === 'active' || empty($data['status']))) {
+            $data['status'] = 'activo';
+        }
+    }
+
     public function validationDefault(Validator $validator): Validator
     {
         $validator

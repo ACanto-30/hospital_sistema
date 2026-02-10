@@ -14,7 +14,8 @@
 .Spotlight-V100
 .Trashes
 # Icon must end with two \r
-Icon
+Icon
+
 ehthumbs.db
 Thumbs.db
 .directory
@@ -52,3 +53,9 @@ yarn-debug.log
 yarn-error.log
 /webroot/uploads/comprobantes/*
 !/webroot/uploads/comprobantes/.gitkeep
+
+/resources/receipts/*
+!/resources/receipts/.gitkeep
+
+/debug_serve.txt
+/last_logs.txt

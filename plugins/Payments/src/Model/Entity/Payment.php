@@ -5,6 +5,22 @@ namespace Payments\Model\Entity;
 
 use Cake\ORM\Entity;
 
+/**
+ * Payment Entity
+ *
+ * @property int $id
+ * @property int $associate_id
+ * @property int|null $processed_by_user_id
+ * @property int $payment_method_id
+ * @property int $payment_status_id
+ * @property float $amount
+ * @property string|null $proof_image
+ * @property \Cake\I18n\FrozenTime $payment_date
+ *
+ * @property \Payments\Model\Entity\Associate $associate
+ * @property \Payments\Model\Entity\PaymentMethod $payment_method
+ * @property \Payments\Model\Entity\PaymentStatus $payment_status
+ */
 class Payment extends Entity
 {
     protected array $_accessible = [
