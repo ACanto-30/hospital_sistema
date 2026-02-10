@@ -15,6 +15,16 @@ return static function (RouteBuilder $routes): void {
             'action' => 'administratorDashboard'
         ]);
 
+        $builder->connect('/toggle-user-status/*', [
+            'controller' => 'Users',
+            'action' => 'toggleUserStatus'
+        ]);
+
+        $builder->connect('/edit-associate-plan/*', [
+            'controller' => 'Users',
+            'action' => 'editAssociatePlan'
+        ]);
+
         // Fallbacks del plugin
         $builder->fallbacks();
     });

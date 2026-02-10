@@ -132,6 +132,15 @@ $this->assign('title', 'Hospital Privado X | Crear Cuenta');
       </div>
 
       <div class="input-group">
+        <span class="icon left" aria-hidden="true">📅</span>
+        <?= $this->Form->control('birth_date', [
+          'label' => false,
+          'type' => 'date',
+          'placeholder' => 'Fecha de Nacimiento'
+        ]) ?>
+      </div>
+
+      <div class="input-group">
         <span class="icon left" aria-hidden="true">📞</span>
         <?= $this->Form->control('phone', [
           'label' => false,
@@ -162,15 +171,18 @@ $this->assign('title', 'Hospital Privado X | Crear Cuenta');
 
     <script>
       // Lógica para mostrar/ocultar campos de asociado
-      document.getElementById('role-selector').addEventListener('change', function () {
-        const associateFields = document.getElementById('associate-fields');
+      const roleSelector = document.getElementById('role-selector');
+      const associateFields = document.getElementById('associate-fields');
+
+      function toggleAssociateFields() {
         // El ID 4 corresponde a 'Asociado' según el seed
-        if (this.value == '4') {
+        if (roleSelector.value == '4') {
           associateFields.style.display = 'block';
           // Hacer campos requeridos si es asociado
           document.getElementsByName('id_card')[0].required = true;
           document.getElementsByName('first_name')[0].required = true;
           document.getElementsByName('last_name')[0].required = true;
+          document.getElementsByName('birth_date')[0].required = true;
           document.getElementsByName('plan_id')[0].required = true;
         } else {
           associateFields.style.display = 'none';
@@ -178,9 +190,15 @@ $this->assign('title', 'Hospital Privado X | Crear Cuenta');
           document.getElementsByName('id_card')[0].required = false;
           document.getElementsByName('first_name')[0].required = false;
           document.getElementsByName('last_name')[0].required = false;
+          document.getElementsByName('birth_date')[0].required = false;
           document.getElementsByName('plan_id')[0].required = false;
         }
-      });
+      }
+
+      roleSelector.addEventListener('change', toggleAssociateFields);
+
+      // Ejecutar al cargar la página por si hay errores de validación y el valor ya está seleccionado
+      window.addEventListener('DOMContentLoaded', toggleAssociateFields);
     </script>
 
     <?= $this->Form->button('Registrarse', ['class' => 'btn btn-primary']) ?>

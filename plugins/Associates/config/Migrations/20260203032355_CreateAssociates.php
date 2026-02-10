@@ -31,6 +31,9 @@ class CreateAssociates extends BaseMigration
                 'limit' => 100,
                 'null' => false,
             ])
+            ->addColumn('birth_date', 'date', [
+                'null' => false,
+            ])
             ->addColumn('phone', 'string', [
                 'limit' => 20,
                 'null' => true,
@@ -61,6 +64,8 @@ class CreateAssociates extends BaseMigration
 
             // 🔗 Foreign Keys
             ->addForeignKey('user_id', 'users', 'id')
+
+            ->addForeignKey('plan_id', 'insurance_plans', 'id')
 
             ->create();
     }

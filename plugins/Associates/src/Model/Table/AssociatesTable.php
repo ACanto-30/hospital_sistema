@@ -70,6 +70,11 @@ class AssociatesTable extends Table
             ->requirePresence('plan_id', 'create')
             ->notEmptyString('plan_id');
 
+        $validator
+            ->date('birth_date')
+            ->requirePresence('birth_date', 'create')
+            ->notEmptyDate('birth_date');
+
         return $validator;
     }
 }

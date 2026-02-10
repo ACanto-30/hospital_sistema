@@ -15,6 +15,8 @@ class AssociatesController extends AppController
 
     public function dashboard()
     {
+        $this->viewBuilder()->setLayout('dashboard');
+
         $identity = $this->Authentication->getIdentity();
         $associatesTable = $this->fetchTable('Associates.Associates');
 

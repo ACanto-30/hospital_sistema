@@ -167,6 +167,7 @@ class UsersController extends AppController
                             'email' => $user->email, // Usamos el mismo email del usuario por consistencia
                             'address' => $data['address'] ?? null,
                             'plan_id' => $data['plan_id'] ?? null,
+                            'birth_date' => $data['birth_date'] ?? null,
                             'member_status' => 'active',
                         ];
 
@@ -279,15 +280,110 @@ class UsersController extends AppController
             return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'dashboard']);
         }
 
-        // Listado de usuarios con roles, ordenados por fecha de creación
-        $query = $this->Users->find()
-            ->contain(['Roles'])
-            ->orderBy(['Users.created_at' => 'DESC']);
+        $listType = $this->request->getQuery('type', 'users');
 
-        $users = $this->paginate($query, [
-            'limit' => 10,
-        ]);
+        if ($listType === 'associates') {
+            $associatesTable = $this->fetchTable('Associates.Associates');
+            $query = $associatesTable->find()
+                ->contain(['Users', 'InsurancePlans'])
+                ->orderBy(['Associates.registered_at' => 'DESC']);
+            $data = $this->paginate($query, [
+                'limit' => 10,
+                'scope' => 'associates'
+            ]);
+        } else {
+            // Listado de usuarios con roles, ordenados por fecha de creación
+            $query = $this->Users->find()
+                ->contain(['Roles'])
+                ->orderBy(['Users.created_at' => 'DESC']);
+            $data = $this->paginate($query, [
+                'limit' => 10,
+                'scope' => 'users'
+            ]);
+        }
 
-        $this->set(compact('users', 'currentUser'));
+        $insurancePlans = $this->fetchTable('Associates.InsurancePlans')->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'name'
+        ])->toArray();
+
+        $this->set(compact('data', 'currentUser', 'listType', 'insurancePlans'));
+    }
+
+    /**
+     * Edita el plan de un asociado y registra el cambio
+     */
+    public function editAssociatePlan($associateId = null)
+    {
+        $this->request->allowMethod(['post', 'put']);
+        $identity = $this->Authentication->getIdentity();
+
+        $associatesTable = $this->fetchTable('Associates.Associates');
+        $associate = $associatesTable->get($associateId);
+
+        $data = $this->request->getData();
+        $oldPlanId = $associate->plan_id;
+        $newPlanId = (int) ($data['plan_id'] ?? $oldPlanId);
+        $reason = $data['reason'] ?? '';
+
+        try {
+            $associatesTable->getConnection()->transactional(function () use ($associatesTable, $associate, $oldPlanId, $newPlanId, $reason, $identity, $data) {
+                // 1. Actualizar datos personales y Plan en el Asociado
+                $associate = $associatesTable->patchEntity($associate, [
+                    'first_name' => $data['first_name'] ?? $associate->first_name,
+                    'last_name' => $data['last_name'] ?? $associate->last_name,
+                    'phone' => $data['phone'] ?? $associate->phone,
+                    'address' => $data['address'] ?? $associate->address,
+                    'plan_id' => $newPlanId
+                ]);
+
+                if (!$associatesTable->save($associate)) {
+                    throw new \Exception('Error al actualizar los datos del asociado.');
+                }
+
+                // 2. Registrar el cambio en la tabla de trazabilidad SOLO si el plan cambió
+                if ($oldPlanId !== $newPlanId) {
+                    $planChangesTable = $this->fetchTable('Associates.AssociatePlanChanges');
+                    $change = $planChangesTable->newEntity([
+                        'associate_id' => $associate->id,
+                        'old_plan_id' => $oldPlanId,
+                        'new_plan_id' => $newPlanId,
+                        'reason' => $reason,
+                        'change_by_user_id' => $identity->getIdentifier(),
+                        'change_date' => date('Y-m-d')
+                    ]);
+
+                    if (!$planChangesTable->save($change)) {
+                        throw new \Exception('Error al registrar la trazabilidad del cambio de plan.');
+                    }
+                }
+            });
+
+            $this->Flash->success('Los datos se actualizaron correctamente.');
+        } catch (\Exception $e) {
+            $this->Flash->error('No se pudo realizar la actualización: ' . $e->getMessage());
+        }
+
+        return $this->redirect($this->referer());
+    }
+
+    /**
+     * Alterna el estado de un usuario (activo/inactivo)
+     */
+    public function toggleUserStatus($id = null)
+    {
+        $this->request->allowMethod(['post', 'delete']);
+        $user = $this->Users->get($id);
+
+        $newStatus = ($user->status === 'activo') ? 'inactivo' : 'activo';
+        $user->status = $newStatus;
+
+        if ($this->Users->save($user)) {
+            $this->Flash->success("Usuario " . ($newStatus === 'activo' ? 'activado' : 'desactivado') . " correctamente.");
+        } else {
+            $this->Flash->error('No se pudo cambiar el estado del usuario.');
+        }
+
+        return $this->redirect($this->referer());
     }
 }
