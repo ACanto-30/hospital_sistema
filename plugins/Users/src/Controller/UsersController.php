@@ -15,6 +15,24 @@ class UsersController extends AppController
         $this->Authentication->allowUnauthenticated(['login', 'register']);
     }
 
+    public function beforeFilter(\Cake\Event\EventInterface $event)
+    {
+        parent::beforeFilter($event);
+
+        // Normalizar correo en peticiones POST para login o registro
+        // Esto asegura que 'Test@Gmail.com' sea igual a 'test@gmail.com'
+        if ($this->request->is('post')) {
+            $email = $this->request->getData('email');
+            if ($email) {
+                $cleanEmail = strtolower(trim((string) $email));
+                $this->request = $this->request->withParsedBody(array_merge(
+                    (array) $this->request->getParsedBody(),
+                    ['email' => $cleanEmail]
+                ));
+            }
+        }
+    }
+
     public function index()
     {
         // Listado general con roles
@@ -142,7 +160,7 @@ class UsersController extends AppController
             $data = $this->request->getData();
 
             if (empty($data['status'])) {
-                $data['status'] = 'active';
+                $data['status'] = 'activo';
             }
 
             $user = $this->Users->patchEntity($user, $data);
@@ -168,7 +186,7 @@ class UsersController extends AppController
                             'address' => $data['address'] ?? null,
                             'plan_id' => $data['plan_id'] ?? null,
                             'birth_date' => $data['birth_date'] ?? null,
-                            'member_status' => 'active',
+                            'member_status' => 'activo',
                         ];
 
                         $associate = $associatesTable->patchEntity($associate, $associateData);
@@ -219,20 +237,23 @@ class UsersController extends AppController
         }
 
         if ($this->request->is('post') && !$result->isValid()) {
-            \Cake\Log\Log::error('Login Failed Status: ' . $result->getStatus());
-
-            // PRUEBA MANUAL DE DIAGNÓSTICO
             $email = $this->request->getData('email');
-            $pass = $this->request->getData('password');
-            $testUser = $this->Users->find()->where(['email' => $email])->first();
+            \Cake\Log\Log::error("[LoginFailure] Intento fallido para: $email. Código de error: " . $result->getStatus());
 
-            if ($testUser) {
+            // Diagnóstico Exhaustivo
+            $dbUser = $this->Users->find()->where(['email' => $email])->first();
+            if ($dbUser) {
                 $hasher = new \Authentication\PasswordHasher\DefaultPasswordHasher();
-                $match = $hasher->check($pass, $testUser->password);
-                \Cake\Log\Log::debug("[LoginDebug] Manual check for $email: " . ($match ? 'MATCHES!' : 'NO MATCH'));
-                \Cake\Log\Log::debug("[LoginDebug] DB Hash: " . substr($testUser->password, 0, 10) . "...");
+                $passInput = (string) $this->request->getData('password');
+                $match = $hasher->check($passInput, $dbUser->password);
+
+                \Cake\Log\Log::debug("[LoginDebug] Usuario encontrado: " . $dbUser->email);
+                \Cake\Log\Log::debug("[LoginDebug] ¿Contraseña coincide manualmente?: " . ($match ? 'SÍ' : 'NO'));
+                \Cake\Log\Log::debug("[LoginDebug] Longitud pass ingresada: " . strlen($passInput));
+                \Cake\Log\Log::debug("[LoginDebug] Hash en BD empieza con: " . substr($dbUser->password, 0, 10));
+                \Cake\Log\Log::debug("[LoginDebug] Estatus del usuario: " . ($dbUser->status ?? 'N/A'));
             } else {
-                \Cake\Log\Log::debug("[LoginDebug] Manual check could not find user $email");
+                \Cake\Log\Log::debug("[LoginDebug] El correo $email NO existe en la base de datos.");
             }
 
             $this->Flash->error('Usuario o contraseña incorrectos.');

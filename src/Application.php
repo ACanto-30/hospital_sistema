@@ -126,11 +126,7 @@ class Application extends BaseApplication implements
 
         $service->loadAuthenticator('Authentication.Form', [
             'fields' => $fields,
-            'loginUrl' => \Cake\Routing\Router::url([
-                'plugin' => 'Users',
-                'controller' => 'Users',
-                'action' => 'login',
-            ]),
+            'loginUrl' => ['/login', '/'],
         ]);
 
         // JWT opcional

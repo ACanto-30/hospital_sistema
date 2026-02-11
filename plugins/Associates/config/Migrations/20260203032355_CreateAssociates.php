@@ -53,8 +53,8 @@ class CreateAssociates extends BaseMigration
 
             // 📌 Estado
             ->addColumn('member_status', 'enum', [
-                'values' => ['active', 'inactive', 'suspended'],
-                'default' => 'active',
+                'values' => ['activo', 'inactivo', 'suspendido'],
+                'default' => 'activo',
             ])
 
             // 📅 Registro

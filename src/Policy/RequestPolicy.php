@@ -44,11 +44,17 @@ class RequestPolicy
 
         // 3. ZONAS POR PLUGIN
         $zoneAccess = [
-            'Payments' => ['Cajero', 'Asociado'],
-            'Associates' => ['Asociado', 'Medico']
+            'Payments' => ['Cajero', 'Asociado', 'Administrador'],
+            'Associates' => ['Asociado', 'Medico'],
+            'Users' => ['Administrador', 'Cajero', 'Asociado', 'Medico']
         ];
 
-        if (isset($zoneAccess[$plugin]) && in_array($roleName, $zoneAccess[$plugin])) {
+        if ($plugin && isset($zoneAccess[$plugin]) && in_array($roleName, $zoneAccess[$plugin])) {
+            return true;
+        }
+
+        // Caso especial: Si el plugin es null pero la ruta empieza con /payments (a veces pasa por routing manual)
+        if (!$plugin && strpos($path, '/payments') === 0 && in_array($roleName, ['Administrador', 'Cajero'])) {
             return true;
         }
 
