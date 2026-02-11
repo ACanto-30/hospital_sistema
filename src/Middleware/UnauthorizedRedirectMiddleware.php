@@ -11,11 +11,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-/**
- * UnauthorizedRedirectMiddleware
- *
- * Catches ForbiddenExceptions and redirects to root.
- */
 class UnauthorizedRedirectMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -23,9 +18,25 @@ class UnauthorizedRedirectMiddleware implements MiddlewareInterface
         try {
             return $handler->handle($request);
         } catch (ForbiddenException | AuthForbiddenException $e) {
+
+            $path = $request->getUri()->getPath();
+
+            
+            $publicPaths = [
+                '/doctor-dashboard',
+            ];
+
+            if (in_array($path, $publicPaths, true)) {
+                
+                return (new Response())
+                    ->withStatus(403)
+                    ->withStringBody('Forbidden (temporal): ruta permitida para diseño estático, revisar Authorization luego.');
+            }
+
             return (new Response())
                 ->withHeader('Location', '/')
                 ->withStatus(302);
         }
     }
 }
+

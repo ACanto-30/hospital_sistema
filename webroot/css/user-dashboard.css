@@ -79,7 +79,6 @@
   margin-bottom: 22px;
 }
 
-/* Las tarjetas del summary arriba NO necesitan sombra tan fuerte */
 .dashboard .summary-grid .summary-card{
   box-shadow: 0 10px 26px rgba(0,0,0,0.10);
   padding: 18px;
@@ -247,42 +246,306 @@
 .dashboard .dashboard-page.dashboard-cashier .summary-card{
   box-shadow: 0 8px 24px rgba(0,0,0,0.10);
 }
+
 /* Mensaje envio de comprobante emergente*/
 .flash-overlay{
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
 }
 
 .flash-modal{
-    background: #ffffff;
-    padding: 26px 28px;
-    border-radius: 16px;
-    max-width: 420px;
-    width: 90%;
-    text-align: center;
-    box-shadow: 0 20px 40px rgba(0,0,0,.25);
+  background: #ffffff;
+  padding: 26px 28px;
+  border-radius: 16px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,.25);
 }
 
 .flash-modal .message{
-    font-size: 16px;
-    margin-bottom: 18px;
+  font-size: 16px;
+  margin-bottom: 18px;
 }
 
 .flash-btn{
-    background: #157347;
-    color: #fff;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 10px;
-    font-weight: 700;
-    cursor: pointer;
+  background: #157347;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .flash-btn:hover{
-    opacity: .9;
+  opacity: .9;
+}
+
+/* ================================
+   Pagos - Formulario (Cajero)
+   ================================ */
+
+.dashboard .pay-card{
+  max-width: 980px;
+  width: 100%;
+}
+
+.dashboard .pay-card-head{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.dashboard .pay-lead{
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+
+.dashboard .pay-badge{
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  background: #ecfdf3;
+  color: #157347;
+  border: 1px solid #d7efe2;
+  margin-left: 6px;
+}
+
+.dashboard .pay-badge-soft{
+  background: #f3f4f6;
+  color: #374151;
+  border-color: #e5e7eb;
+}
+
+/* Mini card lateral */
+.dashboard .pay-card-mini{
+  min-width: 160px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.04);
+}
+
+.dashboard .pay-mini-label{
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.dashboard .pay-mini-value{
+  font-size: 14px;
+  color: #111827;
+  font-weight: 900;
+}
+
+/* Grid */
+.dashboard .pay-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.dashboard .pay-grid .full{
+  grid-column: 1 / -1;
+}
+
+/* CakePHP form wrapper*/
+.dashboard .pay-field .input,
+.dashboard .pay-field .select,
+.dashboard .pay-field .file{
+  margin-bottom: 0;
+}
+
+.dashboard .pay-label{
+  display: block;
+  font-weight: 900;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+/* Inputs */
+.dashboard .pay-input{
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+/* File */
+.dashboard .pay-file{
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1.5px dashed #cbd5e1;
+  background: #f8fcfa;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.dashboard .pay-input:focus,
+.dashboard .pay-file:focus{
+  border-color: #157347;
+  box-shadow: 0 0 0 4px rgba(21, 115, 71, 0.15);
+}
+
+/* Hint */
+.dashboard .pay-hint{
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+/* Info box */
+.dashboard .pay-info{
+  margin-top: 14px;
+  background: #f3faf6;
+  border: 1px solid #d7efe2;
+  color: #157347;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+}
+
+/* Actions */
+.dashboard .pay-actions{
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+/* Errores CakePHP */
+.dashboard .error-message{
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 900;
+  color: #b42318;
+}
+
+.dashboard .form-error,
+.dashboard input.form-error,
+.dashboard select.form-error{
+  border-color: #b42318 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px){
+  .dashboard .pay-grid{
+    grid-template-columns: 1fr;
+  }
+  .dashboard .pay-card-head{
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dashboard .pay-card-mini{
+    width: 100%;
+  }
+  .dashboard .pay-actions{
+    justify-content: stretch;
+  }
+  .dashboard .pay-actions .btn{
+    width: 100%;
+  }
+}
+
+/* ================================
+   Dashboard Médico (estático)
+   Requisito: <div class="dashboard-page dashboard-doctor">
+   ================================ */
+
+.dashboard .dashboard-page.dashboard-doctor{
+  padding: 24px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #138a52 0%, #0f6b40 65%, #0b5b36 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard .dashboard-page.dashboard-doctor > *{
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard .doctor-grid{
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 18px;
+}
+
+.dashboard .doctor-sub{
+  margin-top: 6px;
+}
+
+.dashboard .doctor-actions{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  justify-content: flex-end;
+}
+
+.dashboard .doctor-list{
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dashboard .doctor-item{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #eef5f0;
+  background: #f8fcfa;
+}
+
+.dashboard .doctor-pill{
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  background: #ecfdf3;
+  color: #157347;
+  border: 1px solid #d7efe2;
+}
+
+.dashboard .doctor-quick{
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 900px){
+  .dashboard .doctor-grid{
+    grid-template-columns: 1fr;
+  }
+  .dashboard .doctor-actions{
+    justify-content: stretch;
+  }
+  .dashboard .doctor-actions .btn,
+  .dashboard .doctor-quick .btn{
+    width: 100%;
+    text-align: center;
+  }
 }

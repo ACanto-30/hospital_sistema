@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Users\Controller;
 
 use App\Controller\AppController;
+use Cake\Event\EventInterface;
 
 class UsersController extends AppController
 {
@@ -11,8 +12,20 @@ class UsersController extends AppController
     {
         parent::initialize();
 
-        // Dejo login y register públicos; el resto requiere sesión
-        $this->Authentication->allowUnauthenticated(['login', 'register']);
+        // Login, register y doctorDashboard públicos (temporal por diseño estático)
+        $this->Authentication->allowUnauthenticated(['login', 'register', 'doctorDashboard']);
+    }
+
+    public function beforeFilter(EventInterface $event)
+    {
+        parent::beforeFilter($event);
+
+        // Evita que Authorization exija autorización en esta acción (temporal)
+        if ($this->request->getParam('action') === 'doctorDashboard') {
+            if (property_exists($this, 'Authorization') && $this->Authorization) {
+                $this->Authorization->skipAuthorization();
+            }
+        }
     }
 
     public function beforeFilter(\Cake\Event\EventInterface $event)
@@ -68,7 +81,7 @@ class UsersController extends AppController
         if ($this->request->is('post')) {
             $data = $this->request->getData();
 
-            // Si no viene el estado, por defecto lo pongo activo
+            
             if (empty($data['estado_usuario'])) {
                 $data['estado_usuario'] = 'activo';
             }
@@ -172,7 +185,7 @@ class UsersController extends AppController
                     }
 
                     // Si el rol es 'Asociado' (ID 4), guardamos en la tabla associates
-                    if ((int) $user->role_id === 4) {
+                    if ((int)$user->role_id === 4) {
                         $associatesTable = $this->fetchTable('Associates.Associates');
                         $associate = $associatesTable->newEmptyEntity();
 
@@ -182,7 +195,7 @@ class UsersController extends AppController
                             'first_name' => $data['first_name'] ?? '',
                             'last_name' => $data['last_name'] ?? '',
                             'phone' => $data['phone'] ?? null,
-                            'email' => $user->email, // Usamos el mismo email del usuario por consistencia
+                            'email' => $user->email,
                             'address' => $data['address'] ?? null,
                             'plan_id' => $data['plan_id'] ?? null,
                             'birth_date' => $data['birth_date'] ?? null,
@@ -191,7 +204,6 @@ class UsersController extends AppController
 
                         $associate = $associatesTable->patchEntity($associate, $associateData);
                         if (!$associatesTable->save($associate)) {
-                            // Si falla el guardado del asociado, lanzamos error para el rollback
                             $errors = $associate->getErrors();
                             throw new \Exception('Error al guardar datos del asociado: ' . json_encode($errors));
                         }
@@ -203,10 +215,9 @@ class UsersController extends AppController
                 if ($result) {
                     $this->Flash->success('Usuario registrado correctamente.');
                     return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'login']);
-                } else {
-                    $this->Flash->error('No se pudo registrar el usuario. Por favor, verifique los datos.');
                 }
 
+                $this->Flash->error('No se pudo registrar el usuario. Por favor, verifique los datos.');
             } catch (\Exception $e) {
                 \Cake\Log\Log::error('Register Error: ' . $e->getMessage());
                 $this->Flash->error('Error durante el registro: ' . $e->getMessage());
@@ -228,37 +239,38 @@ class UsersController extends AppController
 
         $result = $this->Authentication->getResult();
 
-        // Si el usuario ya está autenticado (vía Form o Session), redirigir
         if ($result && $result->isValid()) {
             \Cake\Log\Log::info('Login Success for: ' . ($this->Authentication->getIdentity()->email ?? 'unknown'));
             $redirect = $this->Authentication->getLoginRedirect() ?? '/dashboard';
-
             return $this->redirect($redirect);
         }
 
         if ($this->request->is('post') && !$result->isValid()) {
-            $email = $this->request->getData('email');
-            \Cake\Log\Log::error("[LoginFailure] Intento fallido para: $email. Código de error: " . $result->getStatus());
 
-            // Diagnóstico Exhaustivo
-            $dbUser = $this->Users->find()->where(['email' => $email])->first();
-            if ($dbUser) {
-                $hasher = new \Authentication\PasswordHasher\DefaultPasswordHasher();
-                $passInput = (string) $this->request->getData('password');
-                $match = $hasher->check($passInput, $dbUser->password);
+    \Cake\Log\Log::error('Login Failed Status: ' . $result->getStatus());
 
-                \Cake\Log\Log::debug("[LoginDebug] Usuario encontrado: " . $dbUser->email);
-                \Cake\Log\Log::debug("[LoginDebug] ¿Contraseña coincide manualmente?: " . ($match ? 'SÍ' : 'NO'));
-                \Cake\Log\Log::debug("[LoginDebug] Longitud pass ingresada: " . strlen($passInput));
-                \Cake\Log\Log::debug("[LoginDebug] Hash en BD empieza con: " . substr($dbUser->password, 0, 10));
-                \Cake\Log\Log::debug("[LoginDebug] Estatus del usuario: " . ($dbUser->status ?? 'N/A'));
-            } else {
-                \Cake\Log\Log::debug("[LoginDebug] El correo $email NO existe en la base de datos.");
-            }
+    $email = $this->request->getData('email');
+    \Cake\Log\Log::error("[LoginFailure] Intento fallido para: $email. Código de error: " . $result->getStatus());
 
-            $this->Flash->error('Usuario o contraseña incorrectos.');
-        }
+    // Diagnóstico Exhaustivo
+    $dbUser = $this->Users->find()->where(['email' => $email])->first();
+    if ($dbUser) {
+        $hasher = new \Authentication\PasswordHasher\DefaultPasswordHasher();
+        $passInput = (string) $this->request->getData('password');
+        $match = $hasher->check($passInput, $dbUser->password);
+
+        \Cake\Log\Log::debug("[LoginDebug] Usuario encontrado: " . $dbUser->email);
+        \Cake\Log\Log::debug("[LoginDebug] ¿Contraseña coincide manualmente?: " . ($match ? 'SÍ' : 'NO'));
+        \Cake\Log\Log::debug("[LoginDebug] Longitud pass ingresada: " . strlen($passInput));
+        \Cake\Log\Log::debug("[LoginDebug] Hash en BD empieza con: " . substr($dbUser->password, 0, 10));
+        \Cake\Log\Log::debug("[LoginDebug] Estatus del usuario: " . ($dbUser->status ?? 'N/A'));
+    } else {
+        \Cake\Log\Log::debug("[LoginDebug] El correo $email NO existe en la base de datos.");
     }
+
+    $this->Flash->error('Usuario o contraseña incorrectos.');
+}
+
 
     public function logout()
     {
@@ -274,17 +286,11 @@ class UsersController extends AppController
 
     public function dashboard()
     {
-        /**
-         * Dashboard general / punto de redirección
-         */
         $this->viewBuilder()->setLayout('dashboard');
     }
 
     public function administratorDashboard()
     {
-        /**
-         * Dashboard del Administrador
-         */
         $this->viewBuilder()->setLayout('dashboard');
 
         $identity = $this->Authentication->getIdentity();
@@ -292,11 +298,9 @@ class UsersController extends AppController
             return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'login']);
         }
 
-        // Usuario actual (admin) con rol
         $currentUser = $this->Users->get($identity->getIdentifier(), ['contain' => ['Roles']]);
 
-        // Seguridad extra: si no es admin, lo mando al dashboard normal
-        if (empty($currentUser->role_id) || ((int) $currentUser->role_id !== 1)) {
+        if (empty($currentUser->role_id) || ((int)$currentUser->role_id !== 1)) {
             $this->Flash->error('No tienes permisos para entrar a este módulo.');
             return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'dashboard']);
         }
@@ -313,7 +317,6 @@ class UsersController extends AppController
                 'scope' => 'associates'
             ]);
         } else {
-            // Listado de usuarios con roles, ordenados por fecha de creación
             $query = $this->Users->find()
                 ->contain(['Roles'])
                 ->orderBy(['Users.created_at' => 'DESC']);
@@ -331,9 +334,36 @@ class UsersController extends AppController
         $this->set(compact('data', 'currentUser', 'listType', 'insurancePlans'));
     }
 
-    /**
-     * Edita el plan de un asociado y registra el cambio
-     */
+    
+    public function doctorDashboard()
+    {
+        
+        if (property_exists($this, 'Authorization') && $this->Authorization) {
+            $this->Authorization->skipAuthorization();
+        }
+
+        $this->viewBuilder()->setLayout('dashboard');
+
+        $doctorName = 'Dr. Demo';
+
+        $stats = [
+            'pacientes_hoy' => 12,
+            'citas_pendientes' => 5,
+            'emergencias' => 1,
+        ];
+
+        $agendaHoy = [
+            ['hora' => '08:00', 'paciente' => 'María González', 'motivo' => 'Consulta general', 'estado' => 'Confirmada'],
+            ['hora' => '09:30', 'paciente' => 'Carlos Pérez', 'motivo' => 'Control', 'estado' => 'Pendiente'],
+        ];
+
+        $enEspera = [
+            ['paciente' => 'José Herrera', 'prioridad' => 'Media', 'tiempo' => '12 min'],
+        ];
+
+        $this->set(compact('doctorName', 'stats', 'agendaHoy', 'enEspera'));
+    }
+
     public function editAssociatePlan($associateId = null)
     {
         $this->request->allowMethod(['post', 'put']);
@@ -344,12 +374,11 @@ class UsersController extends AppController
 
         $data = $this->request->getData();
         $oldPlanId = $associate->plan_id;
-        $newPlanId = (int) ($data['plan_id'] ?? $oldPlanId);
+        $newPlanId = (int)($data['plan_id'] ?? $oldPlanId);
         $reason = $data['reason'] ?? '';
 
         try {
             $associatesTable->getConnection()->transactional(function () use ($associatesTable, $associate, $oldPlanId, $newPlanId, $reason, $identity, $data) {
-                // 1. Actualizar datos personales y Plan en el Asociado
                 $associate = $associatesTable->patchEntity($associate, [
                     'first_name' => $data['first_name'] ?? $associate->first_name,
                     'last_name' => $data['last_name'] ?? $associate->last_name,
@@ -362,7 +391,6 @@ class UsersController extends AppController
                     throw new \Exception('Error al actualizar los datos del asociado.');
                 }
 
-                // 2. Registrar el cambio en la tabla de trazabilidad SOLO si el plan cambió
                 if ($oldPlanId !== $newPlanId) {
                     $planChangesTable = $this->fetchTable('Associates.AssociatePlanChanges');
                     $change = $planChangesTable->newEntity([
@@ -388,9 +416,6 @@ class UsersController extends AppController
         return $this->redirect($this->referer());
     }
 
-    /**
-     * Alterna el estado de un usuario (activo/inactivo)
-     */
     public function toggleUserStatus($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);

@@ -38,8 +38,6 @@ use Cake\Http\ServerRequest;
 // Middleware
 use App\Middleware\RoleAccessMiddleware;
 
-
-
 class Application extends BaseApplication implements
     AuthenticationServiceProviderInterface,
     AuthorizationServiceProviderInterface
@@ -48,7 +46,6 @@ class Application extends BaseApplication implements
     {
         parent::bootstrap();
 
-        // JWT (opcional)
         $jwtKeyPath = CONFIG . 'jwt.key';
         Configure::write(
             'JWT.key',
@@ -74,19 +71,80 @@ class Application extends BaseApplication implements
             ]))
             ->add(new RoutingMiddleware($this))
 
-            // Autenticación (crea identity)
+            
             ->add(new AuthenticationMiddleware($this))
 
-            ->add(new RoleAccessMiddleware())
+            
+            ->add(function (
+                \Psr\Http\Message\ServerRequestInterface $request,
+                \Psr\Http\Server\RequestHandlerInterface $handler
+            ) {
+                $path = $request->getUri()->getPath();
 
-            // Catch Forbidden and redirect
+                if ($path === '/doctor-dashboard') {
+                    
+                    $request = $request
+                        ->withAttribute('skipAuthorization', true)
+                        ->withAttribute('publicDemo', true);
+
+                    return $handler->handle($request);
+                }
+
+                return $handler->handle($request);
+            })
+
+            /**
+             * RoleAccessMiddleware (bypass temporal)
+             */
+            ->add(function (
+                \Psr\Http\Message\ServerRequestInterface $request,
+                \Psr\Http\Server\RequestHandlerInterface $handler
+            ) {
+                $path = $request->getUri()->getPath();
+                if ($path === '/doctor-dashboard') {
+                    return $handler->handle($request);
+                }
+
+                $mw = new RoleAccessMiddleware();
+                return $mw->process($request, $handler);
+            })
+
+            
             ->add(new \App\Middleware\UnauthorizedRedirectMiddleware())
 
-            // Autorización
-            ->add(new AuthorizationMiddleware($this))
-            ->add(new RequestAuthorizationMiddleware())
+            /**
+             * AuthorizationMiddleware (bypass temporal)
+             */
+            ->add(function (
+                \Psr\Http\Message\ServerRequestInterface $request,
+                \Psr\Http\Server\RequestHandlerInterface $handler
+            ) {
+                $path = $request->getUri()->getPath();
+                if ($path === '/doctor-dashboard') {
+                    return $handler->handle($request);
+                }
 
-            // Otros
+                $mw = new AuthorizationMiddleware($this);
+                return $mw->process($request, $handler);
+            })
+
+            /**
+             * RequestAuthorizationMiddleware (bypass temporal)
+             */
+            ->add(function (
+                \Psr\Http\Message\ServerRequestInterface $request,
+                \Psr\Http\Server\RequestHandlerInterface $handler
+            ) {
+                $path = $request->getUri()->getPath();
+                if ($path === '/doctor-dashboard') {
+                    return $handler->handle($request);
+                }
+
+                $mw = new RequestAuthorizationMiddleware();
+                return $mw->process($request, $handler);
+            })
+
+            
             ->add(new BodyParserMiddleware())
             ->add(new CsrfProtectionMiddleware([
                 'httponly' => true,
@@ -129,7 +187,6 @@ class Application extends BaseApplication implements
             'loginUrl' => ['/login', '/'],
         ]);
 
-        // JWT opcional
         $service->loadAuthenticator('Authentication.Jwt', [
             'secretKey' => Configure::read('JWT.key'),
             'algorithm' => 'HS256',
@@ -138,7 +195,6 @@ class Application extends BaseApplication implements
             'returnPayload' => true,
         ]);
 
-        // IDENTIFIER
         $service->loadIdentifier('Authentication.Password', [
             'fields' => $fields,
             'resolver' => [

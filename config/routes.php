@@ -34,6 +34,10 @@ return function (RouteBuilder $routes): void {
             '/registrar-pago',
             ['plugin' => 'Payments', 'controller' => 'Payments', 'action' => 'pay']
         );
+        $builder->connect(
+            '/doctor-dashboard',
+            ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'doctorDashboard']
+        );
 
         $builder->fallbacks();
     });

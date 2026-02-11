@@ -14,7 +14,10 @@ return static function (RouteBuilder $routes): void {
             'controller' => 'Users',
             'action' => 'administratorDashboard'
         ]);
-
+        $builder->connect('/doctor-dashboard', [
+             'controller' => 'Users',
+             'action' => 'doctorDashboard'
+        ]);
         $builder->connect('/toggle-user-status/*', [
             'controller' => 'Users',
             'action' => 'toggleUserStatus'
