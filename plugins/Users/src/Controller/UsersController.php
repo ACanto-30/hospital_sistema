@@ -12,30 +12,23 @@ class UsersController extends AppController
     {
         parent::initialize();
 
-        $this->Authentication->allowUnauthenticated(['login', 'register', 'doctorDashboard']);
+        // Login, register públicos
+        $this->Authentication->allowUnauthenticated(['login', 'register']);
     }
 
-    /**
-     * beforeFilter unificado (CORREGIDO)
-     */
-    public function beforeFilter(EventInterface $event)
+
+
+    public function beforeFilter(\Cake\Event\EventInterface $event)
     {
         parent::beforeFilter($event);
-
-        // Evita autorización en doctorDashboard
-        if ($this->request->getParam('action') === 'doctorDashboard') {
-            if (property_exists($this, 'Authorization') && $this->Authorization) {
-                $this->Authorization->skipAuthorization();
-            }
-        }
 
         // Normalizar email en POST
         if ($this->request->is('post')) {
             $email = $this->request->getData('email');
             if ($email) {
-                $cleanEmail = strtolower(trim((string)$email));
+                $cleanEmail = strtolower(trim((string) $email));
                 $this->request = $this->request->withParsedBody(array_merge(
-                    (array)$this->request->getParsedBody(),
+                    (array) $this->request->getParsedBody(),
                     ['email' => $cleanEmail]
                 ));
             }
@@ -196,18 +189,109 @@ class UsersController extends AppController
             'contain' => ['Roles']
         ]);
 
-        if ((int)$currentUser->role_id !== 1) {
+        if ((int) $currentUser->role_id !== 1) {
             $this->Flash->error('No tienes permisos para entrar a este módulo.');
             return $this->redirect(['action' => 'dashboard']);
         }
 
-        $query = $this->Users->find()
-            ->contain(['Roles'])
-            ->order(['Users.created_at' => 'DESC']);
+        // Determinar qué lista mostrar (users vs associates)
+        $listType = $this->request->getQuery('type', 'users');
+        $insurancePlans = [];
 
-        $data = $this->paginate($query, ['limit' => 10]);
+        if ($listType === 'associates') {
+            $associatesTable = $this->fetchTable('Associates.Associates');
+            $query = $associatesTable->find()
+                ->contain(['InsurancePlans', 'Users'])
+                ->order(['Associates.id' => 'DESC']);
 
-        $this->set(compact('data', 'currentUser'));
+            // Cargar planes para el formulario de edición
+            $insurancePlans = $this->fetchTable('Associates.InsurancePlans')->find('list', [
+                'keyField' => 'id',
+                'valueField' => 'name'
+            ])->toArray();
+
+        } else {
+            // Default: Users
+            $query = $this->Users->find()
+                ->contain(['Roles'])
+                ->order(['Users.created_at' => 'DESC']);
+
+            // Forzar listType a 'users' por seguridad si venía algo raro
+            $listType = 'users';
+        }
+
+        try {
+            $data = $this->paginate($query, ['limit' => 10]);
+        } catch (\Exception $e) {
+            // Fallback en caso de error de paginación o query
+            $data = [];
+            $this->Flash->error('Error al cargar los datos: ' . $e->getMessage());
+        }
+
+        $this->set(compact('data', 'currentUser', 'listType', 'insurancePlans'));
+    }
+
+    public function createDebt($associateId = null)
+    {
+        $this->request->allowMethod(['post']);
+
+        // Debug: Log incoming ID
+        \Cake\Log\Log::debug("createDebt called. associateId arg: " . var_export($associateId, true));
+
+        // Fallback: Intentar obtener ID de la request si no llegó como argumento
+        if (!$associateId) {
+            $associateId = $this->request->getParam('id');
+        }
+        if (!$associateId) {
+            $associateId = $this->request->getQuery('id');
+        }
+        if (!$associateId) {
+            $associateId = $this->request->getData('associate_id');
+        }
+
+        \Cake\Log\Log::debug("createDebt final ID: " . var_export($associateId, true));
+
+        // Auth Check (simular admin check como en dashboard)
+        $identity = $this->Authentication->getIdentity();
+        $currentUser = $this->Users->get($identity->getIdentifier());
+        if ((int) $currentUser->role_id !== 1) {
+            $this->Flash->error('No autorizado.');
+            return $this->redirect(['action' => 'dashboard']);
+        }
+
+        $associatesTable = $this->fetchTable('Associates.Associates');
+        try {
+            $associate = $associatesTable->get($associateId);
+        } catch (\Exception $e) {
+            // Error detallado
+            $this->Flash->error('Asociado no encontrado. ID recibido: ' . json_encode($associateId) . '. Detalles: ' . $e->getMessage());
+            return $this->redirect(['action' => 'administratorDashboard', '?' => ['type' => 'associates']]);
+        }
+
+        $paymentsTable = $this->fetchTable('Payments.Payments');
+        $payment = $paymentsTable->newEmptyEntity();
+
+        $data = $this->request->getData();
+
+        // Datos forzados
+        $paymentData = [
+            'associate_id' => $associate->id,
+            'amount' => $data['amount'],
+            // 'payment_method_id' removido
+            'payment_status_id' => 1, // Pendiente
+            'is_paid' => 0,
+        ];
+
+        $payment = $paymentsTable->patchEntity($payment, $paymentData);
+
+        if ($paymentsTable->save($payment)) {
+            $this->Flash->success('Cobro/Deuda registrada correctamente.');
+        } else {
+            $errors = $payment->getErrors();
+            $this->Flash->error('Error al registrar: ' . json_encode($errors));
+        }
+
+        return $this->redirect(['action' => 'administratorDashboard', '?' => ['type' => 'associates']]);
     }
 
     public function doctorDashboard()
@@ -218,13 +302,101 @@ class UsersController extends AppController
 
         $this->viewBuilder()->setLayout('dashboard');
 
-        $doctorName = 'Dr. Demo';
-        $stats = [
-            'pacientes_hoy' => 12,
-            'citas_pendientes' => 5,
-            'emergencias' => 1,
-        ];
+        $user = $this->request->getAttribute('identity') ?? null;
+        $doctorName = $user ? ($user->full_name ?? $user->username ?? $user->email ?? 'Dr. Usuario') : 'Dr. Usuario';
 
-        $this->set(compact('doctorName', 'stats'));
+        $associatesTable = $this->fetchTable('Associates.Associates');
+        $associates = $associatesTable->find()
+            ->contain([
+                'AssociatesConditions' => ['Conditions'],
+                'MedicalRecords',
+            ])
+            ->order(['Associates.last_name' => 'ASC', 'Associates.first_name' => 'ASC']);
+
+        $associates = $this->paginate($associates, ['limit' => 20]);
+
+        $this->set(compact('doctorName', 'associates', 'user'));
+    }
+
+    public function register()
+    {
+        // Si ya está logueado, lo mando al dashboard
+        if ($this->Authentication->getIdentity()) {
+            return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'dashboard']);
+        }
+
+        $this->viewBuilder()->setLayout('auth');
+
+        $user = $this->Users->newEmptyEntity();
+
+        $roles = $this->fetchTable('Users.Roles')->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'name',
+            'conditions' => ['Roles.active' => 1],
+            'order' => ['Roles.name' => 'ASC'],
+        ])->toArray();
+
+        // Cargar Planes de Seguro para el dropdown
+        $insurancePlans = $this->fetchTable('Associates.InsurancePlans')->find('list', [
+            'keyField' => 'id',
+            'valueField' => 'name',
+        ])->toArray();
+
+        if ($this->request->is('post')) {
+            $data = $this->request->getData();
+
+            if (empty($data['status'])) {
+                $data['status'] = 'activo';
+            }
+
+            $user = $this->Users->patchEntity($user, $data);
+
+            try {
+                $result = $this->Users->getConnection()->transactional(function () use ($user, $data) {
+                    if (!$this->Users->save($user)) {
+                        return false;
+                    }
+
+                    // Si el rol es 'Asociado' (ID 4), guardamos en la tabla associates
+                    if ((int) $user->role_id === 4) {
+                        $associatesTable = $this->fetchTable('Associates.Associates');
+                        $associate = $associatesTable->newEmptyEntity();
+
+                        $associateData = [
+                            'user_id' => $user->id,
+                            'id_card' => $data['id_card'] ?? '',
+                            'first_name' => $data['first_name'] ?? '',
+                            'last_name' => $data['last_name'] ?? '',
+                            'phone' => $data['phone'] ?? null,
+                            'email' => $user->email,
+                            'address' => $data['address'] ?? null,
+                            'plan_id' => $data['plan_id'] ?? null,
+                            'birth_date' => $data['birth_date'] ?? null,
+                            'member_status' => 'activo',
+                        ];
+
+                        $associate = $associatesTable->patchEntity($associate, $associateData);
+                        if (!$associatesTable->save($associate)) {
+                            $errors = $associate->getErrors();
+                            throw new \Exception('Error al guardar datos del asociado: ' . json_encode($errors));
+                        }
+                    }
+
+                    return true;
+                });
+
+                if ($result) {
+                    $this->Flash->success('Usuario registrado correctamente.');
+                    return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'login']);
+                }
+
+                $this->Flash->error('No se pudo registrar el usuario. Por favor, verifique los datos.');
+            } catch (\Exception $e) {
+                \Cake\Log\Log::error('Register Error: ' . $e->getMessage());
+                $this->Flash->error('Error durante el registro: ' . $e->getMessage());
+            }
+        }
+
+        $this->set(compact('user', 'roles', 'insurancePlans'));
     }
 }

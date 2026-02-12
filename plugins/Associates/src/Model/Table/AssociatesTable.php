@@ -27,6 +27,21 @@ class AssociatesTable extends Table
             'className' => 'Associates.InsurancePlans',
         ]);
 
+        $this->hasMany('Payments', [
+            'foreignKey' => 'associate_id',
+            'className' => 'Payments.Payments',
+        ]);
+
+        $this->hasMany('AssociatesConditions', [
+            'foreignKey' => 'associate_id',
+            'className' => 'Associates.AssociatesConditions',
+        ]);
+
+        $this->hasMany('MedicalRecords', [
+            'foreignKey' => 'associate_id',
+            'className' => 'Associates.MedicalRecords',
+        ]);
+
         $this->addBehavior('Timestamp', [
             'events' => [
                 'Model.beforeSave' => [

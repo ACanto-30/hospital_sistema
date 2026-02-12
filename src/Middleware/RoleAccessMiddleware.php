@@ -29,16 +29,17 @@ class RoleAccessMiddleware implements MiddlewareInterface
         $user = $identity->getOriginalData();
         $role_name = $identity->role_name ?? ($user->role_name ?? ($user->role->name ?? null));
 
-        // Mapeo Maestro
+        // Mapeo Maestro (incluir "Médico" con y sin acento por compatibilidad con BD)
         $roleDashboards = [
             'Administrador' => '/administrator-dashboard',
             'Cajero' => '/dashboard-cashier',
             'Medico' => '/doctor-dashboard',
+            'Médico' => '/doctor-dashboard',
             'Asociado' => '/associate-dashboard'
         ];
 
         // Obtenemos el role_name de la identidad
-        $role_name = $identity->role_name ?? null;
+        // Linea 41 eliminada
         $target = $roleDashboards[$role_name] ?? null;
 
         // Si estamos en la raíz y ya hay sesión, mandarlo a su dashboard si lo tiene

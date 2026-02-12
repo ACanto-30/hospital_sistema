@@ -13,6 +13,13 @@ $adminNombre = $currentUser->full_name ?? $currentUser->username ?? 'Administrad
         Bienvenido, <?= h($adminNombre) ?> (<?= h($currentUser->role->name ?? 'Administrador') ?>)
       </p>
     </div>
+    <div class="dashboard-meta">
+      <?= $this->Html->link(
+        'Cerrar sesión',
+        ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'logout'],
+        ['class' => 'btn btn-primary btn-logout']
+      ) ?>
+    </div>
   </div>
 
   <hr class="divider">
@@ -55,174 +62,210 @@ $adminNombre = $currentUser->full_name ?? $currentUser->username ?? 'Administrad
     </div>
   </div>
 
-  <div class="summary-card">
-    <div class="card-header">
-      <h3 class="section-title"><?= $listType === 'associates' ? 'Asociados Miembros' : 'Usuarios del Sistema' ?></h3>
-      <span class="muted"><?= $this->Paginator->counter('Página {{page}} de {{pages}}') ?></span>
-    </div>
+</div>
 
-    <hr class="divider">
-
-    <div class="table-responsive">
-      <table class="dash-table">
-        <thead>
-          <tr>
-            <?php if ($listType === 'users'): ?>
-              <th><?= $this->Paginator->sort('id', 'ID') ?></th>
-              <th><?= $this->Paginator->sort('username', 'Usuario') ?></th>
-              <th><?= $this->Paginator->sort('full_name', 'Nombre') ?></th>
-              <th><?= $this->Paginator->sort('email', 'Correo') ?></th>
-              <th>Rol</th>
-              <th><?= $this->Paginator->sort('status', 'Estado') ?></th>
-              <th>Acciones</th>
-            <?php else: ?>
-              <th>ID</th>
-              <th>Cédula</th>
-              <th>Asociado</th>
-              <th>Plan Actual</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            <?php endif; ?>
-          </tr>
-        </thead>
-
-        <tbody>
-          <?php foreach ($data as $item): ?>
-            <?php if ($listType === 'users'): ?>
-              <tr>
-                <td><?= h($item->id) ?></td>
-                <td><?= h($item->username) ?></td>
-                <td><?= h($item->full_name) ?></td>
-                <td><?= h($item->email) ?></td>
-                <td><?= h($item->role->name ?? 'Sin rol') ?></td>
-                <td>
-                  <?php if (($item->status ?? '') === 'activo'): ?>
-                    <span class="dash-badge dash-badge--ok">activo</span>
-                  <?php else: ?>
-                    <span class="dash-badge dash-badge--off"><?= h($item->status ?? 'inactivo') ?></span>
-                  <?php endif; ?>
-                </td>
-                <td class="actions">
-                  <?php if (($item->status ?? '') === 'activo'): ?>
-                    <?= $this->Form->postLink(
-                      '<span title="Desactivar">🚫</span>',
-                      ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'toggleUserStatus', $item->id],
-                      ['confirm' => '¿Estás seguro de desactivar este usuario?', 'escape' => false, 'class' => 'action-icon']
-                    ) ?>
-                  <?php else: ?>
-                    <?= $this->Form->postLink(
-                      '<span title="Activar">✔️</span>',
-                      ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'toggleUserStatus', $item->id],
-                      ['confirm' => '¿Estás seguro de activar este usuario?', 'escape' => false, 'class' => 'action-icon active']
-                    ) ?>
-                  <?php endif; ?>
-                </td>
-              </tr>
-            <?php else: ?>
-              <tr>
-                <td><?= h($item->id) ?></td>
-                <td><?= h($item->id_card) ?></td>
-                <td><?= h($item->first_name . ' ' . $item->last_name) ?></td>
-                <td>
-                  <span class="dash-badge dash-badge--ok" style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe;">
-                    <?= h($item->insurance_plan->name ?? 'Sin Plan') ?>
-                  </span>
-                </td>
-                <td>
-                  <span class="dash-badge <?= ($item->member_status ?? '') === 'active' ? 'dash-badge--ok' : 'dash-badge--off' ?>">
-                    <?= h($item->member_status ?? 'inactivo') ?>
-                  </span>
-                </td>
-                <td class="actions">
-                  <button type="button" class="action-icon" onclick="toggleEdit('edit-row-<?= $item->id ?>')" title="Editar Plan">
-                    📝
-                  </button>
-                  <?php if (($item->user->status ?? '') === 'activo'): ?>
-                    <?= $this->Form->postLink(
-                      '<span title="Desactivar Usuario">🚫</span>',
-                      ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'toggleUserStatus', $item->user_id],
-                      ['confirm' => '¿Estás seguro de desactivar este usuario?', 'escape' => false, 'class' => 'action-icon']
-                    ) ?>
-                  <?php else: ?>
-                    <?= $this->Form->postLink(
-                      '<span title="Activar Usuario">✔️</span>',
-                      ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'toggleUserStatus', $item->user_id],
-                      ['confirm' => '¿Estás seguro de activar este usuario?', 'escape' => false, 'class' => 'action-icon active']
-                    ) ?>
-                  <?php endif; ?>
-                </td>
-              </tr>
-              <!-- Row expandible para edición -->
-              <tr id="edit-row-<?= $item->id ?>" class="edit-row" style="display: none;">
-                <td colspan="6">
-                  <div class="edit-container">
-                    <?= $this->Form->create(null, ['url' => ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'editAssociatePlan', $item->id]]) ?>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                      <div>
-                        <label class="muted small">Nombre(s)</label>
-                        <?= $this->Form->control('first_name', ['label' => false, 'value' => $item->first_name, 'class' => 'form-input']) ?>
-                      </div>
-                      <div>
-                        <label class="muted small">Apellido(s)</label>
-                        <?= $this->Form->control('last_name', ['label' => false, 'value' => $item->last_name, 'class' => 'form-input']) ?>
-                      </div>
-                      <div>
-                        <label class="muted small">Teléfono</label>
-                        <?= $this->Form->control('phone', ['label' => false, 'value' => $item->phone, 'class' => 'form-input']) ?>
-                      </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px;">
-                      <div>
-                        <label class="muted small">Dirección</label>
-                        <?= $this->Form->control('address', ['label' => false, 'value' => $item->address, 'class' => 'form-input']) ?>
-                      </div>
-                      <div>
-                        <label class="muted small">Nuevo Plan de Seguro</label>
-                        <?= $this->Form->control('plan_id', [
-                          'label' => false,
-                          'type' => 'select',
-                          'options' => $insurancePlans,
-                          'default' => $item->plan_id,
-                          'class' => 'form-select'
-                        ]) ?>
-                      </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 15px; align-items: end;">
-                      <div>
-                        <label class="muted small">Motivo del cambio de plan (opcional)</label>
-                        <?= $this->Form->control('reason', [
-                          'label' => false,
-                          'type' => 'text',
-                          'placeholder' => 'Ej: Solicitud por mejor cobertura o actualización de datos',
-                          'class' => 'form-input'
-                        ]) ?>
-                      </div>
-                      <div style="display: flex; gap: 5px;">
-                        <?= $this->Form->button('Guardar', ['class' => 'btn-save', 'style' => 'flex: 1;']) ?>
-                        <button type="button" class="btn-cancel" onclick="toggleEdit('edit-row-<?= $item->id ?>')" style="flex: 1;">X</button>
-                      </div>
-                    </div>
-                    <?= $this->Form->end() ?>
-                  </div>
-                </td>
-              </tr>
-            <?php endif; ?>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
-    </div>
-
-    <ul class="pagination">
-      <?= $this->Paginator->first('<< Primero') ?>
-      <?= $this->Paginator->prev('< Anterior') ?>
-      <?= $this->Paginator->numbers(['modulus' => 5]) ?>
-      <?= $this->Paginator->next('Siguiente >') ?>
-      <?= $this->Paginator->last('Último >>') ?>
-    </ul>
-
+<div class="summary-card">
+  <div class="card-header">
+    <h3 class="section-title"><?= $listType === 'associates' ? 'Asociados Miembros' : 'Usuarios del Sistema' ?></h3>
+    <span class="muted"><?= $this->Paginator->counter('Página {{page}} de {{pages}}') ?></span>
   </div>
+
+  <hr class="divider">
+
+  <div class="table-responsive">
+    <table class="dash-table">
+      <thead>
+        <tr>
+          <?php if ($listType === 'users'): ?>
+            <th><?= $this->Paginator->sort('id', 'ID') ?></th>
+            <th><?= $this->Paginator->sort('username', 'Usuario') ?></th>
+            <th><?= $this->Paginator->sort('full_name', 'Nombre') ?></th>
+            <th><?= $this->Paginator->sort('email', 'Correo') ?></th>
+            <th>Rol</th>
+            <th><?= $this->Paginator->sort('status', 'Estado') ?></th>
+            <th>Acciones</th>
+          <?php else: ?>
+            <th>ID</th>
+            <th>Cédula</th>
+            <th>Asociado</th>
+            <th>Plan Actual</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          <?php endif; ?>
+        </tr>
+      </thead>
+
+      <tbody>
+        <?php foreach ($data as $item): ?>
+          <?php if ($listType === 'users'): ?>
+            <tr>
+              <td><?= h($item->id) ?></td>
+              <td><?= h($item->username) ?></td>
+              <td><?= h($item->full_name) ?></td>
+              <td><?= h($item->email) ?></td>
+              <td><?= h($item->role->name ?? 'Sin rol') ?></td>
+              <td>
+                <?php if (($item->status ?? '') === 'activo'): ?>
+                  <span class="dash-badge dash-badge--ok">activo</span>
+                <?php else: ?>
+                  <span class="dash-badge dash-badge--off"><?= h($item->status ?? 'inactivo') ?></span>
+                <?php endif; ?>
+              </td>
+              <td class="actions">
+                <?php if (($item->status ?? '') === 'activo'): ?>
+                  <?= $this->Form->postLink(
+                    '<span title="Desactivar">🚫</span>',
+                    ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'toggleUserStatus', $item->id],
+                    ['confirm' => '¿Estás seguro de desactivar este usuario?', 'escape' => false, 'class' => 'action-icon']
+                  ) ?>
+                <?php else: ?>
+                  <?= $this->Form->postLink(
+                    '<span title="Activar">✔️</span>',
+                    ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'toggleUserStatus', $item->id],
+                    ['confirm' => '¿Estás seguro de activar este usuario?', 'escape' => false, 'class' => 'action-icon active']
+                  ) ?>
+                <?php endif; ?>
+              </td>
+            </tr>
+          <?php else: ?>
+            <tr>
+              <td><?= h($item->id) ?></td>
+              <td><?= h($item->id_card) ?></td>
+              <td><?= h($item->first_name . ' ' . $item->last_name) ?></td>
+              <td>
+                <span class="dash-badge dash-badge--ok" style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe;">
+                  <?= h($item->insurance_plan->name ?? 'Sin Plan') ?>
+                </span>
+              </td>
+              <td>
+                <span class="dash-badge <?= ($item->member_status ?? '') === 'active' ? 'dash-badge--ok' : 'dash-badge--off' ?>">
+                  <?= h($item->member_status ?? 'inactivo') ?>
+                </span>
+              </td>
+              <td class="actions">
+                <button type="button" class="action-icon" onclick="toggleEdit('edit-row-<?= $item->id ?>')" title="Editar Plan">
+                  📝
+                </button>
+                <button type="button" class="action-icon" onclick="toggleEdit('charge-row-<?= $item->id ?>')" title="Generar Cobro Manual">
+                  💵
+                </button>
+                <?php if (($item->user->status ?? '') === 'activo'): ?>
+                  <?= $this->Form->postLink(
+                    '<span title="Desactivar Usuario">🚫</span>',
+                    ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'toggleUserStatus', $item->user_id],
+                    ['confirm' => '¿Estás seguro de desactivar este usuario?', 'escape' => false, 'class' => 'action-icon']
+                  ) ?>
+                <?php else: ?>
+                  <?= $this->Form->postLink(
+                    '<span title="Activar Usuario">✔️</span>',
+                    ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'toggleUserStatus', $item->user_id],
+                    ['confirm' => '¿Estás seguro de activar este usuario?', 'escape' => false, 'class' => 'action-icon active']
+                  ) ?>
+                <?php endif; ?>
+              </td>
+            </tr>
+            <!-- Row expandible para edición -->
+            <tr id="edit-row-<?= $item->id ?>" class="edit-row" style="display: none;">
+              <td colspan="6">
+                <div class="edit-container">
+                  <?= $this->Form->create(null, ['url' => ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'editAssociatePlan', $item->id]]) ?>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                      <label class="muted small">Nombre(s)</label>
+                      <?= $this->Form->control('first_name', ['label' => false, 'value' => $item->first_name, 'class' => 'form-input']) ?>
+                    </div>
+                    <div>
+                      <label class="muted small">Apellido(s)</label>
+                      <?= $this->Form->control('last_name', ['label' => false, 'value' => $item->last_name, 'class' => 'form-input']) ?>
+                    </div>
+                    <div>
+                      <label class="muted small">Teléfono</label>
+                      <?= $this->Form->control('phone', ['label' => false, 'value' => $item->phone, 'class' => 'form-input']) ?>
+                    </div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                      <label class="muted small">Dirección</label>
+                      <?= $this->Form->control('address', ['label' => false, 'value' => $item->address, 'class' => 'form-input']) ?>
+                    </div>
+                    <div>
+                      <label class="muted small">Nuevo Plan de Seguro</label>
+                      <?= $this->Form->control('plan_id', [
+                        'label' => false,
+                        'type' => 'select',
+                        'options' => $insurancePlans,
+                        'default' => $item->plan_id,
+                        'class' => 'form-select'
+                      ]) ?>
+                    </div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 15px; align-items: end;">
+                    <div>
+                      <label class="muted small">Motivo del cambio de plan (opcional)</label>
+                      <?= $this->Form->control('reason', [
+                        'label' => false,
+                        'type' => 'text',
+                        'placeholder' => 'Ej: Solicitud por mejor cobertura o actualización de datos',
+                        'class' => 'form-input'
+                      ]) ?>
+                    </div>
+                    <div style="display: flex; gap: 5px;">
+                      <?= $this->Form->button('Guardar', ['class' => 'btn-save', 'style' => 'flex: 1;']) ?>
+                      <button type="button" class="btn-cancel" onclick="toggleEdit('edit-row-<?= $item->id ?>')" style="flex: 1;">X</button>
+                    </div>
+                  </div>
+                  <?= $this->Form->end() ?>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row expandible para COBRO MANUAL (Simulación) -->
+            <tr id="charge-row-<?= $item->id ?>" class="edit-row" style="display: none; background-color: #f0fdf4;">
+              <td colspan="6">
+                <div class="edit-container" style="border-left-color: #059669;">
+                  <h4 style="margin-top: 0; color: #059669; font-size: 1rem; margin-bottom: 15px;">💰 Generar Cobro Manual (Simulación Mensualidad)</h4>
+                  <!-- Enviar datos del usuario directamente usando la ruta de / en vez de url porque da error-->
+                  <?= $this->Form->create(null, ['url' => ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'createDebt']]) ?>
+                  <?= $this->Form->hidden('associate_id', ['value' => $item->id]) ?>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: end;">
+                    <div>
+                      <label class="muted small">Monto a Cobrar (B/.)</label>
+                      <?= $this->Form->control('amount', [
+                        'label' => false,
+                        'class' => 'form-input',
+                        'type' => 'number',
+                        'step' => '0.01',
+                        'required' => true,
+                        'placeholder' => '0.00'
+                      ]) ?>
+                    </div>
+                    <div style="display: flex; gap: 5px;">
+                      <?= $this->Form->button('Generar Deuda', ['class' => 'btn-save', 'style' => 'flex: 1; background: #059669;']) ?>
+                      <button type="button" class="btn-cancel" onclick="toggleEdit('charge-row-<?= $item->id ?>')" style="flex: 1;">Cancelar</button>
+                    </div>
+                  </div>
+                  <?= $this->Form->end() ?>
+                </div>
+              </td>
+            </tr>
+          <?php endif; ?>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="pagination">
+    <?= $this->Paginator->first('<< Primero') ?>
+    <?= $this->Paginator->prev('< Anterior') ?>
+    <?= $this->Paginator->numbers(['modulus' => 5]) ?>
+    <?= $this->Paginator->next('Siguiente >') ?>
+    <?= $this->Paginator->last('Último >>') ?>
+  </ul>
+
+</div>
 
 </div>
 

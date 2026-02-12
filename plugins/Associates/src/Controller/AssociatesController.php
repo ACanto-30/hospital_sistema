@@ -22,7 +22,16 @@ class AssociatesController extends AppController
 
         $associate = $associatesTable->find()
             ->where(['user_id' => $identity->getIdentifier()])
-            ->contain(['Users', 'InsurancePlans'])
+            ->contain([
+                'Users',
+                'InsurancePlans',
+                'Payments' => [
+                    'PaymentDetails' => [
+                        'PaymentMethods',
+                        'PaymentStatuses'
+                    ]
+                ]
+            ])
             ->first();
 
         if (!$associate) {

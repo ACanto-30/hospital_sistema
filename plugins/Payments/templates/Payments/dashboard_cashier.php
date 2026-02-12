@@ -126,8 +126,9 @@ $statusFilter = $statusFilter ?? 'pending';
                     <?php foreach ($pagos as $p): ?>
                         <tr>
                             <td>#<?= h($p->id) ?></td>
-                            <td><?= h(($p->associate->first_name ?? '-') . ' ' . ($p->associate->last_name ?? '')) ?></td>
-                            <td>Pago de Cuota</td>
+                            <!-- Accedemos al asociado a través del payment padre -->
+                            <td><?= h(($p->payment->associate->first_name ?? '-') . ' ' . ($p->payment->associate->last_name ?? '')) ?></td>
+                            <td>Pago a Cuenta</td>
                             <td><strong>B/. <?= number_format((float) $p->amount, 2) ?></strong></td>
                             <td><?= h($p->payment_method->name ?? 'N/A') ?></td>
                             <td>
@@ -180,7 +181,7 @@ $statusFilter = $statusFilter ?? 'pending';
                                             <?= $this->Form->create(null, ['url' => ['_name' => 'process_payment', 'id' => $p->id]]) ?>
 
                                             <div class="form-group mb-4">
-                                                <label class="muted small">Monto Recibido (Corregir si es necesario)</label>
+                                                <label class="muted small">Monto Recibido</label>
                                                 <div class="input-with-symbol">
                                                     <span class="symbol">B/.</span>
                                                     <?= $this->Form->control('amount', [
@@ -241,40 +242,48 @@ $statusFilter = $statusFilter ?? 'pending';
 </div>
 
 <style>
-    /* Reutilizando y Mejorando Estilos del Dashboard Admin */
+    /* Estilos Premium (Unificados) - Cashier & Doctor */
     .dashboard-page {
         padding: 20px 0;
+        max-width: 100%;
     }
 
     .summary-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin-bottom: 35px;
     }
 
     .summary-card {
         background: white !important;
-        border-radius: 12px !important;
-        padding: 20px !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
-        border: 1px solid #e5e7eb !important;
-        transition: all 0.3s ease !important;
+        border-radius: 16px !important;
+        padding: 25px !important;
+        box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.08) !important;
+        border: 1px solid #f1f5f9 !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
         transform: scale(1) !important;
         opacity: 0.9 !important;
         margin-top: 0 !important;
     }
 
+    .summary-card:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+        opacity: 1 !important;
+        z-index: 2;
+    }
+
     .active-tab {
         border-color: #0b8f55 !important;
         box-shadow: 0 10px 15px -3px rgba(11, 143, 85, 0.2) !important;
-        transform: scale(1.08) !important;
+        transform: scale(1.05) !important;
         opacity: 1 !important;
         z-index: 5 !important;
     }
 
     .active-tab .section-title {
-        color: #0b8f55;
+        color: #0b8f55 !important;
     }
 
     .card-content {
@@ -283,68 +292,129 @@ $statusFilter = $statusFilter ?? 'pending';
         align-items: center;
     }
 
+    .card-info .section-title {
+        color: #334155;
+        font-size: 1.1rem;
+        font-weight: 700;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .card-info .muted {
+        color: #64748b;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
     .card-icon {
-        font-size: 2rem;
-        background: #f0fdf4;
-        padding: 10px;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
+        font-size: 2.2rem;
+        background: #ecfdf5;
+        color: #059669;
+        padding: 15px;
+        border-radius: 12px;
+        width: 60px;
+        height: 60px;
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
     .stats-card {
-        background: #f9fafb;
-        border-style: dashed;
+        background: #fff !important;
+        border-style: solid !important;
     }
 
     .dash-table {
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
-        margin-top: 10px;
+        margin-top: 15px;
     }
 
     .dash-table th {
         background: #f8fafc;
-        padding: 12px 15px;
+        padding: 16px;
         text-align: left;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
         color: #64748b;
+        font-weight: 700;
         border-bottom: 2px solid #e2e8f0;
     }
 
     .dash-table td {
-        padding: 15px;
+        padding: 18px 16px;
         border-bottom: 1px solid #f1f5f9;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
+        color: #334155;
+        vertical-align: middle;
+    }
+
+    .dash-table tr:hover td {
+        background-color: #f8fafc;
     }
 
     .action-icon {
         background: #f1f5f9;
         border: 1px solid #e2e8f0;
-        border-radius: 6px;
-        width: 34px;
-        height: 34px;
+        border-radius: 8px;
+        width: 38px;
+        height: 38px;
         cursor: pointer;
         transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         margin-right: 5px;
+        color: #475569;
     }
 
     .action-icon:hover {
         background: #e2e8f0;
-        transform: scale(1.1);
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        color: #0f172a;
     }
 
+    /* Etiquetas de Estado */
+    .dash-badge {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        letter-spacing: 0.02em;
+    }
+
+    .dash-badge--ok {
+        background: #d1fae5;
+        color: #059669;
+        border: 1px solid #a7f3d0;
+    }
+
+    .dash-badge--off {
+        background: #f3f4f6;
+        color: #4b5563;
+        border: 1px solid #e5e7eb;
+    }
+
+    /* Payment Grid & Edit Row */
     .payment-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 30px;
+        gap: 40px;
         align-items: start;
+    }
+
+    .edit-container {
+        padding: 25px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        border: 1px solid #e2e8f0;
+        margin: 15px 0;
     }
 
     .receipt-preview-container {
@@ -396,6 +466,7 @@ $statusFilter = $statusFilter ?? 'pending';
         left: 12px;
         color: #64748b;
         font-weight: 600;
+        z-index: 2;
     }
 
     .input-with-symbol input {
@@ -403,12 +474,22 @@ $statusFilter = $statusFilter ?? 'pending';
         font-size: 1.1rem;
         font-weight: 600;
         color: #0b8f55;
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        height: 45px;
+    }
+
+    .form-select {
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        height: 45px;
+        padding: 0 15px;
     }
 
     .edit-actions {
         display: flex;
-        gap: 10px;
-        margin-top: 20px;
+        gap: 15px;
+        margin-top: 25px;
     }
 
     .btn-save {
@@ -433,8 +514,14 @@ $statusFilter = $statusFilter ?? 'pending';
         border: 1px solid #e2e8f0;
         padding: 12px 24px;
         border-radius: 8px;
+        font-weight: 600;
         cursor: pointer;
         flex: 1;
+    }
+
+    .btn-cancel:hover {
+        background: #f1f5f9;
+        color: #334155;
     }
 
     /* Lightbox */
@@ -459,6 +546,7 @@ $statusFilter = $statusFilter ?? 'pending';
         border-radius: 4px;
     }
 
+    /* Utilities */
     .d-block {
         display: block;
     }
@@ -469,6 +557,14 @@ $statusFilter = $statusFilter ?? 'pending';
 
     .mb-4 {
         margin-bottom: 1.5rem;
+    }
+
+    .muted {
+        color: #64748b;
+    }
+
+    .small {
+        font-size: 0.85rem;
     }
 </style>
 

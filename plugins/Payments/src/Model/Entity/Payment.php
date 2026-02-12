@@ -14,6 +14,7 @@ use Cake\ORM\Entity;
  * @property int $payment_method_id
  * @property int $payment_status_id
  * @property float $amount
+ * @property bool|null $is_paid
  * @property string|null $proof_image
  * @property \Cake\I18n\FrozenTime $payment_date
  *
@@ -29,6 +30,7 @@ class Payment extends Entity
         'payment_method_id' => true,
         'payment_status_id' => true,
         'amount' => true,
+        'is_paid' => true,
         'proof_image' => true,
         'payment_date' => true,
         'associate' => true,

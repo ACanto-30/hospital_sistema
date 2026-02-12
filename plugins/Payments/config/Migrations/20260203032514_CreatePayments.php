@@ -21,34 +21,21 @@ class CreatePayments extends BaseMigration
             ->addColumn('associate_id', 'integer', [
                 'null' => false,
             ])
-            ->addColumn('processed_by_user_id', 'integer', [
-                'null' => true,
-                'default' => null,
-            ])
-            ->addColumn('payment_method_id', 'integer', [
-                'null' => false,
-            ])
-            ->addColumn('payment_status_id', 'integer', [
-                'null' => false,
-                'default' => 1,
-            ])
             ->addColumn('amount', 'decimal', [
                 'precision' => 10,
                 'scale' => 2,
                 'null' => false,
             ])
-            ->addColumn('proof_image', 'string', [
-                'limit' => 255,
+            ->addColumn('is_paid', 'boolean', [
                 'null' => true,
+                'default' => false,
             ])
             ->addColumn('payment_date', 'datetime', [
-                'null' => false,
+                'null' => true,
+                'default'=> null,
             ])
 
             ->addForeignKey('associate_id', 'associates', 'id')
-            ->addForeignKey('processed_by_user_id', 'users', 'id')
-            ->addForeignKey('payment_method_id', 'payment_methods', 'id')
-            ->addForeignKey('payment_status_id', 'payment_statuses', 'id')
 
             ->create();
     }

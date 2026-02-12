@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="es">
+
 <head>
     <?= $this->Html->charset() ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,32 +11,33 @@
 </head>
 
 <body>
-<div class="dashboard">
+    <div class="dashboard">
 
-    <header class="dash-topbar">
-        <div class="dash-brand">
-            <span class="dash-logo">🏥</span>
-            <span class="dash-brand-text">Hospital Privado X</span>
-        </div>
+        <header class="dash-topbar">
+            <div class="dash-brand">
+                <!--<span class="dash-logo">🏥</span>-->
+                <!--<span class="dash-brand-text">Hospital Privado X</span>-->
+            </div>
 
-        <div class="dash-topbar-actions">
-            <?= $this->Html->link(
-                'Cerrar sesión',
-                ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'logout'],
-                ['class' => 'btn btn-primary btn-logout']
-            ) ?>
-        </div>
-    </header>
+            <!--<div class="dash-topbar-actions">
+                <?= $this->Html->link(
+                    'Cerrar sesión',
+                    ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'logout'],
+                    ['class' => 'btn btn-primary btn-logout']
+                ) ?>
+            </div>-->
+        </header>
 
-    <main class="dash-container">
-        <section class="dash-card">
-            <?= $this->Flash->render() ?>
-            <?= $this->fetch('content') ?>
-        </section>
-    </main>
+        <main class="dash-container">
+            <section class="dash-card">
+                <?= $this->Flash->render() ?>
+                <?= $this->fetch('content') ?>
+            </section>
+        </main>
 
-</div>
+    </div>
 
-<?= $this->fetch('script') ?>
+    <?= $this->fetch('script') ?>
 </body>
+
 </html>

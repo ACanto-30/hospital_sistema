@@ -71,80 +71,31 @@ class Application extends BaseApplication implements
             ]))
             ->add(new RoutingMiddleware($this))
 
-            
+
             ->add(new AuthenticationMiddleware($this))
 
-            
-            ->add(function (
-                \Psr\Http\Message\ServerRequestInterface $request,
-                \Psr\Http\Server\RequestHandlerInterface $handler
-            ) {
-                $path = $request->getUri()->getPath();
 
-                if ($path === '/doctor-dashboard') {
-                    
-                    $request = $request
-                        ->withAttribute('skipAuthorization', true)
-                        ->withAttribute('publicDemo', true);
 
-                    return $handler->handle($request);
-                }
-
-                return $handler->handle($request);
-            })
 
             /**
              * RoleAccessMiddleware (bypass temporal)
              */
-            ->add(function (
-                \Psr\Http\Message\ServerRequestInterface $request,
-                \Psr\Http\Server\RequestHandlerInterface $handler
-            ) {
-                $path = $request->getUri()->getPath();
-                if ($path === '/doctor-dashboard') {
-                    return $handler->handle($request);
-                }
+            ->add(new RoleAccessMiddleware())
 
-                $mw = new RoleAccessMiddleware();
-                return $mw->process($request, $handler);
-            })
 
-            
             ->add(new \App\Middleware\UnauthorizedRedirectMiddleware())
 
             /**
              * AuthorizationMiddleware (bypass temporal)
              */
-            ->add(function (
-                \Psr\Http\Message\ServerRequestInterface $request,
-                \Psr\Http\Server\RequestHandlerInterface $handler
-            ) {
-                $path = $request->getUri()->getPath();
-                if ($path === '/doctor-dashboard') {
-                    return $handler->handle($request);
-                }
-
-                $mw = new AuthorizationMiddleware($this);
-                return $mw->process($request, $handler);
-            })
+            ->add(new AuthorizationMiddleware($this))
 
             /**
              * RequestAuthorizationMiddleware (bypass temporal)
              */
-            ->add(function (
-                \Psr\Http\Message\ServerRequestInterface $request,
-                \Psr\Http\Server\RequestHandlerInterface $handler
-            ) {
-                $path = $request->getUri()->getPath();
-                if ($path === '/doctor-dashboard') {
-                    return $handler->handle($request);
-                }
+            ->add(new RequestAuthorizationMiddleware())
 
-                $mw = new RequestAuthorizationMiddleware();
-                return $mw->process($request, $handler);
-            })
 
-            
             ->add(new BodyParserMiddleware())
             ->add(new CsrfProtectionMiddleware([
                 'httponly' => true,

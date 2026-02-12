@@ -15,8 +15,8 @@ return static function (RouteBuilder $routes): void {
             'action' => 'administratorDashboard'
         ]);
         $builder->connect('/doctor-dashboard', [
-             'controller' => 'Users',
-             'action' => 'doctorDashboard'
+            'controller' => 'Users',
+            'action' => 'doctorDashboard'
         ]);
         $builder->connect('/toggle-user-status/*', [
             'controller' => 'Users',
@@ -26,6 +26,15 @@ return static function (RouteBuilder $routes): void {
         $builder->connect('/edit-associate-plan/*', [
             'controller' => 'Users',
             'action' => 'editAssociatePlan'
+        ]);
+
+        $builder->connect('/create-debt/:id', [
+            'controller' => 'Users',
+            'action' => 'createDebt'
+        ], [
+            '_name' => 'plugin_create_debt',
+            'pass' => ['id'],
+            'id' => '\d+'
         ]);
 
         // Fallbacks del plugin

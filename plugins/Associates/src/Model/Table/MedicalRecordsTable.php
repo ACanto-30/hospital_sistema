@@ -40,6 +40,11 @@ class MedicalRecordsTable extends Table
         $this->setTable('medical_records');
         $this->setDisplayField('id');
         $this->setPrimaryKey('id');
+
+        $this->belongsTo('Associates', [
+            'foreignKey' => 'associate_id',
+            'className' => 'Associates.Associates',
+        ]);
     }
 
     /**

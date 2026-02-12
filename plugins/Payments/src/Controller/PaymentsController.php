@@ -106,77 +106,129 @@ class PaymentsController extends AppController
             'valueField' => 'name'
         ])->toArray();
 
-        $payment = $this->Payments->newEmptyEntity();
+        // 3. Buscar Deudas Pendientes (Payments padres con is_paid = false)
+        // Calculamos cuánto falta por pagar de cada una
+        $pendingPaymentsQuery = $this->Payments->find()
+            ->where([
+                'associate_id' => $associate->id,
+                'is_paid' => false
+            ])
+            ->contain(['PaymentDetails']) // Para sumar lo ya abonado
+            ->order(['payment_date' => 'DESC']);
+
+        $pendingOptions = [];
+        $debts = []; // Para validación JS/Backend (ID => Monto Restante)
+
+        foreach ($pendingPaymentsQuery as $dept) {
+            $totalAmount = (float) $dept->amount;
+
+            // Sumar abonos APROBADOS (2) y PENDIENTES (1)
+            $paidSoFar = 0;
+            foreach ($dept->payment_details as $detail) {
+                if (in_array($detail->payment_status_id, [1, 2])) {
+                    $paidSoFar += (float) $detail->amount;
+                }
+            }
+
+            $remaining = $totalAmount - $paidSoFar;
+
+            if ($remaining > 0.01) { // Solo si queda deuda real (> 1 centavo)
+                $label = "Cuota del " . ($dept->payment_date ? $dept->payment_date->format('d/m/Y') : 'Fecha Desc.') .
+                    " | Deuda: B/. " . number_format($totalAmount, 2) .
+                    " | Restante: B/. " . number_format($remaining, 2);
+
+                $pendingOptions[$dept->id] = $label;
+                $debts[$dept->id] = $remaining;
+            }
+        }
+
+        // 4. Preparar entidad PaymentDetail
+        $paymentDetailsTable = $this->fetchTable('Payments.PaymentDetails');
+        $paymentDetail = $paymentDetailsTable->newEmptyEntity();
 
         if ($this->request->is('post')) {
-            // Si NO es asociado (ej: admin/cajero pagando por alguien más), se debería manejar diferente.
-            // Por ahora, asumimos que el usuario QUE PAGA debe ser un asociado, a menos que el form envíe 'associate_id'.
-            // Para simplificar según tu requerimiento, usaremos el asociado encontrado.
-
             if (!$associate) {
-                // Opción B: Si no hay asociado ligado, quizás es un pago anónimo o admin.
-                // PERO la BD exige associate_id NOT NULL.
                 $this->Flash->error('Este usuario no tiene un perfil de asociado para asignar el pago.');
                 return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'dashboard']);
             }
 
             $data = $this->request->getData();
-            $file = $data['comprobante'] ?? null;
-            $saved = false;
 
-            // Validación de archivo
-            if (!$file || $file->getError() !== UPLOAD_ERR_OK) {
-                $this->Flash->error('Debe subir un comprobante válido.');
+            // Validar que seleccionó una deuda válida
+            $paymentId = $data['payment_id'] ?? null;
+            if (!$paymentId || !isset($debts[$paymentId])) {
+                $this->Flash->error('Debe seleccionar una deuda válida para abonar.');
+                // Re-enviamos al form
             } else {
-                $filename = $file->getClientFilename();
-                $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                // Validar monto
+                $amountToPay = (float) ($data['amount'] ?? 0);
+                $maxAllowed = $debts[$paymentId];
 
-                if (!in_array($ext, ['png', 'jpg', 'jpeg', 'pdf'])) {
-                    $this->Flash->error('Formato no permitido (solo imágenes o PDF).');
+                // Margen de error pequeño por float conversion
+                if ($amountToPay <= 0) {
+                    $this->Flash->error('El monto a pagar debe ser mayor a 0.');
+                } elseif ($amountToPay > ($maxAllowed + 0.01)) {
+                    $this->Flash->error('El monto ingresado (B/. ' . number_format($amountToPay, 2) . ') supera la deuda restante (B/. ' . number_format($maxAllowed, 2) . ').');
                 } else {
-                    $targetDir = ROOT . DS . 'resources' . DS . 'receipts' . DS;
-                    if (!is_dir($targetDir)) {
-                        mkdir($targetDir, 0755, true);
+                    // Procesamiento de archivo y guardado
+                    $file = $data['comprobante'] ?? null;
+                    $saved = false;
+
+                    if (!$file || $file->getError() !== UPLOAD_ERR_OK) {
+                        $this->Flash->error('Debe subir un comprobante válido.');
+                    } else {
+                        $filename = $file->getClientFilename();
+                        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+                        if (!in_array($ext, ['png', 'jpg', 'jpeg', 'pdf'])) {
+                            $this->Flash->error('Formato no permitido (solo imágenes o PDF).');
+                        } else {
+                            $targetDir = ROOT . DS . 'resources' . DS . 'receipts' . DS;
+                            if (!is_dir($targetDir)) {
+                                mkdir($targetDir, 0755, true);
+                            }
+
+                            $safeName = date('Ymd_His') . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+                            $targetPath = $targetDir . $safeName;
+
+                            try {
+                                $file->moveTo($targetPath);
+
+                               
+                                $detailData = [
+                                    'payment_id' => $paymentId,
+                                    'payment_method_id' => $data['payment_method_id'],
+                                    'amount' => $amountToPay,
+                                    'payment_date' => date('Y-m-d H:i:s'),
+                                    'payment_status_id' => 1, 
+                                    'proof_image' => 'resources/receipts/' . $safeName,
+                                    'processed_by_user_id' => null
+                                ];
+
+                                $paymentDetail = $paymentDetailsTable->patchEntity($paymentDetail, $detailData);
+
+                                if ($paymentDetailsTable->save($paymentDetail)) {
+                                    $saved = true;
+                                } else {
+                                    $this->Flash->error('Error al guardar el abono en BD.');
+                                }
+
+                            } catch (\Exception $e) {
+                                $this->Flash->error('Error al procesar el archivo o guardar: ' . $e->getMessage());
+                            }
+                        }
                     }
 
-                    $safeName = date('Ymd_His') . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-                    $targetPath = $targetDir . $safeName;
-
-                    try {
-                        $file->moveTo($targetPath);
-
-                        // Preparar datos para BD
-                        $paymentData = [
-                            'associate_id' => $associate->id,
-                            'payment_method_id' => $data['payment_method_id'],
-                            'amount' => $data['amount'],
-                            'payment_date' => date('Y-m-d H:i:s'),
-                            'payment_status_id' => 1, // Por Aprobar (Default)
-                            'proof_image' => 'resources/receipts/' . $safeName,
-                            'processed_by_user_id' => null
-                        ];
-
-                        $payment = $this->Payments->patchEntity($payment, $paymentData);
-
-                        if ($this->Payments->save($payment)) {
-                            $saved = true;
-                        } else {
-                            $this->Flash->error('Error al guardar el pago en BD.');
-                        }
-
-                    } catch (\Exception $e) {
-                        $this->Flash->error('Error al procesar el archivo o guardar.');
+                    if ($saved) {
+                        $this->Flash->success('Abono registrado correctamente. Pendiente de aprobación.');
+                        return $this->redirect(['plugin' => 'Associates', 'controller' => 'Associates', 'action' => 'dashboard']);
                     }
                 }
             }
-
-            if ($saved) {
-                $this->Flash->success('Pago registrado correctamente.');
-                return $this->redirect(['plugin' => 'Associates', 'controller' => 'Associates', 'action' => 'dashboard']);
-            }
         }
 
-        $this->set(compact('payment', 'paymentMethods', 'associate'));
+        // Pasamos paymentDetail a la vista en lugar de payment
+        $this->set(compact('paymentDetail', 'paymentMethods', 'associate', 'pendingOptions', 'debts'));
     }
 
     public function dashboardCashier()
@@ -187,17 +239,19 @@ class PaymentsController extends AppController
         $user = $this->request->getAttribute('identity') ?? null;
         $statusFilter = $this->request->getQuery('status', 'pending');
 
+        $paymentDetailsTable = $this->fetchTable('Payments.PaymentDetails');
+
         // Resumen Estadístico (Dashboard Header)
         $today = date('Y-m-d');
 
-        // 1. Total Cobrado Hoy (Solo Aprobados)
-        $querySum = $this->Payments->find();
+        // 1. Total Cobrado Hoy (Solo Detalle Aprobados)
+        $querySum = $paymentDetailsTable->find();
         $sumResult = $querySum->select(['total' => $querySum->func()->sum('amount')])
-            ->where(['DATE(payment_date)' => $today, 'payment_status_id' => 2])
+            ->where(['DATE(payment_date)' => $today, 'payment_status_id' => 2]) // 2 = Aprobado
             ->first();
 
-        // 2. Pagos Procesados Hoy (Aprobados o Rechazados)
-        $procesadosHoy = $this->Payments->find()
+        // 2. Pagos (Detalles) Procesados Hoy (Aprobados o Rechazados)
+        $procesadosHoy = $paymentDetailsTable->find()
             ->where([
                 'DATE(payment_date)' => $today,
                 'payment_status_id IN' => [2, 3]
@@ -205,7 +259,7 @@ class PaymentsController extends AppController
             ->count();
 
         // 3. Pendientes Totales (No solo hoy)
-        $pendientesTotales = $this->Payments->find()
+        $pendientesTotales = $paymentDetailsTable->find()
             ->where(['payment_status_id' => 1])
             ->count();
 
@@ -216,17 +270,22 @@ class PaymentsController extends AppController
         ];
 
         // Lógica de Filtrado para la Tabla
-        $query = $this->Payments->find()
-            ->contain(['Associates', 'PaymentMethods', 'PaymentStatuses']);
+        // Necesitamos contain Payments -> Associates para mostrar quién pagó
+        $query = $paymentDetailsTable->find()
+            ->contain([
+                'Payments' => ['Associates'],
+                'PaymentMethods',
+                'PaymentStatuses'
+            ]);
 
         if ($statusFilter === 'pending') {
-            $query->where(['Payments.payment_status_id' => 1]);
+            $query->where(['PaymentDetails.payment_status_id' => 1]);
         } elseif ($statusFilter === 'processed') {
-            $query->where(['Payments.payment_status_id IN' => [2, 3]]);
+            $query->where(['PaymentDetails.payment_status_id IN' => [2, 3]]);
         }
         // Si es 'all', no aplicamos filtro de status
 
-        $query->orderBy(['Payments.payment_date' => 'DESC']);
+        $query->orderBy(['PaymentDetails.payment_date' => 'DESC']);
 
         $pagos = $this->paginate($query, ['limit' => 20]);
         $paymentStatuses = $this->fetchTable('Payments.PaymentStatuses')->find('list')->toArray();
@@ -235,12 +294,14 @@ class PaymentsController extends AppController
     }
 
     /**
-     * Procesa un pago: cambia monto, estado y asigna el cajero responsable.
+     * Procesa un abono (PaymentDetail): cambia monto, estado y asigna el cajero responsable.
+     * El dashboard del cajero muestra PaymentDetails (abonos), por lo que el ID recibido
+     * es el ID del PaymentDetail, no del Payment padre.
      */
     public function processPayment($id = null)
     {
-        \Cake\Log\Log::debug("[ProcessPayment] Iniciando procesamiento para ID: $id");
-        
+        \Cake\Log\Log::debug("[ProcessPayment] Iniciando procesamiento para PaymentDetail ID: $id");
+
         try {
             // Validar método HTTP
             $this->request->allowMethod(['post', 'put', 'patch']);
@@ -253,12 +314,15 @@ class PaymentsController extends AppController
                 return $this->redirect($this->referer(['action' => 'dashboardCashier']));
             }
 
-            // Obtener el pago
+            // Obtener el PaymentDetail (abono) - el dashboard envía el ID del detalle
+            $paymentDetailsTable = $this->fetchTable('Payments.PaymentDetails');
             try {
-                $payment = $this->Payments->get($id);
-                \Cake\Log\Log::debug("[ProcessPayment] Pago encontrado: ID=$id, Estado actual=" . $payment->payment_status_id . ", Monto actual=" . $payment->amount);
+                $paymentDetail = $paymentDetailsTable->get($id, [
+                    'contain' => ['Payments']
+                ]);
+                \Cake\Log\Log::debug("[ProcessPayment] PaymentDetail encontrado: ID=$id, Estado actual=" . $paymentDetail->payment_status_id . ", Monto actual=" . $paymentDetail->amount);
             } catch (\Cake\Datasource\Exception\RecordNotFoundException $e) {
-                \Cake\Log\Log::error("[ProcessPayment] Pago no encontrado con ID: $id - " . $e->getMessage());
+                \Cake\Log\Log::error("[ProcessPayment] PaymentDetail no encontrado con ID: $id - " . $e->getMessage());
                 $this->Flash->error('Pago no encontrado.');
                 return $this->redirect($this->referer(['action' => 'dashboardCashier']));
             }
@@ -303,9 +367,9 @@ class PaymentsController extends AppController
             $data['processed_by_user_id'] = $userId;
             \Cake\Log\Log::debug("[ProcessPayment] Datos finales a guardar (después de conversión): " . json_encode($data));
 
-            // Autorizar usando la Policy
+            // Autorizar usando la Policy del Payment padre
             try {
-                $this->Authorization->authorize($payment);
+                $this->Authorization->authorize($paymentDetail->payment, 'processPayment');
                 \Cake\Log\Log::debug("[ProcessPayment] Autorización exitosa");
             } catch (\Exception $e) {
                 \Cake\Log\Log::error("[ProcessPayment] Error de autorización: " . $e->getMessage());
@@ -313,25 +377,22 @@ class PaymentsController extends AppController
                 return $this->redirect($this->referer(['action' => 'dashboardCashier']));
             }
 
-            // Parchear la entidad con los nuevos datos
-            // Usar ['accessibleFields' => ['*' => true]] para asegurar que todos los campos se parcheen
-            $payment = $this->Payments->patchEntity($payment, $data, [
+            // Parchear el PaymentDetail con los nuevos datos
+            $paymentDetail = $paymentDetailsTable->patchEntity($paymentDetail, $data, [
                 'accessibleFields' => [
                     'payment_status_id' => true,
                     'amount' => true,
                     'processed_by_user_id' => true
                 ]
             ]);
-            
-            \Cake\Log\Log::debug("[ProcessPayment] Después de patchEntity - payment_status_id: " . $payment->payment_status_id . " (tipo: " . gettype($payment->payment_status_id) . ")");
-            \Cake\Log\Log::debug("[ProcessPayment] Después de patchEntity - amount: " . $payment->amount);
-            \Cake\Log\Log::debug("[ProcessPayment] Después de patchEntity - processed_by_user_id: " . $payment->processed_by_user_id);
-            \Cake\Log\Log::debug("[ProcessPayment] ¿La entidad está dirty? " . ($payment->isDirty('payment_status_id') ? 'SÍ' : 'NO'));
-            \Cake\Log\Log::debug("[ProcessPayment] Campos dirty: " . implode(', ', $payment->getDirty()));
-            
+
+            \Cake\Log\Log::debug("[ProcessPayment] Después de patchEntity - payment_status_id: " . $paymentDetail->payment_status_id . " (tipo: " . gettype($paymentDetail->payment_status_id) . ")");
+            \Cake\Log\Log::debug("[ProcessPayment] Después de patchEntity - amount: " . $paymentDetail->amount);
+            \Cake\Log\Log::debug("[ProcessPayment] Después de patchEntity - processed_by_user_id: " . $paymentDetail->processed_by_user_id);
+
             // Verificar errores de validación
-            if ($payment->hasErrors()) {
-                $errors = $payment->getErrors();
+            if ($paymentDetail->hasErrors()) {
+                $errors = $paymentDetail->getErrors();
                 \Cake\Log\Log::error("[ProcessPayment] Errores de validación: " . json_encode($errors));
                 $errorMessages = [];
                 foreach ($errors as $field => $fieldErrors) {
@@ -344,22 +405,20 @@ class PaymentsController extends AppController
             }
 
             \Cake\Log\Log::debug("[ProcessPayment] Entidad parcheada sin errores. Intentando guardar...");
-            \Cake\Log\Log::debug("[ProcessPayment] Valores antes de guardar - payment_status_id: {$payment->payment_status_id}, amount: {$payment->amount}");
+            \Cake\Log\Log::debug("[ProcessPayment] Valores antes de guardar - payment_status_id: {$paymentDetail->payment_status_id}, amount: {$paymentDetail->amount}");
 
-            // Guardar el pago
-            $saved = $this->Payments->save($payment);
-            
+            // Guardar el PaymentDetail
+            $saved = $paymentDetailsTable->save($paymentDetail);
+
             if ($saved) {
-                // Verificar que realmente se guardó
-                $paymentAfterSave = $this->Payments->get($id);
-                \Cake\Log\Log::info("[ProcessPayment] Pago #$id actualizado exitosamente por usuario $userId");
-                \Cake\Log\Log::debug("[ProcessPayment] Valores después de guardar - payment_status_id: {$paymentAfterSave->payment_status_id}, amount: {$paymentAfterSave->amount}");
-                $this->Flash->success('El pago #' . $id . ' ha sido actualizado correctamente.');
+                \Cake\Log\Log::info("[ProcessPayment] PaymentDetail #$id actualizado exitosamente por usuario $userId");
+                // Actualizar is_paid del Payment padre según el total de abonos aprobados
+                $this->updateParentPaymentStatus($paymentDetail->payment_id);
+                $this->Flash->success('El abono #' . $id . ' ha sido actualizado correctamente.');
             } else {
-                $errors = $payment->getErrors();
-                \Cake\Log\Log::error("[ProcessPayment] Error al guardar pago #$id: " . json_encode($errors));
-                
-                // Mostrar errores específicos si existen
+                $errors = $paymentDetail->getErrors();
+                \Cake\Log\Log::error("[ProcessPayment] Error al guardar PaymentDetail #$id: " . json_encode($errors));
+
                 if (!empty($errors)) {
                     $errorMessages = [];
                     foreach ($errors as $field => $fieldErrors) {
@@ -383,36 +442,74 @@ class PaymentsController extends AppController
     }
 
     /**
+     * Actualiza el is_paid del Payment padre según el total de abonos APROBADOS.
+     * Solo los abonos con payment_status_id = 2 (Aprobado) cuentan para cubrir la deuda.
+     * Si el total aprobado >= monto de la cuota → is_paid = true.
+     * Si no, o si algún abono pasa de aprobado a pendiente/rechazado → is_paid = false.
+     *
+     * @param int $paymentId ID del Payment padre
+     * @return void
+     */
+    private function updateParentPaymentStatus(int $paymentId): void
+    {
+        $payment = $this->Payments->get($paymentId);
+        $totalDebt = (float) $payment->amount;
+
+        $paymentDetailsTable = $this->fetchTable('Payments.PaymentDetails');
+        $querySum = $paymentDetailsTable->find();
+        $approvedSum = $querySum
+            ->select(['total' => $querySum->func()->sum('amount')])
+            ->where([
+                'payment_id' => $paymentId,
+                'payment_status_id' => 2, // Solo APROBADOS
+            ])
+            ->first();
+
+        $totalApproved = $approvedSum && $approvedSum->total !== null
+            ? (float) $approvedSum->total
+            : 0.0;
+
+        $isPaid = $totalApproved >= ($totalDebt - 0.01); // Margen por errores de float
+
+        if ((bool) $payment->is_paid !== $isPaid) {
+            $payment->is_paid = $isPaid;
+            $this->Payments->save($payment);
+            \Cake\Log\Log::info("[ProcessPayment] Payment #$paymentId actualizado: is_paid=" . ($isPaid ? 'true' : 'false') . " (abonos aprobados: B/. $totalApproved, deuda: B/. $totalDebt)");
+        }
+    }
+
+    /**
      * Sirve el archivo del comprobante de forma segura desde /resources o /webroot/uploads.
      * Solo accesible para usuarios autorizados vía Policy.
      */
     public function serveReceipt($id = null)
     {
-        // Cargamos el pago con su asociado para que la Policy pueda validar la propiedad si fuera necesario
-        /** @var \Payments\Model\Entity\Payment $payment */
-        $payment = $this->Payments->get($id, contain: ['Associates']);
+        // Modificado para buscar en PaymentDetails en lugar de Payments
+        $paymentDetailsTable = $this->fetchTable('Payments.PaymentDetails');
 
-        \Cake\Log\Log::debug("[ServeReceipt] Request for ID: $id. DB Path: " . $payment->proof_image);
-
-        // Log to a separate file for easy access
-        file_put_contents(ROOT . DS . 'debug_serve.txt', date('[Y-m-d H:i:s] ') . "Request ID: $id - DB Path: " . $payment->proof_image . PHP_EOL, FILE_APPEND);
-
-        // Verificar permiso usando la Policy (seeReceipt)
         try {
-            $this->Authorization->authorize($payment, 'seeReceipt');
+            /** @var \Payments\Model\Entity\PaymentDetail $detail */
+            $detail = $paymentDetailsTable->get($id, [
+                'contain' => ['Payments'] // Necesitamos el Payment padre para autorización si se requiere
+            ]);
+        } catch (\Cake\Datasource\Exception\RecordNotFoundException $e) {
+            throw new \Cake\Http\Exception\NotFoundException("Detalle de pago no encontrado.");
+        }
+
+        // Autorización: usamos el payment padre como proxy para permission 'seeReceipt'
+        // Asumimos que la Policy de Payment aplica aquí
+        try {
+            $this->Authorization->authorize($detail->payment, 'seeReceipt');
         } catch (\Exception $e) {
-            file_put_contents(ROOT . DS . 'debug_serve.txt', "  AUTHORIZATION FAILED: " . $e->getMessage() . PHP_EOL, FILE_APPEND);
             throw $e;
         }
 
-        if (!$payment->proof_image) {
-            \Cake\Log\Log::error("[ServeReceipt] Payment #$id has no proof_image string in DB.");
-            file_put_contents(ROOT . DS . 'debug_serve.txt', "  ERROR: No proof_image in DB" . PHP_EOL, FILE_APPEND);
+        if (!$detail->proof_image) {
             throw new \Cake\Http\Exception\NotFoundException("Este pago no tiene comprobante.");
         }
 
         // Limpieza de ruta: Extraer solo el nombre del archivo
-        $filename = basename(str_replace(['\\', '/'], DS, (string) $payment->proof_image));
+        $filename = basename(str_replace(['\\', '/'], DS, (string) $detail->proof_image));
 
         // Intentar encontrarlo en las carpetas estándar
         $possiblePaths = [
@@ -421,24 +518,16 @@ class PaymentsController extends AppController
 
         $filePath = null;
         foreach ($possiblePaths as $path) {
-            \Cake\Log\Log::debug("[ServeReceipt] Checking existence of: $path");
-            $exists = file_exists($path);
-            file_put_contents(ROOT . DS . 'debug_serve.txt', "  Checking: $path - " . ($exists ? "EXISTS" : "NOT FOUND") . PHP_EOL, FILE_APPEND);
-            if ($exists) {
+            if (file_exists($path)) {
                 $filePath = $path;
-                \Cake\Log\Log::debug("[ServeReceipt] FOUND file at: $path");
                 break;
             }
         }
 
         if (!$filePath) {
-            \Cake\Log\Log::error("[ServeReceipt] File not found for Payment #$id. Tested: " . implode(', ', $possiblePaths));
-            file_put_contents(ROOT . DS . 'debug_serve.txt', "  ERROR: File not found on disk" . PHP_EOL, FILE_APPEND);
             throw new \Cake\Http\Exception\NotFoundException("Archivo físico no encontrado.");
         }
 
-        \Cake\Log\Log::debug("[ServeReceipt] Serving file: $filePath");
-        file_put_contents(ROOT . DS . 'debug_serve.txt', "  SUCCESS: Serving $filePath" . PHP_EOL, FILE_APPEND);
         return $this->response->withFile($filePath);
     }
 }

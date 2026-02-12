@@ -26,16 +26,17 @@ class PaymentsTable extends Table
             'className' => 'Users.Users',
         ]);
 
-        $this->belongsTo('PaymentMethods', [
-            'foreignKey' => 'payment_method_id',
-            'joinType' => 'INNER',
-            'className' => 'Payments.PaymentMethods',
-        ]);
+
 
         $this->belongsTo('PaymentStatuses', [
             'foreignKey' => 'payment_status_id',
             'joinType' => 'INNER',
             'className' => 'Payments.PaymentStatuses',
+        ]);
+
+        $this->hasMany('PaymentDetails', [
+            'foreignKey' => 'payment_id',
+            'className' => 'Payments.PaymentDetails',
         ]);
 
         $this->addBehavior('Timestamp', [
@@ -58,9 +59,7 @@ class PaymentsTable extends Table
             ->requirePresence('amount', 'create')
             ->notEmptyString('amount');
 
-        $validator
-            ->requirePresence('payment_method_id', 'create')
-            ->notEmptyString('payment_method_id');
+
 
         return $validator;
     }

@@ -21,17 +21,7 @@ class UnauthorizedRedirectMiddleware implements MiddlewareInterface
 
             $path = $request->getUri()->getPath();
 
-            
-            $publicPaths = [
-                '/doctor-dashboard',
-            ];
 
-            if (in_array($path, $publicPaths, true)) {
-                
-                return (new Response())
-                    ->withStatus(403)
-                    ->withStringBody('Forbidden (temporal): ruta permitida para diseño estático, revisar Authorization luego.');
-            }
 
             return (new Response())
                 ->withHeader('Location', '/')

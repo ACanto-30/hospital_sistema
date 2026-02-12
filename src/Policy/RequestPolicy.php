@@ -26,8 +26,15 @@ class RequestPolicy
         }
 
         // 2. LÓGICA DE USUARIOS AUTENTICADOS
-        // Obtenemos el role_name de la identidad (usando la propiedad virtual)
-        $roleName = $identity->role_name ?? null;
+        // Obtenemos el role_name de la identidad
+        $user = $identity->getOriginalData();
+        $roleName = $identity->role_name ?? ($user->role_name ?? ($user->role->name ?? null));
+
+        // Dashboard genérico (Pages::dashboard): permitir a cualquier autenticado.
+        // Evita loop de redirección cuando RoleAccessMiddleware no redirige (ej. rol desconocido).
+        if ($controller === 'Pages' && $action === 'dashboard') {
+            return true;
+        }
 
         // Administrador: Acceso Total
         if ($roleName === 'Administrador') {
@@ -45,8 +52,8 @@ class RequestPolicy
         // 3. ZONAS POR PLUGIN
         $zoneAccess = [
             'Payments' => ['Cajero', 'Asociado', 'Administrador'],
-            'Associates' => ['Asociado', 'Medico'],
-            'Users' => ['Administrador', 'Cajero', 'Asociado', 'Medico']
+            'Associates' => ['Asociado', 'Medico', 'Médico'],
+            'Users' => ['Administrador', 'Cajero', 'Asociado', 'Medico', 'Médico']
         ];
 
         if ($plugin && isset($zoneAccess[$plugin]) && in_array($roleName, $zoneAccess[$plugin])) {
