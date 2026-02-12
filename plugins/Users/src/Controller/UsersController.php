@@ -399,4 +399,47 @@ class UsersController extends AppController
 
         $this->set(compact('user', 'roles', 'insurancePlans'));
     }
+
+    public function toggleUserStatus($id = null)
+    {
+        $this->request->allowMethod(['post']);
+        $user = $this->Users->get($id);
+
+        $newStatus = ($user->status === 'activo') ? 'inactivo' : 'activo';
+        $user->status = $newStatus;
+
+        if ($this->Users->save($user)) {
+            $this->Flash->success('El estado del usuario se ha actualizado a: ' . $newStatus);
+        } else {
+            $this->Flash->error('No se pudo actualizar el estado.');
+        }
+
+        return $this->redirect($this->referer(['action' => 'administratorDashboard']));
+    }
+
+    public function editAssociatePlan($associateId = null)
+    {
+        $this->request->allowMethod(['post', 'put', 'patch']);
+
+        $associatesTable = $this->fetchTable('Associates.Associates');
+        try {
+            $associate = $associatesTable->get($associateId);
+        } catch (\Exception $e) {
+            $this->Flash->error('Asociado no encontrado.');
+            return $this->redirect(['action' => 'administratorDashboard', '?' => ['type' => 'associates']]);
+        }
+
+        $data = $this->request->getData();
+
+        $associate = $associatesTable->patchEntity($associate, $data);
+
+        if ($associatesTable->save($associate)) {
+            $this->Flash->success('Datos del asociado actualizados.');
+        } else {
+            $errors = $associate->getErrors();
+            $this->Flash->error('Error al actualizar: ' . json_encode($errors));
+        }
+
+        return $this->redirect(['action' => 'administratorDashboard', '?' => ['type' => 'associates']]);
+    }
 }
