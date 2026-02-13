@@ -310,9 +310,18 @@ function fieldClass($value)
     </div>
 
     <div class="header-box">
-      <?= $this->Html->link('Cerrar sesión', ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'logout'], ['class' => 'btn-logout']) ?>
-    </div>
+  <?= $this->Html->link(
+      'Editar perfil',
+      ['plugin' => 'Associates', 'controller' => 'Associates', 'action' => 'editProfile'],
+      ['class' => 'btn-pay', 'style' => 'margin-bottom:10px; display:block; text-align:center;']
+  ) ?>
 
+  <?= $this->Html->link(
+      'Cerrar sesión',
+      ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'logout'],
+      ['class' => 'btn-logout', 'style' => 'margin-top:10px; display:block; text-align:center;']
+  ) ?>
+</div>
   </div>
 </div>
 
