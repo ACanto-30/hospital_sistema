@@ -1,12 +1,4 @@
 <?php
-/**
- * @var \Payments\Model\Entity\PaymentDetail $paymentDetail
- * @var \Cake\ORM\ResultSet $paymentMethods
- * @var $associate
- * @var array $pendingOptions
- * @var array $debts
- */
-
 $this->assign('title', 'Realizar Pago - ' . ($associate->first_name ?? '') . ' ' . ($associate->last_name ?? ''));
 
 $user = $this->getRequest()->getAttribute('identity') ?? null;
@@ -17,76 +9,154 @@ if (!empty($user)) {
 ?>
 
 <style>
-  /* Solo para esta vista */
-  .pay-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 14px;
-  }
 
-  .pay-grid .full {
-    grid-column: 1 / -1;
-  }
+/* ==== Mantiene tu diseño base ==== */
 
-  .pay-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 16px;
-  }
+.summary-card{
+    transition:.25s ease;
+}
+.summary-card:hover{
+    transform:translateY(-2px);
+}
 
-  .pay-hint {
-    font-size: 12px;
-    color: #6b7280;
-    margin-top: 6px;
-  }
+/* Inputs */
+input, select{
+    border-radius:10px !important;
+    padding:10px 12px !important;
+    border:1px solid #d1d5db !important;
+    transition:.2s ease;
+    font-size:14px;
+}
 
-  .pay-info {
-    margin-top: 14px;
-    background: #f3faf6;
-    border: 1px solid #d7efe2;
-    color: #157347;
-    padding: 12px 14px;
-    border-radius: 14px;
-    font-size: 13px;
-  }
+input:focus, select:focus{
+    border-color:#15803d !important;
+    box-shadow:0 0 0 3px rgba(21,128,61,.15);
+}
 
-  .pay-feedback {
-    color: #dc2626;
-    font-size: 12px;
-    margin-top: 6px;
-    display: none;
-  }
+/* PASOS */
+.step-block{
+    opacity:.5;
+    pointer-events:none;
+    transition:.3s ease;
+}
 
-  @media (max-width: 768px) {
-    .pay-grid {
-      grid-template-columns: 1fr;
-    }
-  }
+.step-block.active{
+    opacity:1;
+    pointer-events:auto;
+}
+
+.step-label{
+    font-weight:700;
+    margin-top:18px;
+    margin-bottom:6px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.step-number{
+    background:#15803d;
+    color:white;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+}
+
+/* Caja deuda */
+.debt-box{
+    margin-top:10px;
+    padding:14px;
+    border-radius:14px;
+    background:#ecfdf5;
+    border:1px solid #bbf7d0;
+    display:none;
+}
+
+.debt-amount{
+    font-size:20px;
+    font-weight:700;
+    color:#065f46;
+}
+
+.progress-bar-container{
+    height:8px;
+    background:#e5e7eb;
+    border-radius:10px;
+    margin-top:10px;
+    overflow:hidden;
+}
+
+.progress-bar{
+    height:100%;
+    width:0%;
+    background:#15803d;
+    transition:.3s ease;
+}
+
+/* Feedback */
+.feedback-error{
+    color:#dc2626;
+    font-size:12px;
+    margin-top:5px;
+    display:none;
+}
+
+.feedback-success{
+    color:#15803d;
+    font-size:12px;
+    margin-top:5px;
+    display:none;
+}
+
+/* Archivo */
+.file-preview{
+    margin-top:8px;
+    font-size:12px;
+    color:#065f46;
+    display:none;
+}
+
+.btn-full{
+    margin-top:8px;
+    font-size:12px;
+    background:#e2e8f0;
+    border:none;
+    padding:6px 10px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.btn-full:hover{
+    background:#cbd5e1;
+}
+
 </style>
 
 <div class="dashboard-page dashboard-cashier">
 
   <div class="dashboard-header">
     <div>
-      <h2 class="dashboard-title"><?= empty($pendingOptions) ? 'Realizar Pago' : 'Realizar Abono' ?></h2>
+      <h2 class="dashboard-title">Realizar Abono</h2>
       <p class="dashboard-subtitle">
-        <?= empty($pendingOptions) ? 'Sin deudas pendientes' : 'Envío de comprobante para verificación manual' ?> • <?= h($nombreUsuario) ?>
+        Envío de comprobante para verificación manual • <?= h($nombreUsuario) ?>
       </p>
     </div>
 
     <div class="dashboard-meta">
       <?= $this->Html->link(
         'Volver al Dashboard',
-        ['plugin' => 'Associates', 'controller' => 'Associates', 'action' => 'dashboard'],
-        ['class' => 'btn btn-primary']
+        ['plugin'=>'Associates','controller'=>'Associates','action'=>'dashboard'],
+        ['class'=>'btn btn-primary']
       ) ?>
 
       <?= $this->Html->link(
         'Cerrar sesión',
-        ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'logout'],
-        ['class' => 'btn btn-primary btn-logout']
+        ['plugin'=>'Users','controller'=>'Users','action'=>'logout'],
+        ['class'=>'btn btn-primary btn-logout']
       ) ?>
     </div>
   </div>
@@ -95,136 +165,198 @@ if (!empty($user)) {
 
   <div class="dashboard-content">
 
-    <?php if (empty($pendingOptions)): ?>
-      <!-- Caso Paz y Salvo -->
-      <div class="summary-card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 40px;">
-        <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
-        <h3 class="section-title" style="color: #065f46;">¡Estás Paz y Salvo!</h3>
-        <p class="muted" style="margin-top: 1rem;">No tienes deudas pendientes por pagar en este momento.</p>
+    <div class="summary-card" style="max-width:980px;width:100%;">
+      <h3 class="section-title">Formulario de Pago</h3>
+
+      <p class="muted">
+        Asociado:
+        <strong><?= h($associate->first_name . ' ' . $associate->last_name) ?></strong>
+        (<?= h($associate->id_card) ?>)
+      </p>
+
+      <?= $this->Form->create($paymentDetail,['type'=>'file','autocomplete'=>'off','id'=>'paymentForm']) ?>
+
+      <!-- PASO 1 -->
+      <div id="step1" class="step-block active">
+        <div class="step-label">
+          <div class="step-number">1</div>
+          Seleccione la deuda
+        </div>
+
+        <?= $this->Form->control('payment_id',[
+          'label'=>false,
+          'type'=>'select',
+          'options'=>$pendingOptions,
+          'empty'=>'Seleccione una opción...',
+          'required'=>true,
+          'id'=>'payment_select'
+        ]) ?>
+
+        <div id="debtBox" class="debt-box">
+            <div>Deuda pendiente:</div>
+            <div class="debt-amount" id="debtAmount"></div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+      </div>
+
+      <!-- PASO 2 -->
+      <div id="step2" class="step-block">
+        <div class="step-label">
+          <div class="step-number">2</div>
+          Ingrese el monto
+        </div>
+
+        <?= $this->Form->control('amount',[
+          'label'=>false,
+          'type'=>'number',
+          'step'=>'0.01',
+          'min'=>'0.01',
+          'required'=>true,
+          'id'=>'amount_input',
+          'placeholder'=>'0.00'
+        ]) ?>
+
+        <button type="button" id="payFullBtn" class="btn-full" style="display:none;">
+          Pagar monto total
+        </button>
+
+        <div id="errorMsg" class="feedback-error"></div>
+        <div id="successMsg" class="feedback-success"></div>
+      </div>
+
+      <!-- PASO 3 -->
+      <div id="step3" class="step-block">
+        <div class="step-label">
+          <div class="step-number">3</div>
+          Método de pago
+        </div>
+
+        <?= $this->Form->control('payment_method_id',[
+          'label'=>false,
+          'type'=>'select',
+          'options'=>$paymentMethods,
+          'empty'=>'Seleccione',
+          'required'=>true,
+          'id'=>'method_select'
+        ]) ?>
+      </div>
+
+      <!-- PASO 4 -->
+      <div id="step4" class="step-block">
+        <div class="step-label">
+          <div class="step-number">4</div>
+          Adjunte el comprobante
+        </div>
+
+        <?= $this->Form->control('comprobante',[
+          'label'=>false,
+          'type'=>'file',
+          'accept'=>'.jpg,.jpeg,.png,.pdf',
+          'required'=>true,
+          'id'=>'file_input'
+        ]) ?>
+
+        <div id="filePreview" class="file-preview"></div>
+      </div>
+
+      <div style="margin-top:14px;background:#f3faf6;border:1px solid #d7efe2;color:#157347;padding:12px;border-radius:14px;font-size:13px;">
+        Este pago será validado manualmente por administración.
+      </div>
+
+      <div style="margin-top:18px;">
+        <?= $this->Form->button('Enviar comprobante',[
+          'class'=>'btn btn-primary',
+          'style'=>'width:100%;margin-bottom:10px;',
+          'id'=>'submitBtn',
+          'disabled'=>true
+        ]) ?>
+
         <?= $this->Html->link(
-          'Volver al Dashboard',
-          ['plugin' => 'Associates', 'controller' => 'Associates', 'action' => 'dashboard'],
-          ['class' => 'btn btn-primary', 'style' => 'margin-top: 20px;']
+          'Cancelar',
+          ['plugin'=>'Associates','controller'=>'Associates','action'=>'dashboard'],
+          ['class'=>'btn btn-primary btn-logout','style'=>'width:100%;']
         ) ?>
       </div>
 
-    <?php else: ?>
-      <!-- Caso con Deudas -->
-      <div class="summary-card" style="max-width: 980px; width: 100%;">
-        <h3 class="section-title">Realizar Abono</h3>
-        <p class="muted" style="margin-top: 6px;">
-          Asociado: <strong><?= h($associate->first_name . ' ' . $associate->last_name) ?></strong> (<?= h($associate->id_card) ?>)<br>
-          Complete el formulario y adjunte el comprobante.
-        </p>
-
-        <?= $this->Form->create($paymentDetail, ['type' => 'file', 'autocomplete' => 'off', 'id' => 'paymentForm']) ?>
-
-        <div class="pay-grid">
-
-          <div class="full">
-            <?= $this->Form->control('payment_id', [
-              'label' => 'Seleccione la Deuda a Abonar',
-              'type' => 'select',
-              'options' => $pendingOptions,
-              'empty' => 'Seleccione una opción...',
-              'required' => true,
-              'id' => 'payment_select'
-            ]) ?>
-            <div class="pay-hint">Se muestra el monto original y lo restante.</div>
-          </div>
-
-          <div>
-            <?= $this->Form->control('amount', [
-              'label' => 'Monto a Pagar (B/.)',
-              'type' => 'number',
-              'step' => '0.01',
-              'min' => '0.01',
-              'required' => true,
-              'id' => 'amount_input',
-              'placeholder' => '0.00'
-            ]) ?>
-            <div id="amount-feedback" class="pay-feedback"></div>
-          </div>
-
-          <div>
-            <?= $this->Form->control('payment_method_id', [
-              'label' => 'Método de pago',
-              'type' => 'select',
-              'options' => $paymentMethods,
-              'empty' => 'Seleccione',
-              'required' => true
-            ]) ?>
-            <div class="pay-hint">Seleccione el método utilizado.</div>
-          </div>
-
-          <div class="full">
-            <?= $this->Form->control('comprobante', [
-              'label' => 'Adjuntar comprobante',
-              'type' => 'file',
-              'accept' => '.jpg,.jpeg,.png,.pdf',
-              'required' => true
-            ]) ?>
-            <div class="pay-hint">Formatos permitidos: JPG, PNG, PDF. Tamaño máximo: 5MB.</div>
-          </div>
-
-        </div>
-
-        <div class="pay-info">
-          Importante: este sistema solo recibe el comprobante. El estado (Pendiente / Pagado) se define manualmente.
-        </div>
-
-        <div class="pay-actions">
-          <?= $this->Form->button('Enviar comprobante', ['class' => 'btn btn-primary']) ?>
-
-          <?= $this->Html->link(
-            'Cancelar',
-            ['plugin' => 'Associates', 'controller' => 'Associates', 'action' => 'dashboard'],
-            ['class' => 'btn btn-primary btn-logout']
-          ) ?>
-        </div>
-
-        <?= $this->Form->end() ?>
-
-      </div>
-    <?php endif; ?>
-
+      <?= $this->Form->end() ?>
+    </div>
   </div>
 </div>
 
 <?php if (!empty($debts)): ?>
 <script>
-    const debts = <?= json_encode($debts) ?>;
-    const paymentSelect = document.getElementById('payment_select');
-    const amountInput = document.getElementById('amount_input');
-    const feedback = document.getElementById('amount-feedback');
 
-    if (paymentSelect && amountInput && feedback) {
-        paymentSelect.addEventListener('change', validateAmount);
-        amountInput.addEventListener('input', validateAmount);
+const debts = <?= json_encode($debts) ?>;
 
-        function validateAmount() {
-            const selectedId = paymentSelect.value;
-            const currentAmount = parseFloat(amountInput.value) || 0;
+const paymentSelect = document.getElementById('payment_select');
+const amountInput = document.getElementById('amount_input');
+const methodSelect = document.getElementById('method_select');
+const fileInput = document.getElementById('file_input');
 
-            if (!selectedId) {
-                feedback.style.display = 'none';
-                feedback.textContent = '';
-                amountInput.style.borderColor = '';
-                return;
-            }
+const step2 = document.getElementById('step2');
+const step3 = document.getElementById('step3');
+const step4 = document.getElementById('step4');
 
-            const maxDebt = parseFloat(debts[selectedId]);
+const debtBox = document.getElementById('debtBox');
+const debtAmount = document.getElementById('debtAmount');
+const progressBar = document.getElementById('progressBar');
+const errorMsg = document.getElementById('errorMsg');
+const successMsg = document.getElementById('successMsg');
+const payFullBtn = document.getElementById('payFullBtn');
+const submitBtn = document.getElementById('submitBtn');
+const filePreview = document.getElementById('filePreview');
 
-            if (currentAmount > (maxDebt + 0.01)) {
-                feedback.textContent = 'El monto no puede superar la deuda restante de B/. ' + maxDebt.toFixed(2);
-                feedback.style.display = 'block';
-                amountInput.style.borderColor = '#dc2626';
-            } else {
-                feedback.style.display = 'none';
-                feedback.textContent = '';
-                amountInput.style.borderColor = '';
-            }
-        }
+let currentMax = 0;
+
+/* Paso 1 */
+paymentSelect.addEventListener('change', function(){
+    if(!this.value) return;
+
+    currentMax = parseFloat(debts[this.value]);
+    debtAmount.innerText = "B/. " + currentMax.toFixed(2);
+    debtBox.style.display='block';
+    payFullBtn.style.display='inline-block';
+
+    step2.classList.add('active');
+});
+
+/* Paso 2 */
+amountInput.addEventListener('input', function(){
+    const value = parseFloat(this.value) || 0;
+
+    if(value > currentMax){
+        errorMsg.innerText="El monto no puede superar la deuda.";
+        errorMsg.style.display='block';
+        successMsg.style.display='none';
+        submitBtn.disabled=true;
     }
+    else if(value > 0){
+        errorMsg.style.display='none';
+        successMsg.innerText="Monto válido ✔";
+        successMsg.style.display='block';
+        progressBar.style.width = ((value/currentMax)*100)+"%";
+        step3.classList.add('active');
+    }
+});
+
+/* Paso 3 */
+methodSelect.addEventListener('change', function(){
+    if(this.value){
+        step4.classList.add('active');
+    }
+});
+
+/* Paso 4 */
+fileInput.addEventListener('change', function(){
+    if(this.files.length > 0){
+        filePreview.innerText = "Archivo seleccionado: " + this.files[0].name;
+        filePreview.style.display='block';
+        submitBtn.disabled=false;
+    }
+});
+
 </script>
 <?php endif; ?>

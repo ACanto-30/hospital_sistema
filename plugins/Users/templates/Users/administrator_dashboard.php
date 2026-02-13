@@ -71,6 +71,69 @@ $adminNombre = $currentUser->full_name ?? $currentUser->username ?? 'Administrad
   </div>
 
   <hr class="divider">
+<hr class="divider">
+
+<?php if ($listType === 'associates'): ?>
+<div class="search-container" style="margin-bottom:20px;">
+  <?= $this->Form->create(null, ['type' => 'get']) ?>
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:15px;align-items:end;">
+
+    <div>
+      <label class="muted small">Buscar</label>
+      <?= $this->Form->control('search', [
+        'label' => false,
+        'placeholder' => 'Nombre, apellido, cédula o teléfono...',
+        'value' => $this->request->getQuery('search'),
+        'class' => 'form-input'
+      ]) ?>
+    </div>
+
+    <div>
+      <label class="muted small">Plan</label>
+      <?= $this->Form->control('plan', [
+        'label' => false,
+        'type' => 'select',
+        'empty' => 'Todos',
+        'options' => $insurancePlans,
+        'value' => $this->request->getQuery('plan'),
+        'class' => 'form-select'
+      ]) ?>
+    </div>
+
+    <div>
+      <label class="muted small">Estado</label>
+      <?= $this->Form->control('status', [
+        'label' => false,
+        'type' => 'select',
+        'empty' => 'Todos',
+        'options' => [
+          'active' => 'Activo',
+          'inactive' => 'Inactivo'
+        ],
+        'value' => $this->request->getQuery('status'),
+        'class' => 'form-select'
+      ]) ?>
+    </div>
+
+    <div style="display:flex;gap:5px;">
+      <?= $this->Form->button('Buscar', ['class' => 'btn-save']) ?>
+      <?= $this->Html->link(
+        'Limpiar',
+        ['?' => ['type' => 'associates']],
+        ['class' => 'btn-cancel']
+      ) ?>
+    </div>
+
+  </div>
+  <?= $this->Form->end() ?>
+</div>
+<?php endif; ?>
+
+
+<div class="table-responsive">
+    <table class="dash-table">
+      <thead>
+        <tr>
 
   <div class="table-responsive">
     <table class="dash-table">

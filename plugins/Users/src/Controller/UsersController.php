@@ -199,38 +199,70 @@ class UsersController extends AppController
         $insurancePlans = [];
 
         if ($listType === 'associates') {
-            $associatesTable = $this->fetchTable('Associates.Associates');
-            $query = $associatesTable->find()
-                ->contain(['InsurancePlans', 'Users'])
-                ->order(['Associates.id' => 'DESC']);
 
-            // Cargar planes para el formulario de edición
-            $insurancePlans = $this->fetchTable('Associates.InsurancePlans')->find('list', [
-                'keyField' => 'id',
-                'valueField' => 'name'
-            ])->toArray();
+    $associatesTable = $this->fetchTable('Associates.Associates');
 
-        } else {
-            // Default: Users
-            $query = $this->Users->find()
-                ->contain(['Roles'])
-                ->order(['Users.created_at' => 'DESC']);
+    $query = $associatesTable->find()
+        ->contain(['InsurancePlans', 'Users']);
 
-            // Forzar listType a 'users' por seguridad si venía algo raro
-            $listType = 'users';
-        }
+    // 🔎 Capturar filtros
+    $search = $this->request->getQuery('search');
+    $plan   = $this->request->getQuery('plan');
+    $status = $this->request->getQuery('status');
 
-        try {
-            $data = $this->paginate($query, ['limit' => 10]);
-        } catch (\Exception $e) {
-            // Fallback en caso de error de paginación o query
-            $data = [];
-            $this->Flash->error('Error al cargar los datos: ' . $e->getMessage());
-        }
-
-        $this->set(compact('data', 'currentUser', 'listType', 'insurancePlans'));
+    if (!empty($search)) {
+        $query->where([
+            'OR' => [
+                'Associates.first_name LIKE' => "%$search%",
+                'Associates.last_name LIKE'  => "%$search%",
+                'Associates.id_card LIKE'    => "%$search%",
+                'Associates.phone LIKE'      => "%$search%"
+            ]
+        ]);
     }
 
+    if (!empty($plan)) {
+        $query->where(['Associates.plan_id' => $plan]);
+    }
+
+    if (!empty($status)) {
+        $query->where(['Associates.member_status' => $status]);
+    }
+
+    // Orden final
+    $query->order(['Associates.id' => 'DESC']);
+
+    // Cargar planes para filtro y edición
+    $insurancePlans = $this->fetchTable('Associates.InsurancePlans')
+        ->find('list', [
+            'keyField'   => 'id',
+            'valueField' => 'name'
+        ])
+        ->toArray();
+
+} else {
+
+    // Default: Users
+    $query = $this->Users->find()
+        ->contain(['Roles'])
+        ->order(['Users.created_at' => 'DESC']);
+
+    // Seguridad
+    $listType = 'users';
+
+    // Evita error si no es associates
+    $insurancePlans = [];
+}
+
+try {
+    $data = $this->paginate($query, ['limit' => 10]);
+} catch (\Exception $e) {
+    $data = [];
+    $this->Flash->error('Error al cargar los datos: ' . $e->getMessage());
+}
+
+$this->set(compact('data', 'currentUser', 'listType', 'insurancePlans'));
+}
     public function createDebt($associateId = null)
     {
         $this->request->allowMethod(['post']);
