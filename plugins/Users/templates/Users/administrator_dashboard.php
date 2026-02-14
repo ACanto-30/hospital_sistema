@@ -328,9 +328,108 @@ $adminNombre = $currentUser->full_name ?? $currentUser->username ?? 'Administrad
     <?= $this->Paginator->last('Último >>') ?>
   </ul>
 
+  <!-- ========================================= -->
+<!-- GESTIÓN ADMINISTRATIVA DE USUARIOS (Debajo del listado) -->
+<!-- ========================================= -->
+
+<hr class="divider" style="margin:40px 0;">
+
+<div style="padding:30px; background:#f9fafb; border-radius:10px; border:1px solid #e5e7eb;">
+
+  <h3 class="section-title" style="margin-bottom:10px;">Gestión Administrativa de Usuarios</h3>
+  <p class="muted" style="margin-bottom:25px;">Edición completa con control total</p>
+
+  <?= $this->Form->create(null, [
+    'url' => ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'adminUpdateUser']
+  ]) ?>
+
+  <!-- IDENTIFICACIÓN -->
+  <div style="margin-bottom:30px;">
+    <h4 style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; font-weight:700; color:#4f46e5; margin-bottom:15px;">
+      Identificación
+    </h4>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <?= $this->Form->control('id', [
+        'label' => 'ID del Usuario',
+        'class' => 'form-input',
+        'required' => true
+      ]) ?>
+
+      <?= $this->Form->control('role', [
+        'label' => 'Rol',
+        'type' => 'select',
+        'options' => [
+          'admin' => 'Administrador',
+          'asociado' => 'Asociado',
+          'usuario' => 'Usuario'
+        ],
+        'default' => 'admin',
+        'class' => 'form-select'
+      ]) ?>
+    </div>
+  </div>
+
+  <!-- INFORMACIÓN PERSONAL -->
+  <div style="margin-bottom:30px;">
+    <h4 style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; font-weight:700; color:#4f46e5; margin-bottom:15px;">
+      Información Personal
+    </h4>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <?= $this->Form->control('name', [
+        'label' => 'Nombre Completo',
+        'class' => 'form-input'
+      ]) ?>
+
+      <?= $this->Form->control('email', [
+        'label' => 'Correo Electrónico',
+        'class' => 'form-input'
+      ]) ?>
+    </div>
+  </div>
+
+  <!-- CONFIGURACIÓN DE CUENTA -->
+  <div style="margin-bottom:30px;">
+    <h4 style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; font-weight:700; color:#4f46e5; margin-bottom:15px;">
+      Configuración de Cuenta
+    </h4>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <?= $this->Form->control('status', [
+        'label' => 'Estado',
+        'type' => 'select',
+        'options' => [
+          'activo' => 'Activo',
+          'inactivo' => 'Inactivo',
+          'suspendido' => 'Suspendido'
+        ],
+        'default' => 'activo',
+        'class' => 'form-select'
+      ]) ?>
+
+      <?= $this->Form->control('password', [
+        'label' => 'Nueva Contraseña',
+        'type' => 'password',
+        'class' => 'form-input'
+      ]) ?>
+    </div>
+  </div>
+
+  <div style="display:flex; justify-content:flex-end;">
+    <?= $this->Form->button('Actualizar Usuario', [
+      'class' => 'btn-save'
+    ]) ?>
+  </div>
+
+  <?= $this->Form->end() ?>
+
 </div>
 
 </div>
+
+</div>
+
 
 <style>
   .btn-deactivate {
@@ -523,3 +622,6 @@ $adminNombre = $currentUser->full_name ?? $currentUser->username ?? 'Administrad
 </script>
 
 </div>
+
+
+
