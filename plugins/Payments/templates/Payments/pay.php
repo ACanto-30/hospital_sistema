@@ -243,6 +243,22 @@ input:focus, select:focus {
 .dashboard-meta .btn {
   margin-left: 8px;
 }
+
+
+/* Centrar completamente el card */
+.dashboard-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 150px);
+  padding: 20px;
+}
+
+/* Para que el card no quede pegado arriba */
+.summary-card {
+  margin: 0 auto;
+}
+
 </style>
 
 <div class="dashboard-page dashboard-cashier">
