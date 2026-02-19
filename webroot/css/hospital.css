@@ -9,3 +9,11 @@
     color: #b00020;
     font-weight: bold;
 }
+
+/*EXPANDIR DASHBOARD GLOBAL*/
+@media (min-width: 1200px){
+  .dashboard .container{
+    max-width: 1600px !important;
+    width: 100%;
+  }
+}

@@ -16,13 +16,12 @@
   display: none !important;
 }
 
-/* Contenedor centrado*/
+/* Contenedor centrado  */
 .dashboard .dashboard-page{
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 20px 24px 20px;
-  position: relative;
-  z-index: 1;
+  width:100%;
+  max-width:1600px;
+  margin:0 auto;
+  padding:0 40px 30px 40px;
 }
 
 /* Header */
@@ -31,6 +30,7 @@
   display:flex;
   align-items:flex-start;
   justify-content:space-between;
+  gap: 14px;
 }
 
 .dashboard .dashboard-title{
@@ -61,20 +61,21 @@
   border-radius:18px;
   padding: 22px;
   box-shadow: 0 18px 45px rgba(0,0,0,.22);
+  width: 100%;
 }
 
-/* Cuando summary-card es el panel grande*/
+/* Cuando summary-card es el panel grande */
 .dashboard .summary-card + .summary-card{
   margin-top: 18px;
 }
 
 /* ================================
-   Summary grid
+   Summary grid (RESPONSIVE)
    ================================ */
 
 .dashboard .summary-grid{
   display:grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap:16px;
   margin-bottom: 22px;
 }
@@ -103,6 +104,7 @@
   display:flex;
   justify-content:space-between;
   align-items:center;
+  gap: 12px;
 }
 
 /* ================================
@@ -146,7 +148,7 @@
 .dash-badge--ok{ background:#e9fbf1; color:#0f6b40; }
 .dash-badge--off{ background:#fdecec; color:#a01818; }
 
-/* Pagination*/
+/* Pagination */
 .pagination{
   list-style:none;
   padding:0;
@@ -192,7 +194,6 @@
   text-decoration:none;
 }
 
-
 /* ================================
    Dashboard Cajero
    Requisito: <div class="dashboard-page dashboard-cashier">
@@ -227,7 +228,7 @@
   z-index: 1;
 }
 
-/* Cajero: header blanco legible */
+/* Cajero: header blanco */
 .dashboard .dashboard-page.dashboard-cashier .dashboard-title{
   color:#ffffff;
   text-shadow: 0 1px 2px rgba(0,0,0,0.25);
@@ -237,17 +238,17 @@
   text-shadow: 0 1px 2px rgba(0,0,0,0.25);
 }
 
-/* Cajero: divider claro */
+/* Cajero: divider*/
 .dashboard .dashboard-page.dashboard-cashier .divider{
   border-top:1px solid rgba(255,255,255,0.25);
 }
 
-/* Cajero: cards con sombra suave */
+/* Cajero: cards sombra  */
 .dashboard .dashboard-page.dashboard-cashier .summary-card{
   box-shadow: 0 8px 24px rgba(0,0,0,0.10);
 }
 
-/* Mensaje envio de comprobante emergente*/
+/* Mensaje envío de comprobante emergente */
 .flash-overlay{
   position: fixed;
   inset: 0;
@@ -292,9 +293,10 @@
    ================================ */
 
 .dashboard .pay-card{
-  max-width: 980px;
+  max-width: 1300px; 
   width: 100%;
 }
+
 
 .dashboard .pay-card-head{
   display: flex;
@@ -363,7 +365,7 @@
   grid-column: 1 / -1;
 }
 
-/* CakePHP form wrapper*/
+/* CakePHP form wrapper */
 .dashboard .pay-field .input,
 .dashboard .pay-field .select,
 .dashboard .pay-field .file{
@@ -445,28 +447,8 @@
   border-color: #b42318 !important;
 }
 
-/* Responsive */
-@media (max-width: 768px){
-  .dashboard .pay-grid{
-    grid-template-columns: 1fr;
-  }
-  .dashboard .pay-card-head{
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .dashboard .pay-card-mini{
-    width: 100%;
-  }
-  .dashboard .pay-actions{
-    justify-content: stretch;
-  }
-  .dashboard .pay-actions .btn{
-    width: 100%;
-  }
-}
-
 /* ================================
-   Dashboard Médico (estático)
+   Dashboard Médico 
    Requisito: <div class="dashboard-page dashboard-doctor">
    ================================ */
 
@@ -536,16 +518,56 @@
   gap: 10px;
 }
 
+/*Responsive general*/
 @media (max-width: 900px){
+  .dashboard .dashboard-page{
+    padding: 0 18px 22px 18px;
+  }
+
+  .dashboard .dashboard-header{
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .dashboard .doctor-grid{
     grid-template-columns: 1fr;
   }
+
   .dashboard .doctor-actions{
     justify-content: stretch;
   }
+
   .dashboard .doctor-actions .btn,
   .dashboard .doctor-quick .btn{
     width: 100%;
     text-align: center;
   }
+}
+
+@media (max-width: 768px){
+  .dashboard .pay-grid{
+    grid-template-columns: 1fr;
+  }
+  .dashboard .pay-card-head{
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dashboard .pay-card-mini{
+    width: 100%;
+  }
+  .dashboard .pay-actions{
+    justify-content: stretch;
+  }
+  .dashboard .pay-actions .btn{
+    width: 100%;
+  }
+}
+
+/*tablas/cards dentro de dashboard*/
+.dashboard .table-responsive{
+  width: 100%;
+}
+
+.dashboard table{
+  width: 100%;
 }

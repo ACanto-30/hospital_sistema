@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= h($this->fetch('title') ?: 'Hospital Privado X') ?></title>
 
-    <?= $this->Html->css(['app', 'users', 'user-dashboard']) ?>
+    <?= $this->Html->css(['app', 'user-dashboard']) ?>
     <?= $this->fetch('css') ?>
 </head>
 

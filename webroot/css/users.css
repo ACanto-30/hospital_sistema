@@ -1,7 +1,7 @@
 /* ===== USERS: LOGIN & REGISTER (AUTH ONLY) ===== */
 
 /* Fondo exclusivo del login / register */
-body{
+body.auth{
     margin:0;
     min-height:100vh;
     background:
@@ -78,7 +78,7 @@ body{
 }
 
 /* BOTÓN AUTH (override del btn global) */
-.btn-primary{
+body.auth .btn-primary{
     margin-top:12px;
     padding:16px;
     border-radius:16px;

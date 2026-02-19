@@ -50,15 +50,16 @@ function fieldClass($value)
   }
 
   /* Header segmentado */
-  .dashboard-header-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 32px;
-    display: grid;
-    grid-template-columns: 1fr 1.5fr auto;
-    gap: 20px;
-    align-items: center;
-  }
+ .dashboard-header-inner{
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: grid;
+  grid-template-columns: 1fr 1.5fr auto;
+  gap: 20px;
+  align-items: center;
+}
 
   /* Header boxes glass + hover animado */
   .header-box {
@@ -107,15 +108,16 @@ function fieldClass($value)
   }
 
   /* Contenedor principal con sombra y vidrio */
-  .dashboard-page {
-    max-width: 1200px;
-    margin: -100px auto 40px;
-    background: rgba(243, 248, 245, 0.95);
-    border-radius: var(--radius);
-    padding: 40px;
-    box-shadow: 0 20px 60px var(--sombra);
-    backdrop-filter: blur(8px);
-  }
+ .dashboard-page{
+  width: 100%;
+  max-width: 1600px;
+  margin: -100px auto 40px;
+  background: rgba(243, 248, 245, 0.95);
+  border-radius: var(--radius);
+  padding: 40px;
+  box-shadow: 0 20px 60px var(--sombra);
+  backdrop-filter: blur(8px);
+}
 
   /* Summary cards neumorphic + hover */
   .summary-card {
@@ -547,6 +549,10 @@ function fieldClass($value)
         }
         function closeDetailsModal(id) {
           document.getElementById('details-modal-' + id).style.display = 'none';
+        }
+        @media (min-width: 1400px){
+        .dashboard-page{ padding: 48px; }
+        .dashboard-header{ padding: 70px 0 130px; }
         }
       </script>
 
