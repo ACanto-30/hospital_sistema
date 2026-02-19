@@ -72,7 +72,7 @@ $adminNombre = $currentUser->full_name ?? $currentUser->username ?? 'Administrad
       <?php if ($listType === 'associates'): ?>
         <div class="search-container" style="margin-bottom:20px;">
           <?= $this->Form->create(null, ['type' => 'get']) ?>
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:15px;align-items:end;">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:15px;align-items:end;">
 
               <div>
                 <label class="muted small">Buscar</label>
@@ -95,7 +95,17 @@ $adminNombre = $currentUser->full_name ?? $currentUser->username ?? 'Administrad
                   'class' => 'form-select'
                 ]) ?>
               </div>
-
+              <div>
+                <label class="muted small">Condición</label>
+                <?= $this->Form->control('condition', [
+                  'label' => false,
+                  'type' => 'select',
+                  'empty' => 'Todas',
+                  'options' => $conditionsList ?? [],
+                  'value' => $this->request->getQuery('condition'),
+                  'class' => 'form-select'
+                ]) ?>
+              </div>
               <div>
                 <label class="muted small">Estado</label>
                 <?= $this->Form->control('status', [

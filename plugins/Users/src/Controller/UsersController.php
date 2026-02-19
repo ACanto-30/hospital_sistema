@@ -16,8 +16,6 @@ class UsersController extends AppController
         $this->Authentication->allowUnauthenticated(['login', 'register']);
     }
 
-
-
     public function beforeFilter(\Cake\Event\EventInterface $event)
     {
         parent::beforeFilter($event);
@@ -196,81 +194,109 @@ class UsersController extends AppController
 
         // Determinar qué lista mostrar (users vs associates)
         $listType = $this->request->getQuery('type', 'users');
+
         $insurancePlans = [];
+        $conditionsList = [];
 
         if ($listType === 'associates') {
 
-    $associatesTable = $this->fetchTable('Associates.Associates');
+            $associatesTable = $this->fetchTable('Associates.Associates');
 
-    $query = $associatesTable->find()
-        ->contain(['InsurancePlans', 'Users']);
+            // query base
+            $query = $associatesTable->find()
+                ->contain([
+                    'InsurancePlans',
+                    'Users',
+                    'AssociatesConditions' => ['Conditions']
+                ]);
 
-    // 🔎 Capturar filtros
-    $search = $this->request->getQuery('search');
-    $plan   = $this->request->getQuery('plan');
-    $status = $this->request->getQuery('status');
+            // Capturar filtros
+            $search    = $this->request->getQuery('search');
+            $plan      = $this->request->getQuery('plan');
+            $status    = $this->request->getQuery('status');
+            $condition = $this->request->getQuery('condition');
 
-    if (!empty($search)) {
-        $query->where([
-            'OR' => [
-                'Associates.first_name LIKE' => "%$search%",
-                'Associates.last_name LIKE'  => "%$search%",
-                'Associates.id_card LIKE'    => "%$search%",
-                'Associates.phone LIKE'      => "%$search%"
-            ]
-        ]);
+            // Search 
+            if (!empty($search)) {
+                $query->where([
+                    'OR' => [
+                        'Associates.first_name LIKE' => "%$search%",
+                        'Associates.last_name LIKE'  => "%$search%",
+                        'Associates.id_card LIKE'    => "%$search%",
+                        'Associates.phone LIKE'      => "%$search%"
+                    ]
+                ]);
+            }
+
+            if (!empty($plan)) {
+                $query->where(['Associates.plan_id' => $plan]);
+            }
+
+            if (!empty($status)) {
+                $query->where(['Associates.member_status' => $status]);
+            }
+
+            // filtro por condición médica
+            if (!empty($condition)) {
+                $query->matching('AssociatesConditions', function ($q) use ($condition) {
+                    return $q->where(['AssociatesConditions.condition_id' => $condition]);
+                });
+
+                // Evita duplicados si el asociado tiene varias condiciones
+                $query->distinct(['Associates.id']);
+            }
+
+            // Orden final
+            $query->order(['Associates.id' => 'DESC']);
+
+            // Cargar planes para filtro y edición
+            $insurancePlans = $this->fetchTable('Associates.InsurancePlans')
+                ->find('list', [
+                    'keyField'   => 'id',
+                    'valueField' => 'name'
+                ])
+                ->toArray();
+
+            // Lista de condiciones para el select del dashboard admin
+            $conditionsList = $this->fetchTable('Associates.Conditions')
+                ->find('list', [
+                    'keyField' => 'id',
+                    'valueField' => 'condition',
+                    'order' => ['Conditions.condition' => 'ASC']
+                ])
+                ->toArray();
+
+        } else {
+
+            // Default: Users
+            $query = $this->Users->find()
+                ->contain(['Roles'])
+                ->order(['Users.created_at' => 'DESC']);
+
+            // Seguridad
+            $listType = 'users';
+            $insurancePlans = [];
+            $conditionsList = [];
+        }
+
+        try {
+            $data = $this->paginate($query, ['limit' => 10]);
+        } catch (\Exception $e) {
+            $data = [];
+            $this->Flash->error('Error al cargar los datos: ' . $e->getMessage());
+        }
+
+        $this->set(compact('data', 'currentUser', 'listType', 'insurancePlans', 'conditionsList'));
     }
 
-    if (!empty($plan)) {
-        $query->where(['Associates.plan_id' => $plan]);
-    }
-
-    if (!empty($status)) {
-        $query->where(['Associates.member_status' => $status]);
-    }
-
-    // Orden final
-    $query->order(['Associates.id' => 'DESC']);
-
-    // Cargar planes para filtro y edición
-    $insurancePlans = $this->fetchTable('Associates.InsurancePlans')
-        ->find('list', [
-            'keyField'   => 'id',
-            'valueField' => 'name'
-        ])
-        ->toArray();
-
-} else {
-
-    // Default: Users
-    $query = $this->Users->find()
-        ->contain(['Roles'])
-        ->order(['Users.created_at' => 'DESC']);
-
-    // Seguridad
-    $listType = 'users';
-
-    // Evita error si no es associates
-    $insurancePlans = [];
-}
-
-try {
-    $data = $this->paginate($query, ['limit' => 10]);
-} catch (\Exception $e) {
-    $data = [];
-    $this->Flash->error('Error al cargar los datos: ' . $e->getMessage());
-}
-
-$this->set(compact('data', 'currentUser', 'listType', 'insurancePlans'));
-}
     public function createDebt($associateId = null)
     {
         $this->request->allowMethod(['post']);
 
-        // Debug: Log incoming ID
+        // Debug
         \Cake\Log\Log::debug("createDebt called. associateId arg: " . var_export($associateId, true));
 
-        // Fallback: Intentar obtener ID de la request si no llegó como argumento
+        // Fallback
         if (!$associateId) {
             $associateId = $this->request->getParam('id');
         }
@@ -283,7 +309,7 @@ $this->set(compact('data', 'currentUser', 'listType', 'insurancePlans'));
 
         \Cake\Log\Log::debug("createDebt final ID: " . var_export($associateId, true));
 
-        // Auth Check (simular admin check como en dashboard)
+        // Auth Check
         $identity = $this->Authentication->getIdentity();
         $currentUser = $this->Users->get($identity->getIdentifier());
         if ((int) $currentUser->role_id !== 1) {
