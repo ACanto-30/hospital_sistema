@@ -174,120 +174,133 @@ class UsersController extends AppController
         $this->viewBuilder()->setLayout('dashboard');
     }
 
-    public function administratorDashboard()
-    {
-        $this->viewBuilder()->setLayout('dashboard');
+   public function administratorDashboard()
+{
+    $this->viewBuilder()->setLayout('dashboard');
 
-        $identity = $this->Authentication->getIdentity();
-        if (!$identity) {
-            return $this->redirect(['action' => 'login']);
-        }
-
-        $currentUser = $this->Users->get($identity->getIdentifier(), [
-            'contain' => ['Roles']
-        ]);
-
-        if ((int) $currentUser->role_id !== 1) {
-            $this->Flash->error('No tienes permisos para entrar a este módulo.');
-            return $this->redirect(['action' => 'dashboard']);
-        }
-
-        // Determinar qué lista mostrar (users vs associates)
-        $listType = $this->request->getQuery('type', 'users');
-
-        $insurancePlans = [];
-        $conditionsList = [];
-
-        if ($listType === 'associates') {
-
-            $associatesTable = $this->fetchTable('Associates.Associates');
-
-            // query base
-            $query = $associatesTable->find()
-                ->contain([
-                    'InsurancePlans',
-                    'Users',
-                    'AssociatesConditions' => ['Conditions']
-                ]);
-
-            // Capturar filtros
-            $search    = $this->request->getQuery('search');
-            $plan      = $this->request->getQuery('plan');
-            $status    = $this->request->getQuery('status');
-            $condition = $this->request->getQuery('condition');
-
-            // Search 
-            if (!empty($search)) {
-                $query->where([
-                    'OR' => [
-                        'Associates.first_name LIKE' => "%$search%",
-                        'Associates.last_name LIKE'  => "%$search%",
-                        'Associates.id_card LIKE'    => "%$search%",
-                        'Associates.phone LIKE'      => "%$search%"
-                    ]
-                ]);
-            }
-
-            if (!empty($plan)) {
-                $query->where(['Associates.plan_id' => $plan]);
-            }
-
-            if (!empty($status)) {
-                $query->where(['Associates.member_status' => $status]);
-            }
-
-            // filtro por condición médica
-            if (!empty($condition)) {
-                $query->matching('AssociatesConditions', function ($q) use ($condition) {
-                    return $q->where(['AssociatesConditions.condition_id' => $condition]);
-                });
-
-                // Evita duplicados si el asociado tiene varias condiciones
-                $query->distinct(['Associates.id']);
-            }
-
-            // Orden final
-            $query->order(['Associates.id' => 'DESC']);
-
-            // Cargar planes para filtro y edición
-            $insurancePlans = $this->fetchTable('Associates.InsurancePlans')
-                ->find('list', [
-                    'keyField'   => 'id',
-                    'valueField' => 'name'
-                ])
-                ->toArray();
-
-            // Lista de condiciones para el select del dashboard admin
-            $conditionsList = $this->fetchTable('Associates.Conditions')
-                ->find('list', [
-                    'keyField' => 'id',
-                    'valueField' => 'condition',
-                    'order' => ['Conditions.condition' => 'ASC']
-                ])
-                ->toArray();
-
-        } else {
-
-            // Default: Users
-            $query = $this->Users->find()
-                ->contain(['Roles'])
-                ->order(['Users.created_at' => 'DESC']);
-
-            // Seguridad
-            $listType = 'users';
-            $insurancePlans = [];
-            $conditionsList = [];
-        }
-
-        try {
-            $data = $this->paginate($query, ['limit' => 10]);
-        } catch (\Exception $e) {
-            $data = [];
-            $this->Flash->error('Error al cargar los datos: ' . $e->getMessage());
-        }
-
-        $this->set(compact('data', 'currentUser', 'listType', 'insurancePlans', 'conditionsList'));
+    // 🔐 Validar sesión
+    $identity = $this->Authentication->getIdentity();
+    if (!$identity) {
+        return $this->redirect(['action' => 'login']);
     }
+
+    $currentUser = $this->Users->get($identity->getIdentifier(), [
+        'contain' => ['Roles']
+    ]);
+
+    // Solo rol 1 (Administrador)
+    if ((int) $currentUser->role_id !== 1) {
+        $this->Flash->error('No tienes permisos para entrar a este módulo.');
+        return $this->redirect(['action' => 'dashboard']);
+    }
+
+    // Determinar tipo de lista
+    $listType = $this->request->getQuery('type', 'users');
+    $insurancePlans = [];
+    $conditionsList = [];
+
+    // ============================
+    // 🔹 CASO: LISTA DE ASOCIADOS
+    // ============================
+    if ($listType === 'associates') {
+
+        $associatesTable = $this->fetchTable('Associates.Associates');
+
+        // Query base con relaciones
+        $query = $associatesTable->find()
+            ->contain([
+                'InsurancePlans',
+                'Users',
+                'AssociatesConditions' => ['Conditions']
+            ]);
+
+        // Capturar filtros
+        $search     = $this->request->getQuery('search');
+        $plan       = $this->request->getQuery('plan');
+        $status     = $this->request->getQuery('status');
+        $condition  = $this->request->getQuery('condition');
+        $birthMonth = $this->request->getQuery('birth_month');
+
+        // 🔍 Filtro búsqueda general
+        if (!empty($search)) {
+            $query->where([
+                'OR' => [
+                    'Associates.first_name LIKE' => "%$search%",
+                    'Associates.last_name LIKE'  => "%$search%",
+                    'Associates.id_card LIKE'    => "%$search%",
+                    'Associates.phone LIKE'      => "%$search%"
+                ]
+            ]);
+        }
+
+        // 🎟️ Filtro por plan
+        if (!empty($plan)) {
+            $query->where(['Associates.plan_id' => $plan]);
+        }
+
+        // ⚙️ Filtro por estado
+        if (!empty($status)) {
+            $query->where(['Associates.member_status' => $status]);
+        }
+
+        // 💊 Filtro por condición médica
+        if (!empty($condition)) {
+            $query->matching('AssociatesConditions', function ($q) use ($condition) {
+                return $q->where(['AssociatesConditions.condition_id' => $condition]);
+            });
+            $query->distinct(['Associates.id']); // evita duplicados
+        }
+
+        // 🎂 Filtro por mes de cumpleaños
+        if (!empty($birthMonth)) {
+            $query->where([
+                'MONTH(Associates.birth_date)' => (int)$birthMonth
+            ]);
+        }
+
+        // Orden
+        $query->order(['Associates.id' => 'DESC']);
+
+        // Listas auxiliares para selects
+        $insurancePlans = $this->fetchTable('Associates.InsurancePlans')
+            ->find('list', ['keyField' => 'id', 'valueField' => 'name'])
+            ->toArray();
+
+        $conditionsList = $this->fetchTable('Associates.Conditions')
+            ->find('list', [
+                'keyField' => 'id',
+                'valueField' => 'condition',
+                'order' => ['Conditions.condition' => 'ASC']
+            ])
+            ->toArray();
+    } 
+    // ============================
+    // 🔹 CASO: LISTA DE USUARIOS
+    // ============================
+    else {
+        $query = $this->Users->find()
+            ->contain(['Roles'])
+            ->order(['Users.created_at' => 'DESC']);
+        $listType = 'users';
+    }
+
+    // 🧭 Paginación segura
+    try {
+        $data = $this->paginate($query, ['limit' => 10]);
+    } catch (\Exception $e) {
+        $data = [];
+        $this->Flash->error('Error al cargar los datos: ' . $e->getMessage());
+    }
+
+    // Enviar a la vista
+    $this->set(compact(
+        'data',
+        'currentUser',
+        'listType',
+        'insurancePlans',
+        'conditionsList'
+    ));
+}
 
     public function createDebt($associateId = null)
     {

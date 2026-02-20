@@ -69,71 +69,176 @@ $adminNombre = $currentUser->full_name ?? $currentUser->username ?? 'Administrad
 
       <hr class="divider">
 
-      <?php if ($listType === 'associates'): ?>
-        <div class="search-container" style="margin-bottom:20px;">
-          <?= $this->Form->create(null, ['type' => 'get']) ?>
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:15px;align-items:end;">
+     <!-- ===================== -->
+<!-- 🔹 FILTROS ASOCIADOS -->
+<!-- ===================== -->
+<?php if ($listType === 'associates'): ?>
+  <div class="search-container" style="margin-bottom:20px;">
+    <?= $this->Form->create(null, ['type' => 'get']) ?>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:15px;align-items:end;">
 
-              <div>
-                <label class="muted small">Buscar</label>
-                <?= $this->Form->control('search', [
-                  'label' => false,
-                  'placeholder' => 'Nombre, apellido, cédula o teléfono...',
-                  'value' => $this->request->getQuery('search'),
-                  'class' => 'form-input'
-                ]) ?>
-              </div>
-
-              <div>
-                <label class="muted small">Plan</label>
-                <?= $this->Form->control('plan', [
-                  'label' => false,
-                  'type' => 'select',
-                  'empty' => 'Todos',
-                  'options' => $insurancePlans,
-                  'value' => $this->request->getQuery('plan'),
-                  'class' => 'form-select'
-                ]) ?>
-              </div>
-              <div>
-                <label class="muted small">Condición</label>
-                <?= $this->Form->control('condition', [
-                  'label' => false,
-                  'type' => 'select',
-                  'empty' => 'Todas',
-                  'options' => $conditionsList ?? [],
-                  'value' => $this->request->getQuery('condition'),
-                  'class' => 'form-select'
-                ]) ?>
-              </div>
-              <div>
-                <label class="muted small">Estado</label>
-                <?= $this->Form->control('status', [
-                  'label' => false,
-                  'type' => 'select',
-                  'empty' => 'Todos',
-                  'options' => [
-                    'active' => 'Activo',
-                    'inactive' => 'Inactivo'
-                  ],
-                  'value' => $this->request->getQuery('status'),
-                  'class' => 'form-select'
-                ]) ?>
-              </div>
-
-              <div style="display:flex;gap:5px;">
-                <?= $this->Form->button('Buscar', ['class' => 'btn-save']) ?>
-                <?= $this->Html->link(
-                  'Limpiar',
-                  ['?' => ['type' => 'associates']],
-                  ['class' => 'btn-cancel']
-                ) ?>
-              </div>
-
-            </div>
-          <?= $this->Form->end() ?>
+        <!-- Buscar -->
+        <div>
+          <label class="muted small">Buscar</label>
+          <?= $this->Form->control('search', [
+            'label' => false,
+            'placeholder' => 'Nombre, apellido, cédula o teléfono...',
+            'value' => $this->request->getQuery('search'),
+            'class' => 'form-input'
+          ]) ?>
         </div>
-      <?php endif; ?>
+
+        <!-- Plan -->
+        <div>
+          <label class="muted small">Plan</label>
+          <?= $this->Form->control('plan', [
+            'label' => false,
+            'type' => 'select',
+            'empty' => 'Todos',
+            'options' => $insurancePlans,
+            'value' => $this->request->getQuery('plan'),
+            'class' => 'form-select'
+          ]) ?>
+        </div>
+
+        <!-- Estado -->
+        <div>
+          <label class="muted small">Estado</label>
+          <?= $this->Form->control('status', [
+            'label' => false,
+            'type' => 'select',
+            'empty' => 'Todos',
+            'options' => [
+              'active' => 'Activo',
+              'inactive' => 'Inactivo'
+            ],
+            'value' => $this->request->getQuery('status'),
+            'class' => 'form-select'
+          ]) ?>
+        </div>
+
+        <!-- Condición médica -->
+        <div>
+          <label class="muted small">Condición</label>
+          <?= $this->Form->control('condition', [
+            'label' => false,
+            'type' => 'select',
+            'empty' => 'Todas',
+            'options' => $conditionsList,
+            'value' => $this->request->getQuery('condition'),
+            'class' => 'form-select'
+          ]) ?>
+        </div>
+
+        <!-- Mes de cumpleaños -->
+        <div>
+          <label class="muted small">Mes de cumpleaños</label>
+          <?= $this->Form->control('birth_month', [
+            'label' => false,
+            'type' => 'select',
+            'empty' => 'Todos',
+            'options' => [
+              '01' => 'Enero',
+              '02' => 'Febrero',
+              '03' => 'Marzo',
+              '04' => 'Abril',
+              '05' => 'Mayo',
+              '06' => 'Junio',
+              '07' => 'Julio',
+              '08' => 'Agosto',
+              '09' => 'Septiembre',
+              '10' => 'Octubre',
+              '11' => 'Noviembre',
+              '12' => 'Diciembre'
+            ],
+            'value' => $this->request->getQuery('birth_month'),
+            'class' => 'form-select'
+          ]) ?>
+        </div>
+
+        <!-- Botones -->
+        <div style="display:flex;gap:5px;">
+          <?= $this->Form->button('Buscar', ['class' => 'btn-save']) ?>
+          <?= $this->Html->link(
+            'Limpiar',
+            ['?' => ['type' => 'associates']],
+            ['class' => 'btn-cancel']
+          ) ?>
+        </div>
+
+      </div>
+    <?= $this->Form->end() ?>
+  </div>
+
+  <!-- ===================== -->
+  <!-- 🔹 TABLA DE ASOCIADOS -->
+  <!-- ===================== -->
+  <div class="card">
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Cédula</th>
+            <th>Teléfono</th>
+            <th>Plan</th>
+            <th>Fecha de Nacimiento</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (!empty($data) && $data->count() > 0): ?>
+            <?php foreach ($data as $associate): ?>
+              <tr>
+                <td><?= h($associate->first_name . ' ' . $associate->last_name) ?></td>
+                <td><?= h($associate->id_card ?? '-') ?></td>
+                <td><?= h($associate->phone ?? '-') ?></td>
+                <td><?= h($associate->insurance_plan->name ?? '-') ?></td>
+                <td><?= $associate->birth_date ? $associate->birth_date->format('d/m/Y') : '-' ?></td>
+                <td><?= $associate->member_status === 'active' ? 'Activo' : 'Inactivo' ?></td>
+              </tr>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <tr>
+              <td colspan="6" class="text-center muted small">No se encontraron asociados.</td>
+            </tr>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<?php endif; ?>
+
+<!-- ===================== -->
+<!-- 🔹 LISTA DE USUARIOS -->
+<!-- ===================== -->
+<?php if ($listType === 'users'): ?>
+  <div class="card">
+    <div class="card-body">
+      <h5>Lista de usuarios del sistema</h5>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Fecha de creación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($data as $user): ?>
+            <tr>
+              <td><?= h($user->nombre_completo ?? $user->username) ?></td>
+              <td><?= h($user->email) ?></td>
+              <td><?= h($user->role->name ?? '-') ?></td>
+              <td><?= $user->created_at ? $user->created_at->format('d/m/Y H:i') : '-' ?></td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<?php endif; ?>
 
       <div class="table-responsive">
         <table class="dash-table">
