@@ -11,7 +11,6 @@ class AssociatesController extends AppController
     {
         parent::initialize();
 
-       
         $this->loadComponent('Flash');
         $this->loadComponent('Authentication.Authentication');
     }
@@ -38,7 +37,6 @@ class AssociatesController extends AppController
             ->first();
 
         if (!$associate) {
-           
             $this->Flash->error('No se encontró un perfil de asociado vinculado a esta cuenta.');
         }
 
@@ -46,12 +44,16 @@ class AssociatesController extends AppController
         $this->render('dashboard_associates');
     }
 
-    
     public function editProfile()
     {
         $this->viewBuilder()->setLayout('dashboard');
 
         $identity = $this->Authentication->getIdentity();
+        if (!$identity) {
+            $this->Flash->error('Debes iniciar sesión.');
+            return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'login']);
+        }
+
         $associatesTable = $this->fetchTable('Associates.Associates');
 
         $associate = $associatesTable->find()
@@ -66,20 +68,16 @@ class AssociatesController extends AppController
 
         if ($this->request->is(['patch', 'post', 'put'])) {
 
-            
             $allowedFields = [
-                'id_card',
-                'first_name',
-                'last_name',
                 'phone',
-                'email',
                 'address',
-                'birth_date',
             ];
 
-            $associate = $associatesTable->patchEntity($associate, $this->request->getData(), [
-                'fields' => $allowedFields
-            ]);
+            $associate = $associatesTable->patchEntity(
+                $associate,
+                $this->request->getData(),
+                ['fields' => $allowedFields]
+            );
 
             if ($associatesTable->save($associate)) {
                 $this->Flash->success('Perfil actualizado correctamente.');

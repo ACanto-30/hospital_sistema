@@ -31,21 +31,20 @@ $this->assign('title', 'Editar Perfil');
     gap:18px;
     margin-bottom:18px;
   }
- .profile-title{
+  .profile-title{
     margin:0;
     font-family: var(--font-main);
     color:#ffffff;
     font-weight: 900;
     font-size: 2rem;
     letter-spacing: .2px;
-}
+  }
 
-.profile-sub{
+  .profile-sub{
     margin:8px 0 0;
     color:#ffffffcc; /* blanco suave */
     font-size: 1rem;
-}
-
+  }
 
   .btn-pro{
     display:inline-flex;
@@ -124,6 +123,17 @@ $this->assign('title', 'Editar Perfil');
 
   .profile-card .input{ margin:0; }
   .profile-card .input + .input{ margin-top:0; }
+
+  /* ✅ Campo bloqueado (solo visual) */
+  .profile-card input:disabled,
+  .profile-card textarea:disabled,
+  .profile-card select:disabled{
+    background: #f3f4f6;
+    color: #6b7280;
+    border-color: rgba(0,0,0,.10);
+    cursor: not-allowed;
+    opacity: 1; /* mantiene legible */
+  }
 
   /* Info box */
   .info-box{
@@ -218,23 +228,27 @@ $this->assign('title', 'Editar Perfil');
     <div class="grid">
       <?= $this->Form->control('id_card', [
         'label' => 'Cédula / ID',
-        'class' => 'form-control'
+        'class' => 'form-control',
+        'disabled' => true
       ]) ?>
 
       <?= $this->Form->control('birth_date', [
         'label' => 'Fecha de nacimiento',
         'type' => 'date',
-        'class' => 'form-control'
+        'class' => 'form-control',
+        'disabled' => true
       ]) ?>
 
       <?= $this->Form->control('first_name', [
         'label' => 'Nombres',
-        'class' => 'form-control'
+        'class' => 'form-control',
+        'disabled' => true
       ]) ?>
 
       <?= $this->Form->control('last_name', [
         'label' => 'Apellidos',
-        'class' => 'form-control'
+        'class' => 'form-control',
+        'disabled' => true
       ]) ?>
 
       <?= $this->Form->control('phone', [
@@ -245,7 +259,8 @@ $this->assign('title', 'Editar Perfil');
 
       <?= $this->Form->control('email', [
         'label' => 'Correo',
-        'class' => 'form-control'
+        'class' => 'form-control',
+        'disabled' => true
       ]) ?>
     </div>
 
