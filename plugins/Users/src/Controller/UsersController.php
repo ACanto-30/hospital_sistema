@@ -189,15 +189,17 @@ class UsersController extends AppController
     ]);
 
     // Solo rol 1 (Administrador)
-    if ((int) $currentUser->role_id !== 1) {
+    if ((int)$currentUser->role_id !== 1) {
         $this->Flash->error('No tienes permisos para entrar a este módulo.');
         return $this->redirect(['action' => 'dashboard']);
     }
 
-    // Determinar tipo de lista
+    // Tipo de lista: "users" o "associates"
     $listType = $this->request->getQuery('type', 'users');
     $insurancePlans = [];
     $conditionsList = [];
+    $birthdayCount = 0;
+    $showBirthdays = $this->request->getQuery('birthdays');
 
     // ============================
     // 🔹 CASO: LISTA DE ASOCIADOS
@@ -214,7 +216,7 @@ class UsersController extends AppController
                 'AssociatesConditions' => ['Conditions']
             ]);
 
-        // Capturar filtros
+        // 📥 Capturar filtros
         $search     = $this->request->getQuery('search');
         $plan       = $this->request->getQuery('plan');
         $status     = $this->request->getQuery('status');
@@ -248,20 +250,52 @@ class UsersController extends AppController
             $query->matching('AssociatesConditions', function ($q) use ($condition) {
                 return $q->where(['AssociatesConditions.condition_id' => $condition]);
             });
-            $query->distinct(['Associates.id']); // evita duplicados
+            $query->distinct(['Associates.id']);
         }
 
-        // 🎂 Filtro por mes de cumpleaños
+        // 🎂 Filtro por mes de cumpleaños específico
         if (!empty($birthMonth)) {
             $query->where([
                 'MONTH(Associates.birth_date)' => (int)$birthMonth
             ]);
         }
 
-        // Orden
-        $query->order(['Associates.id' => 'DESC']);
+        // 🎉 Checkbox: mostrar cumpleañeros por mes listados
+        // Si el usuario marca el checkbox, se filtra automáticamente por el mes actual
+        if ($showBirthdays) {
+            $currentMonth = date('m');
+            $query->where([
+                'MONTH(Associates.birth_date)' => $currentMonth
+            ]);
+            // Si no se seleccionó un mes manualmente, lo establecemos al mes actual
+            if (empty($birthMonth)) {
+                $birthMonth = $currentMonth;
+                $this->request = $this->request->withQueryParams(
+                    array_merge($this->request->getQueryParams(), ['birth_month' => $currentMonth])
+                );
+            }
+        }
 
-        // Listas auxiliares para selects
+        // 📊 Contador de cumpleañeros del mes actual
+        $currentMonth = date('m');
+        $birthdayCount = $associatesTable->find()
+            ->where(['MONTH(Associates.birth_date)' => $currentMonth])
+            ->count();
+
+        // 🔹 Paginación
+        $this->paginate = [
+            'limit' => 10,
+            'order' => ['Associates.first_name' => 'ASC']
+        ];
+
+        try {
+            $data = $this->paginate($query);
+        } catch (\Exception $e) {
+            $data = [];
+            $this->Flash->error('Error al cargar los datos: ' . $e->getMessage());
+        }
+
+        // 📋 Listas auxiliares
         $insurancePlans = $this->fetchTable('Associates.InsurancePlans')
             ->find('list', ['keyField' => 'id', 'valueField' => 'name'])
             ->toArray();
@@ -281,24 +315,24 @@ class UsersController extends AppController
         $query = $this->Users->find()
             ->contain(['Roles'])
             ->order(['Users.created_at' => 'DESC']);
-        $listType = 'users';
+
+        try {
+            $data = $this->paginate($query, ['limit' => 10]);
+        } catch (\Exception $e) {
+            $data = [];
+            $this->Flash->error('Error al cargar los usuarios: ' . $e->getMessage());
+        }
     }
 
-    // 🧭 Paginación segura
-    try {
-        $data = $this->paginate($query, ['limit' => 10]);
-    } catch (\Exception $e) {
-        $data = [];
-        $this->Flash->error('Error al cargar los datos: ' . $e->getMessage());
-    }
-
-    // Enviar a la vista
+    // Enviar variables a la vista
     $this->set(compact(
         'data',
         'currentUser',
         'listType',
         'insurancePlans',
-        'conditionsList'
+        'conditionsList',
+        'showBirthdays',
+        'birthdayCount'
     ));
 }
 
