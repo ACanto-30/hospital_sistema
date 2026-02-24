@@ -39,10 +39,10 @@ $this->assign('title', 'Editar Perfil');
     font-size: 2rem;
     letter-spacing: .2px;
   }
-
+/* blanco suave */
   .profile-sub{
     margin:8px 0 0;
-    color:#ffffffcc; /* blanco suave */
+    color:#ffffffcc; 
     font-size: 1rem;
   }
 
@@ -89,6 +89,7 @@ $this->assign('title', 'Editar Perfil');
   .profile-card .input,
   .profile-card input[type="text"],
   .profile-card input[type="email"],
+  .profile-card input[type="tel"],
   .profile-card input[type="date"],
   .profile-card textarea,
   .profile-card select{
@@ -124,7 +125,7 @@ $this->assign('title', 'Editar Perfil');
   .profile-card .input{ margin:0; }
   .profile-card .input + .input{ margin-top:0; }
 
-  /* ✅ Campo bloqueado (solo visual) */
+  /*Campo bloqueado */
   .profile-card input:disabled,
   .profile-card textarea:disabled,
   .profile-card select:disabled{
@@ -132,7 +133,7 @@ $this->assign('title', 'Editar Perfil');
     color: #6b7280;
     border-color: rgba(0,0,0,.10);
     cursor: not-allowed;
-    opacity: 1; /* mantiene legible */
+    opacity: 1;
   }
 
   /* Info box */
@@ -253,6 +254,7 @@ $this->assign('title', 'Editar Perfil');
 
       <?= $this->Form->control('phone', [
         'label' => 'Teléfono',
+        'type' => 'tel',
         'class' => 'form-control',
         'required' => false
       ]) ?>
@@ -260,7 +262,7 @@ $this->assign('title', 'Editar Perfil');
       <?= $this->Form->control('email', [
         'label' => 'Correo',
         'class' => 'form-control',
-        'disabled' => true
+        'required' => false
       ]) ?>
     </div>
 
@@ -275,7 +277,7 @@ $this->assign('title', 'Editar Perfil');
     </div>
 
     <div class="info-box">
-      <p class="t">Datos no editables aquí</p>
+      <p class="t">Datos no editables</p>
       <p class="d">
         Plan: <strong><?= h($associate->insurance_plan->plan_name ?? $associate->insurance_plan->name ?? 'N/D') ?></strong>
         &nbsp;|&nbsp;

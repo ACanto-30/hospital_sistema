@@ -58,6 +58,43 @@
     }
     .flash-btn:hover{ opacity:.92; }
   </style>
+  <style>
+
+#toast-container{
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9998; 
+}
+
+.toast{
+  min-width: 260px;
+  margin-bottom: 12px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(0,0,0,.25);
+  animation: slideIn .4s ease, fadeOut .5s ease 3.5s forwards;
+}
+
+.toast-success{
+  background: linear-gradient(135deg,#16a34a,#22c55e);
+}
+
+.toast-error{
+  background: linear-gradient(135deg,#dc2626,#ef4444);
+}
+
+@keyframes slideIn{
+  from{transform:translateX(120%); opacity:0;}
+  to{transform:translateX(0); opacity:1;}
+}
+
+@keyframes fadeOut{
+  to{opacity:0; transform:translateX(120%);}
+}
+</style>
 </head>
 <body class="dashboard">
 
@@ -78,6 +115,10 @@
       </div>
     </div>
   <?php endif; ?>
+
+  div id="toast-container">
+  <?= $this->Flash->render('toast') ?>
+</div>
 
   <?= $this->fetch('content') ?>
 

@@ -196,13 +196,16 @@ class UsersController extends AppController
 
     // Tipo de lista: "users" o "associates"
     $listType = $this->request->getQuery('type', 'users');
-    $insurancePlans = [];
-    $conditionsList = [];
-    $birthdayCount = 0;
-    $showBirthdays = $this->request->getQuery('birthdays');
+$insurancePlans = [];
+$conditionsList = [];
+$birthdayCount = 0;
+$showBirthdays = $this->request->getQuery('birthdays');
+
+
+$associateByUserId = [];
 
     // ============================
-    // 🔹 CASO: LISTA DE ASOCIADOS
+    //  LISTA DE ASOCIADOS
     // ============================
     if ($listType === 'associates') {
 
@@ -309,31 +312,56 @@ class UsersController extends AppController
             ->toArray();
     } 
     // ============================
-    // 🔹 CASO: LISTA DE USUARIOS
+    // LISTA DE USUARIOS
     // ============================
-    else {
-        $query = $this->Users->find()
-            ->contain(['Roles'])
-            ->order(['Users.created_at' => 'DESC']);
-
-        try {
-            $data = $this->paginate($query, ['limit' => 10]);
-        } catch (\Exception $e) {
-            $data = [];
-            $this->Flash->error('Error al cargar los usuarios: ' . $e->getMessage());
-        }
+else {
+    $query = $this->Users->find()
+        ->contain(['Roles'])
+        ->order(['Users.created_at' => 'DESC']);
+    try {
+        $data = $this->paginate($query, ['limit' => 10]);
+    } catch (\Exception $e) {
+        $data = [];
+        $this->Flash->error('Error al cargar los usuarios: ' . $e->getMessage());
     }
 
-    // Enviar variables a la vista
-    $this->set(compact(
-        'data',
-        'currentUser',
-        'listType',
-        'insurancePlans',
-        'conditionsList',
-        'showBirthdays',
-        'birthdayCount'
-    ));
+    $associateByUserId = [];
+
+    if (!empty($data)) {
+
+        $userRows = is_array($data) ? $data : $data->toArray();
+        $userIds  = [];
+
+        foreach ($userRows as $u) {
+            if (!empty($u->id)) {
+                $userIds[] = (int)$u->id;
+            }
+        }
+
+        if (!empty($userIds)) {
+            $associatesTable = $this->fetchTable('Associates.Associates');
+
+            $associates = $associatesTable->find()
+                ->where(['Associates.user_id IN' => $userIds])
+                ->all();
+
+            foreach ($associates as $a) {
+                $associateByUserId[(int)$a->user_id] = $a;
+            }
+        }
+    }
+}
+
+$this->set(compact(
+    'data',
+    'currentUser',
+    'listType',
+    'insurancePlans',
+    'conditionsList',
+    'showBirthdays',
+    'birthdayCount',
+    'associateByUserId'
+));
 }
 
     public function createDebt($associateId = null)
@@ -425,7 +453,7 @@ class UsersController extends AppController
 
     public function register()
     {
-        // Si ya está logueado, lo mando al dashboard
+        
         if ($this->Authentication->getIdentity()) {
             return $this->redirect(['plugin' => 'Users', 'controller' => 'Users', 'action' => 'dashboard']);
         }
@@ -522,29 +550,198 @@ class UsersController extends AppController
         return $this->redirect($this->referer(['action' => 'administratorDashboard']));
     }
 
-    public function editAssociatePlan($associateId = null)
-    {
-        $this->request->allowMethod(['post', 'put', 'patch']);
+   public function editAssociatePlan($associateId = null)
+{
+    $this->request->allowMethod(['post', 'put', 'patch']);
 
-        $associatesTable = $this->fetchTable('Associates.Associates');
-        try {
-            $associate = $associatesTable->get($associateId);
-        } catch (\Exception $e) {
-            $this->Flash->error('Asociado no encontrado.');
-            return $this->redirect(['action' => 'administratorDashboard', '?' => ['type' => 'associates']]);
-        }
+    $associatesTable = $this->fetchTable('Associates.Associates');
+    $usersTable = $this->fetchTable('Users.Users');
 
-        $data = $this->request->getData();
-
-        $associate = $associatesTable->patchEntity($associate, $data);
-
-        if ($associatesTable->save($associate)) {
-            $this->Flash->success('Datos del asociado actualizados.');
-        } else {
-            $errors = $associate->getErrors();
-            $this->Flash->error('Error al actualizar: ' . json_encode($errors));
-        }
-
+    try {
+        $associate = $associatesTable->get($associateId, [
+            'contain' => ['Users'],
+        ]);
+    } catch (\Exception $e) {
+        $this->Flash->error('Asociado no encontrado.');
         return $this->redirect(['action' => 'administratorDashboard', '?' => ['type' => 'associates']]);
     }
+
+    $data = (array)$this->request->getData();
+
+    // Normalizar email 
+    if (isset($data['email'])) {
+        $data['email'] = strtolower(trim((string)$data['email']));
+    }
+
+    $allowedAssociateFields = [
+        'first_name',
+        'last_name',
+        'phone',
+        'address',
+        'plan_id',
+        'id_card',
+        'email',
+    ];
+
+    $associate = $associatesTable->patchEntity(
+        $associate,
+        $data,
+        ['fields' => $allowedAssociateFields]
+    );
+
+    $conn = $associatesTable->getConnection();
+
+    try {
+        $conn->transactional(function () use ($associatesTable, $usersTable, $associate, $data) {
+
+            // Guardar asociado
+            if (!$associatesTable->save($associate)) {
+                $errors = $associate->getErrors();
+                throw new \Exception('Error al actualizar asociado: ' . json_encode($errors));
+            }
+
+            // sincronizar Users.email
+            if (!empty($data['email'])) {
+                if (!empty($associate->user)) {
+                    $associate->user->email = $data['email'];
+
+                    if (!$usersTable->save($associate->user)) {
+                        $errors = $associate->user->getErrors();
+                        throw new \Exception('Error al actualizar email del usuario: ' . json_encode($errors));
+                    }
+                } else {
+                    
+                    $user = $usersTable->get($associate->user_id);
+                    $user->email = $data['email'];
+
+                    if (!$usersTable->save($user)) {
+                        $errors = $user->getErrors();
+                        throw new \Exception('Error al actualizar email del usuario: ' . json_encode($errors));
+                    }
+                }
+            }
+        });
+
+        $this->Flash->success('Datos del asociado actualizados.');
+    } catch (\Exception $e) {
+        $this->Flash->error($e->getMessage());
+    }
+
+    return $this->redirect(['action' => 'administratorDashboard', '?' => ['type' => 'associates']]);
+}
+
+
+public function editUser($id = null)
+{
+    $this->request->allowMethod(['post', 'put', 'patch']);
+
+    
+    $identity = $this->Authentication->getIdentity();
+    if (!$identity) {
+        return $this->redirect(['action' => 'login']);
+    }
+
+    $currentUser = $this->Users->get($identity->getIdentifier());
+    if ((int)$currentUser->role_id !== 1) {
+        $this->Flash->error('No autorizado.');
+        return $this->redirect(['action' => 'dashboard']);
+    }
+
+    $usersTable = $this->fetchTable('Users.Users');
+    $associatesTable = $this->fetchTable('Associates.Associates');
+
+    try {
+        $user = $usersTable->get($id);
+    } catch (\Exception $e) {
+        $this->Flash->error('Usuario no encontrado.');
+        return $this->redirect(['action' => 'administratorDashboard', '?' => ['type' => 'users']]);
+    }
+
+    $data = (array)$this->request->getData();
+
+    
+    if (isset($data['email'])) {
+        $data['email'] = strtolower(trim((string)$data['email']));
+    }
+
+    
+    $allowedUserFields = ['full_name', 'username', 'email', 'status', 'password'];
+
+   
+    if (empty($data['password'])) {
+        unset($data['password']);
+    }
+
+    $user = $usersTable->patchEntity($user, $data, ['fields' => $allowedUserFields]);
+
+    $conn = $usersTable->getConnection();
+
+    try {
+        $conn->transactional(function () use ($usersTable, $associatesTable, $user, $data) {
+
+            if (!$usersTable->save($user)) {
+                $errors = $user->getErrors();
+                throw new \Exception('Error al actualizar usuario: ' . json_encode($errors));
+            }
+
+            
+            $isAssociate = ((int)($user->role_id ?? 0) === 4);
+            if (!$isAssociate) {
+                return;
+            }
+
+            $associate = $associatesTable->find()
+                ->where(['Associates.user_id' => $user->id])
+                ->first();
+
+            if (!$associate) {
+                
+                return;
+            }
+
+            
+            $associateData = [];
+
+            $map = [
+                'associate_id_card'      => 'id_card',
+                'associate_first_name'   => 'first_name',
+                'associate_last_name'    => 'last_name',
+                'associate_birth_date'   => 'birth_date',
+                'associate_phone'        => 'phone',
+                'associate_address'      => 'address',
+                'associate_plan_id'      => 'plan_id',
+            ];
+
+            foreach ($map as $formKey => $dbKey) {
+                if (array_key_exists($formKey, $data)) {
+                    $val = $data[$formKey];
+
+                    
+                    if ($val !== null && $val !== '') {
+                        $associateData[$dbKey] = $val;
+                    }
+                }
+            }
+
+            
+            $associateData['email'] = $user->email;
+
+            
+            $associate = $associatesTable->patchEntity($associate, $associateData, [
+                'fields' => array_keys($associateData),
+            ]);
+
+            if (!$associatesTable->save($associate)) {
+                $errors = $associate->getErrors();
+                throw new \Exception('Error al actualizar asociado: ' . json_encode($errors));
+            }
+        });
+
+        $this->Flash->success('Usuario actualizado correctamente.');
+    } catch (\Exception $e) {
+        $this->Flash->error($e->getMessage());
+    }
+
+    return $this->redirect(['action' => 'administratorDashboard', '?' => ['type' => 'users']]);
+}
 }
