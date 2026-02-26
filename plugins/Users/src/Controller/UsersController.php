@@ -550,7 +550,7 @@ $this->set(compact(
         return $this->redirect($this->referer(['action' => 'administratorDashboard']));
     }
 
-   public function editAssociatePlan($associateId = null)
+public function editAssociatePlan($associateId = null)
 {
     $this->request->allowMethod(['post', 'put', 'patch']);
 
@@ -610,7 +610,6 @@ $this->set(compact(
                         throw new \Exception('Error al actualizar email del usuario: ' . json_encode($errors));
                     }
                 } else {
-                    
                     $user = $usersTable->get($associate->user_id);
                     $user->email = $data['email'];
 
@@ -622,7 +621,7 @@ $this->set(compact(
             }
         });
 
-        $this->Flash->success('Datos del asociado actualizados.');
+        $this->Flash->success('Los datos se han actualizado correctamente.');
     } catch (\Exception $e) {
         $this->Flash->error($e->getMessage());
     }
@@ -635,7 +634,6 @@ public function editUser($id = null)
 {
     $this->request->allowMethod(['post', 'put', 'patch']);
 
-    
     $identity = $this->Authentication->getIdentity();
     if (!$identity) {
         return $this->redirect(['action' => 'login']);
@@ -659,15 +657,12 @@ public function editUser($id = null)
 
     $data = (array)$this->request->getData();
 
-    
     if (isset($data['email'])) {
         $data['email'] = strtolower(trim((string)$data['email']));
     }
 
-    
     $allowedUserFields = ['full_name', 'username', 'email', 'status', 'password'];
 
-   
     if (empty($data['password'])) {
         unset($data['password']);
     }
@@ -684,7 +679,6 @@ public function editUser($id = null)
                 throw new \Exception('Error al actualizar usuario: ' . json_encode($errors));
             }
 
-            
             $isAssociate = ((int)($user->role_id ?? 0) === 4);
             if (!$isAssociate) {
                 return;
@@ -695,11 +689,9 @@ public function editUser($id = null)
                 ->first();
 
             if (!$associate) {
-                
                 return;
             }
 
-            
             $associateData = [];
 
             $map = [
@@ -715,18 +707,14 @@ public function editUser($id = null)
             foreach ($map as $formKey => $dbKey) {
                 if (array_key_exists($formKey, $data)) {
                     $val = $data[$formKey];
-
-                    
                     if ($val !== null && $val !== '') {
                         $associateData[$dbKey] = $val;
                     }
                 }
             }
 
-            
             $associateData['email'] = $user->email;
 
-            
             $associate = $associatesTable->patchEntity($associate, $associateData, [
                 'fields' => array_keys($associateData),
             ]);
@@ -737,7 +725,7 @@ public function editUser($id = null)
             }
         });
 
-        $this->Flash->success('Usuario actualizado correctamente.');
+        $this->Flash->success('Los datos se han actualizado correctamente.');
     } catch (\Exception $e) {
         $this->Flash->error($e->getMessage());
     }
