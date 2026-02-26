@@ -196,16 +196,14 @@ class UsersController extends AppController
 
     // Tipo de lista: "users" o "associates"
     $listType = $this->request->getQuery('type', 'users');
-$insurancePlans = [];
-$conditionsList = [];
-$birthdayCount = 0;
-$showBirthdays = $this->request->getQuery('birthdays');
-
-
-$associateByUserId = [];
+    $insurancePlans = [];
+    $conditionsList = [];
+    $birthdayCount = 0;
+    $showBirthdays = $this->request->getQuery('birthdays');
+    $todayBirthdaysList = []; // ✅ Evita warning cuando no se marca el checkbox
 
     // ============================
-    //  LISTA DE ASOCIADOS
+    // 🔹 CASO: LISTA DE ASOCIADOS
     // ============================
     if ($listType === 'associates') {
 
@@ -263,20 +261,26 @@ $associateByUserId = [];
             ]);
         }
 
-        // 🎉 Checkbox: mostrar cumpleañeros por mes listados
-        // Si el usuario marca el checkbox, se filtra automáticamente por el mes actual
-        if ($showBirthdays) {
-            $currentMonth = date('m');
+        // 🎉 ✅ Filtro: Cumpleañeros del día actual + Mini tabla con nombres
+        if ($this->request->getQuery('today_birthdays')) {
+            $todayMonth = date('m');
+            $todayDay   = date('d');
+
+            // 🔍 Aplicar filtro principal
             $query->where([
-                'MONTH(Associates.birth_date)' => $currentMonth
+                'DAY(Associates.birth_date)' => $todayDay,
+                'MONTH(Associates.birth_date)' => $todayMonth
             ]);
-            // Si no se seleccionó un mes manualmente, lo establecemos al mes actual
-            if (empty($birthMonth)) {
-                $birthMonth = $currentMonth;
-                $this->request = $this->request->withQueryParams(
-                    array_merge($this->request->getQueryParams(), ['birth_month' => $currentMonth])
-                );
-            }
+
+            // 📋 Obtener lista (para mostrar mini tabla en la vista)
+            $todayBirthdaysList = $associatesTable->find()
+                ->select(['id', 'first_name', 'last_name', 'birth_date'])
+                ->where([
+                    'DAY(Associates.birth_date)' => $todayDay,
+                    'MONTH(Associates.birth_date)' => $todayMonth
+                ])
+                ->order(['Associates.first_name' => 'ASC'])
+                ->toArray();
         }
 
         // 📊 Contador de cumpleañeros del mes actual
@@ -312,57 +316,35 @@ $associateByUserId = [];
             ->toArray();
     } 
     // ============================
-    // LISTA DE USUARIOS
+    // 🔹 CASO: LISTA DE USUARIOS
     // ============================
-else {
-    $query = $this->Users->find()
-        ->contain(['Roles'])
-        ->order(['Users.created_at' => 'DESC']);
-    try {
-        $data = $this->paginate($query, ['limit' => 10]);
-    } catch (\Exception $e) {
-        $data = [];
-        $this->Flash->error('Error al cargar los usuarios: ' . $e->getMessage());
-    }
+    else {
+        $query = $this->Users->find()
+            ->contain(['Roles'])
+            ->order(['Users.created_at' => 'DESC']);
 
-    $associateByUserId = [];
-
-    if (!empty($data)) {
-
-        $userRows = is_array($data) ? $data : $data->toArray();
-        $userIds  = [];
-
-        foreach ($userRows as $u) {
-            if (!empty($u->id)) {
-                $userIds[] = (int)$u->id;
-            }
-        }
-
-        if (!empty($userIds)) {
-            $associatesTable = $this->fetchTable('Associates.Associates');
-
-            $associates = $associatesTable->find()
-                ->where(['Associates.user_id IN' => $userIds])
-                ->all();
-
-            foreach ($associates as $a) {
-                $associateByUserId[(int)$a->user_id] = $a;
-            }
+        try {
+            $data = $this->paginate($query, ['limit' => 10]);
+        } catch (\Exception $e) {
+            $data = [];
+            $this->Flash->error('Error al cargar los usuarios: ' . $e->getMessage());
         }
     }
+
+    // Enviar variables a la vista
+    $this->set(compact(
+        'data',
+        'currentUser',
+        'listType',
+        'insurancePlans',
+        'conditionsList',
+        'showBirthdays',
+        'birthdayCount',
+        'todayBirthdaysList' // ✅ Nueva variable lista para la mini tabla
+    ));
 }
 
-$this->set(compact(
-    'data',
-    'currentUser',
-    'listType',
-    'insurancePlans',
-    'conditionsList',
-    'showBirthdays',
-    'birthdayCount',
-    'associateByUserId'
-));
-}
+
 
     public function createDebt($associateId = null)
     {

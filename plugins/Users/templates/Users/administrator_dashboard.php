@@ -77,284 +77,137 @@ $adminNombre = $currentUser->full_name ?? $currentUser->username ?? 'Administrad
 
       <hr class="divider">
 
-      <!-- ============================================================
-           SECCIÓN: ASOCIADOS (FILTROS + CHECKLIST + TABLA GENERAL)
-      ============================================================= -->
-      <?php if ($listType === 'associates'): ?>
+      <!-- ===================== -->
+<!-- 🔹 FILTROS ASOCIADOS -->
+<!-- ===================== -->
+<?php if ($listType === 'associates'): ?>
 
-        <h3 style="margin-bottom:12px;font-weight:600;color:#222;">🎯 Panel de Asociados</h3>
+  <h3 style="margin-bottom:12px;font-weight:600;color:#222;">🎯 Panel de Asociados</h3>
 
-        <?php
-          $selectedMonth = $this->request->getQuery('birth_month');
-          $showAllMonths = $this->request->getQuery('all_birthdays');
-          $monthNames = [
-            '01' => 'Enero', '02' => 'Febrero', '03' => 'Marzo', '04' => 'Abril',
-            '05' => 'Mayo', '06' => 'Junio', '07' => 'Julio', '08' => 'Agosto',
-            '09' => 'Septiembre', '10' => 'Octubre', '11' => 'Noviembre', '12' => 'Diciembre'
-          ];
-        ?>
+  <?php
+    $selectedMonth = $this->request->getQuery('birth_month');
+    $showAllMonths = $this->request->getQuery('all_birthdays');
+    $monthNames = [
+      '01' => 'Enero', '02' => 'Febrero', '03' => 'Marzo', '04' => 'Abril',
+      '05' => 'Mayo', '06' => 'Junio', '07' => 'Julio', '08' => 'Agosto',
+      '09' => 'Septiembre', '10' => 'Octubre', '11' => 'Noviembre', '12' => 'Diciembre'
+    ];
+    $currentMonth = date('m');
+  ?>
 
-        <!-- Mensaje superior (según filtros) -->
-        <?php if (!empty($selectedMonth)): ?>
-          <div style="background:#e7f3ff;border-left:4px solid #1e90ff;padding:10px 15px;border-radius:6px;margin-bottom:15px;">
-            🎉 Mostrando los cumpleañeros del mes de <strong><?= $monthNames[$selectedMonth] ?></strong>.
-          </div>
-        <?php elseif ($showAllMonths): ?>
-          <div style="background:#fff4e1;border-left:4px solid #f2b94b;padding:10px 15px;border-radius:6px;margin-bottom:15px;">
-            🎂 Mostrando los cumpleañeros de todos los meses del año.
-          </div>
-        <?php else: ?>
-          <div style="background:#f9f9f9;border-left:4px solid #aaa;padding:10px 15px;border-radius:6px;margin-bottom:15px;">
-            🎂 Este mes hay <strong><?= $birthdayCount ?></strong> cumpleañero<?= $birthdayCount == 1 ? '' : 's' ?> registrados.
-          </div>
-        <?php endif; ?>
+ <!-- 💬 Mensaje informativo -->
+<?php
+  $infoMessage = '';
+  $infoStyle = '';
 
-        <!-- Filtro búsqueda -->
-        <div class="search-container" style="margin-bottom:25px;background:#fafafa;border:1px solid #ddd;border-radius:10px;padding:20px;">
-          <?= $this->Form->create(null, ['type' => 'get', 'id' => 'filterForm']) ?>
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:15px;align-items:end;">
+  if (!empty($selectedMonth)) {
+      $infoMessage = "🎉 Cumpleañeros del mes de <strong>{$monthNames[$selectedMonth]}</strong>.";
+      $infoStyle = "background:#e7f3ff;border-left:4px solid #1e90ff;";
+  } else {
+      $infoMessage = "🎂 Este mes hay <strong>{$birthdayCount}</strong> cumpleañero" . ($birthdayCount == 1 ? '' : 's') . " registrados.";
+      $infoStyle = "background:#f9f9f9;border-left:4px solid #aaa;";
+  }
+?>
+<div style="<?= $infoStyle ?>padding:10px 15px;border-radius:6px;margin-bottom:15px;">
+  <?= $infoMessage ?>
+</div>
 
-              <div>
-                <label style="font-weight:600;">🔍 Buscar</label>
-                <?= $this->Form->control('search', [
-                  'label' => false,
-                  'placeholder' => 'Nombre, cédula o teléfono...',
-                  'value' => $this->request->getQuery('search'),
-                  'class' => 'form-input',
-                  'style' => 'border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;'
-                ]) ?>
-              </div>
-
-              <div>
-                <label style="font-weight:600;">Plan</label>
-                <?= $this->Form->control('plan', [
-                  'label' => false,
-                  'type' => 'select',
-                  'empty' => 'Todos',
-                  'options' => $insurancePlans,
-                  'value' => $this->request->getQuery('plan'),
-                  'class' => 'form-select',
-                  'style' => 'border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;'
-                ]) ?>
-              </div>
-
-              <div>
-                <label style="font-weight:600;">Estado</label>
-                <?= $this->Form->control('status', [
-                  'label' => false,
-                  'type' => 'select',
-                  'empty' => 'Todos',
-                  'options' => ['active' => 'Activo','inactive' => 'Inactivo'],
-                  'value' => $this->request->getQuery('status'),
-                  'class' => 'form-select',
-                  'style' => 'border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;'
-                ]) ?>
-              </div>
-
-              <div>
-                <label style="font-weight:600;">Condición</label>
-                <?= $this->Form->control('condition', [
-                  'label' => false,
-                  'type' => 'select',
-                  'empty' => 'Todas',
-                  'options' => $conditionsList,
-                  'value' => $this->request->getQuery('condition'),
-                  'class' => 'form-select',
-                  'style' => 'border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;'
-                ]) ?>
-              </div>
-
-              <div>
-                <label style="font-weight:600;">Mes de cumpleaños</label>
-                <?= $this->Form->control('birth_month', [
-                  'label' => false,
-                  'type' => 'select',
-                  'empty' => 'Todos',
-                  'options' => $monthNames,
-                  'value' => $this->request->getQuery('birth_month'),
-                  'class' => 'form-select',
-                  'style' => 'border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;'
-                ]) ?>
-              </div>
-
-              <div style="display:flex;gap:5px;">
-                <?= $this->Form->button('Buscar', [
-                  'class' => 'btn-save',
-                  'style' => 'background:#1e90ff;color:#fff;border:none;border-radius:6px;padding:7px 12px;cursor:pointer;'
-                ]) ?>
-
-                <?= $this->Html->link('Limpiar', ['?' => ['type' => 'associates']], [
-                  'class' => 'btn-cancel',
-                  'style' => 'background:#ddd;color:#333;border:none;border-radius:6px;padding:7px 12px;text-decoration:none;display:inline-block;'
-                ]) ?>
-              </div>
-            </div>
-
-            <!-- Mostrar todos -->
-            <div style="margin-top:20px;display:flex;align-items:center;gap:10px;padding:10px 15px;background:#fff7e6;border:1px solid #ffd89c;border-radius:8px;">
-              <?= $this->Form->checkbox('all_birthdays', [
-                'hiddenField' => false,
-                'checked' => (bool)$this->request->getQuery('all_birthdays'),
-                'label' => false,
-                'id' => 'showAllBirthdaysCheckbox'
-              ]) ?>
-              <label for="showAllBirthdaysCheckbox" style="cursor:pointer;font-weight:600;color:#b36b00;">
-                🎂 Mostrar cumpleaños de todos los asociados de todo el año
-              </label>
-            </div>
-
-          <?= $this->Form->end() ?>
+  <!-- ===================== -->
+  <!-- 🔹 FILTRO DE BÚSQUEDA -->
+  <!-- ===================== -->
+  <div class="search-container" style="margin-bottom:25px;background:#fafafa;border:1px solid #ddd;border-radius:10px;padding:20px;">
+    <?= $this->Form->create(null, ['type' => 'get', 'id' => 'filterForm']) ?>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:15px;align-items:end;">
+        <!-- Campos -->
+        <div>
+          <label style="font-weight:600;">🔍 Buscar</label>
+          <?= $this->Form->control('search', ['label' => false,'placeholder' => 'Nombre, cédula o teléfono...','value' => $this->request->getQuery('search'),'class' => 'form-input','style' => 'border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;']) ?>
         </div>
 
-        <!-- Checklist de meses -->
-        <h3 style="color:#1e90ff;margin-top:30px;">📅 Cumpleaños por mes</h3>
-        <hr style="border:1px dashed #1e90ff;margin-bottom:15px;">
-
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:25px;">
-          <?php foreach ($monthNames as $mKey => $mName): ?>
-            <?php $isChecked = (!empty($selectedMonth) && $selectedMonth === $mKey); ?>
-            <label style="display:flex;align-items:center;gap:6px;background:<?= $isChecked ? '#e7f3ff' : '#f9f9f9' ?>;border:1px solid #ccc;border-radius:8px;padding:6px 10px;cursor:pointer;">
-              <input type="checkbox" class="monthCheckbox" data-month="<?= $mKey ?>" <?= $isChecked ? 'checked' : '' ?>>
-              <span style="font-weight:600;color:#333;"><?= $mName ?></span>
-            </label>
-          <?php endforeach; ?>
+        <div>
+          <label style="font-weight:600;">Plan</label>
+          <?= $this->Form->control('plan', ['label' => false,'type' => 'select','empty' => 'Todos','options' => $insurancePlans,'value' => $this->request->getQuery('plan'),'class' => 'form-select','style' => 'border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;']) ?>
         </div>
 
-        <!-- Individual por mes -->
-        <?php if (!empty($selectedMonth)): ?>
-          <h3 style="color:#1e90ff;margin-top:30px;">🎉 Cumpleañeros de <?= $monthNames[$selectedMonth] ?></h3>
-          <hr style="border:1px dashed #1e90ff;margin-bottom:15px;">
-
-          <div style="background:#f0f8ff;border-radius:12px;padding:15px 20px;margin-bottom:30px;">
-            <ul style="list-style:none;padding:0;">
-              <?php
-                $found = false;
-                foreach ($data as $associate):
-                  if (!empty($associate->birth_date) && date('m', strtotime($associate->birth_date)) == $selectedMonth):
-                    $found = true;
-              ?>
-                <li style="padding:6px 0;border-bottom:1px dashed #1e90ff;">
-                  <strong><?= h($associate->first_name . ' ' . $associate->last_name) ?></strong>
-                  — <span style="color:#555;"><?= date('d/m', strtotime($associate->birth_date)) ?></span>
-                </li>
-              <?php
-                  endif;
-                endforeach;
-                if (!$found):
-              ?>
-                <li style="color:#777;">No hay cumpleañeros registrados para este mes.</li>
-              <?php endif; ?>
-            </ul>
-          </div>
-        <?php endif; ?>
-
-        <!-- Agrupado por todos los meses -->
-        <?php if ($showAllMonths): ?>
-          <h3 style="color:#b36b00;margin-top:30px;">🎂 Cumpleañeros agrupados por mes</h3>
-          <hr style="border:1px dashed #b36b00;margin-bottom:20px;">
-
-          <?php foreach ($monthNames as $mKey => $mName): ?>
-            <div style="background:linear-gradient(90deg,#fff4e1,#ffeec2);border-radius:12px;padding:15px 20px;margin-bottom:25px;box-shadow:0 2px 5px rgba(0,0,0,0.08);">
-              <h4 style="margin:0 0 10px 0;color:#b36b00;font-weight:700;">🎉 <?= $mName ?></h4>
-              <ul style="list-style:none;padding-left:10px;margin:0;font-size:15px;">
-                <?php
-                  $found = false;
-                  foreach ($data as $associate):
-                    if (!empty($associate->birth_date) && date('m', strtotime($associate->birth_date)) == $mKey):
-                      $found = true;
-                ?>
-                  <li style="padding:6px 0;border-bottom:1px dashed #f2b94b;">
-                    <strong style="color:#333;"><?= h($associate->first_name . ' ' . $associate->last_name) ?></strong>
-                    — <span style="color:#555;"><?= date('d/m', strtotime($associate->birth_date)) ?></span>
-                  </li>
-                <?php
-                    endif;
-                  endforeach;
-                  if (!$found):
-                ?>
-                  <li style="color:#777;">No hay cumpleañeros registrados en <?= $mName ?>.</li>
-                <?php endif; ?>
-              </ul>
-            </div>
-          <?php endforeach; ?>
-        <?php endif; ?>
-
-        <!-- Tabla general -->
-        <div class="card" style="border-radius:10px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.06);margin-top:40px;">
-          <div class="card-header" style="background:#f1f1f1;padding:10px 15px;font-weight:600;">
-            📋 Lista General de Asociados
-          </div>
-          <div class="card-body" style="padding:0;">
-            <table class="table table-striped" style="width:100%;border-collapse:collapse;">
-              <thead style="background:#f1f1f1;">
-                <tr>
-                  <th style="padding:10px;">Nombre</th>
-                  <th>Cédula</th>
-                  <th>Teléfono</th>
-                  <th>Plan</th>
-                  <th>Fecha de Nacimiento</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php if (!empty($data) && $data->count() > 0): ?>
-                  <?php foreach ($data as $associate): ?>
-                    <tr>
-                      <td style="padding:8px 10px;"><?= h($associate->first_name . ' ' . $associate->last_name) ?></td>
-                      <td><?= h($associate->id_card ?? '-') ?></td>
-                      <td><?= h($associate->phone ?? '-') ?></td>
-                      <td><?= h($associate->insurance_plan->name ?? '-') ?></td>
-                      <td><?= $associate->birth_date ? $associate->birth_date->format('d/m/Y') : '-' ?></td>
-                      <td><?= ($associate->member_status ?? '') === 'active' ? 'Activo' : 'Inactivo' ?></td>
-                    </tr>
-                  <?php endforeach; ?>
-                <?php else: ?>
-                  <tr>
-                    <td colspan="6" class="text-center muted small" style="padding:15px;">No se encontraron asociados.</td>
-                  </tr>
-                <?php endif; ?>
-              </tbody>
-            </table>
-          </div>
+        <div>
+          <label style="font-weight:600;">Estado</label>
+          <?= $this->Form->control('status', ['label' => false,'type' => 'select','empty' => 'Todos','options' => ['active' => 'Activo','inactive' => 'Inactivo'],'value' => $this->request->getQuery('status'),'class' => 'form-select','style' => 'border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;']) ?>
         </div>
 
-        <!-- Script checklist -->
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-          const allCheckbox = document.getElementById('showAllBirthdaysCheckbox');
-          const monthCheckboxes = document.querySelectorAll('.monthCheckbox');
+        <div>
+          <label style="font-weight:600;">Condición</label>
+          <?= $this->Form->control('condition', ['label' => false,'type' => 'select','empty' => 'Todas','options' => $conditionsList,'value' => $this->request->getQuery('condition'),'class' => 'form-select','style' => 'border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;']) ?>
+        </div>
 
-          if (allCheckbox) {
-            allCheckbox.addEventListener('change', function() {
-              const url = new URL(window.location.href);
-              if (allCheckbox.checked) {
-                url.searchParams.set('all_birthdays', '1');
-                url.searchParams.delete('birth_month');
-              } else {
-                url.searchParams.delete('all_birthdays');
-              }
-              window.location.href = url.toString();
-            });
-          }
 
-          monthCheckboxes.forEach(cb => {
-            cb.addEventListener('change', function() {
-              const url = new URL(window.location.href);
-              url.searchParams.delete('all_birthdays');
-              url.searchParams.delete('birth_month');
+        <!-- Botones -->
+        <div style="display:flex;gap:5px;">
+          <?= $this->Form->button('Buscar', ['class' => 'btn-save','style' => 'background:#1e90ff;color:#fff;border:none;border-radius:6px;padding:7px 12px;cursor:pointer;']) ?>
+          <?= $this->Html->link('Limpiar', ['?' => ['type' => 'associates']], ['class' => 'btn-cancel','style' => 'background:#ddd;color:#333;border:none;border-radius:6px;padding:7px 12px;text-decoration:none;display:inline-block;']) ?>
+        </div>
+      </div>
 
-              if (cb.checked) {
-                url.searchParams.set('birth_month', cb.dataset.month);
-              }
-              window.location.href = url.toString();
-            });
-          });
-        });
-        </script>
+      <!-- 🎂 Mostrar cumpleañeros del día actual -->
+<div style="margin-top:20px;display:flex;align-items:center;gap:10px;padding:10px 15px;background:#eaf8e8;border:1px solid #8fd88f;border-radius:8px;">
+  <?= $this->Form->checkbox('today_birthdays', [
+    'hiddenField' => false,
+    'checked' => (bool)$this->request->getQuery('today_birthdays'),
+    'label' => false,
+    'id' => 'showTodayBirthdaysCheckbox'
+  ]) ?>
+  <label for="showTodayBirthdaysCheckbox" style="cursor:pointer;font-weight:600;color:#0b7a0b;">
+    🎉 Mostrar cumpleañeros de hoy
+  </label>
+</div>
+<?= $this->Form->end() ?>
+</div>
 
-        <hr class="divider" style="margin:40px 0;">
+<!-- ===================== -->
+<!-- 🔹 SCRIPT -->
+<!-- ===================== -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const todayCheckbox = document.getElementById('showTodayBirthdaysCheckbox');
+  todayCheckbox.addEventListener('change', function() {
+    const url = new URL(window.location.href);
+    if (todayCheckbox.checked) {
+      url.searchParams.set('today_birthdays', '1');
+    } else {
+      url.searchParams.delete('today_birthdays');
+    }
+    window.location.href = url.toString();
+  });
+});
+</script>
 
-      <?php endif; ?>
+<?php endif; ?>
+<?php if (!empty($todayBirthdaysList)): ?>
+  <div style="margin-top:25px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:15px;">
+    <h4 style="margin:0 0 10px 0;color:#166534;">🎉 Cumpleañeros de hoy (<?= date('d/m/Y') ?>)</h4>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#dcfce7;color:#166534;text-align:left;">
+          <th style="padding:6px;">#</th>
+          <th style="padding:6px;">Nombre</th>
+          <th style="padding:6px;">Fecha de Nacimiento</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php $n = 1; foreach ($todayBirthdaysList as $person): ?>
+          <tr style="border-bottom:1px solid #d1fae5;">
+            <td style="padding:6px;"><?= $n++ ?></td>
+            <td style="padding:6px;"><?= h($person->first_name . ' ' . $person->last_name) ?></td>
+            <td style="padding:6px;"><?= date('d/m/Y', strtotime($person->birth_date)) ?></td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+<?php elseif ($this->request->getQuery('today_birthdays')): ?>
+  <div style="margin-top:20px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:15px;color:#b91c1c;">
+    🚫 No hay cumpleañeros registrados para hoy (<?= date('d/m/Y') ?>).
+  </div>
+<?php endif; ?>
 
       <!-- ============================================================
            TABLA PRINCIPAL (USERS / ASSOCIATES) - 
