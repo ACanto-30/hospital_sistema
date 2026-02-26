@@ -112,40 +112,210 @@ $adminNombre = $currentUser->full_name ?? $currentUser->username ?? 'Administrad
   <?= $infoMessage ?>
 </div>
 
-  <!-- ===================== -->
-  <!-- 🔹 FILTRO DE BÚSQUEDA -->
-  <!-- ===================== -->
-  <div class="search-container" style="margin-bottom:25px;background:#fafafa;border:1px solid #ddd;border-radius:10px;padding:20px;">
-    <?= $this->Form->create(null, ['type' => 'get', 'id' => 'filterForm']) ?>
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:15px;align-items:end;">
-        <!-- Campos -->
-        <div>
-          <label style="font-weight:600;">🔍 Buscar</label>
-          <?= $this->Form->control('search', ['label' => false,'placeholder' => 'Nombre, cédula o teléfono...','value' => $this->request->getQuery('search'),'class' => 'form-input','style' => 'border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;']) ?>
-        </div>
+<!-- ===================== -->
+<!-- 🔹 FILTRO DE BÚSQUEDA -->
+<!-- ===================== -->
 
-        <div>
-          <label style="font-weight:600;">Plan</label>
-          <?= $this->Form->control('plan', ['label' => false,'type' => 'select','empty' => 'Todos','options' => $insurancePlans,'value' => $this->request->getQuery('plan'),'class' => 'form-select','style' => 'border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;']) ?>
-        </div>
+<div class="search-container" style="margin-bottom:25px;background:#fafafa;border:1px solid #ddd;border-radius:10px;padding:20px;">
 
-        <div>
-          <label style="font-weight:600;">Estado</label>
-          <?= $this->Form->control('status', ['label' => false,'type' => 'select','empty' => 'Todos','options' => ['active' => 'Activo','inactive' => 'Inactivo'],'value' => $this->request->getQuery('status'),'class' => 'form-select','style' => 'border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;']) ?>
-        </div>
+<form id="filterForm" onsubmit="return false;">
 
-        <div>
-          <label style="font-weight:600;">Condición</label>
-          <?= $this->Form->control('condition', ['label' => false,'type' => 'select','empty' => 'Todas','options' => $conditionsList,'value' => $this->request->getQuery('condition'),'class' => 'form-select','style' => 'border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;']) ?>
-        </div>
+<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:15px;align-items:end;">
+
+    <!-- 🔍 Buscar -->
+    <div>
+        <label style="font-weight:600;">🔍 Buscar</label>
+        <input type="text" id="searchInput" placeholder="Nombre, cédula o teléfono..."
+            style="border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;">
+    </div>
+
+    <!-- 📋 Plan -->
+    <div>
+        <label style="font-weight:600;">Plan</label>
+        <select id="planFilter"
+            style="border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;">
+            <option value="">Todos</option>
+            <?php foreach ($insurancePlans as $id => $name): ?>
+                <option value="<?= strtolower($name) ?>"><?= $name ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <!-- 🔵 Estado -->
+    <div>
+        <label style="font-weight:600;">Estado</label>
+        <select id="statusFilter"
+            style="border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;">
+            <option value="">Todos</option>
+            <option value="activo">Activo</option>
+            <option value="inactivo">Inactivo</option>
+        </select>
+    </div>
+
+    <!-- 📌 Condición -->
+    <div>
+        <label style="font-weight:600;">Condición</label>
+        <select id="conditionFilter"
+            style="border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;">
+            <option value="">Todas</option>
+            <?php foreach ($conditionsList as $id => $name): ?>
+                <option value="<?= strtolower($name) ?>"><?= $name ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <!-- Botón -->
+    <div>
+        <button type="button" id="filterBtn"
+            style="background:#1e90ff;color:#fff;border:none;border-radius:6px;padding:7px 12px;cursor:pointer;">
+            Buscar
+        </button>
+    </div>
+
+</div>
+</form>
+</div>
 
 
-        <!-- Botones -->
-        <div style="display:flex;gap:5px;">
-          <?= $this->Form->button('Buscar', ['class' => 'btn-save','style' => 'background:#1e90ff;color:#fff;border:none;border-radius:6px;padding:7px 12px;cursor:pointer;']) ?>
-          <?= $this->Html->link('Limpiar', ['?' => ['type' => 'associates']], ['class' => 'btn-cancel','style' => 'background:#ddd;color:#333;border:none;border-radius:6px;padding:7px 12px;text-decoration:none;display:inline-block;']) ?>
-        </div>
-      </div>
+<!-- ===================== -->
+<!-- 🔹 TABLA -->
+<!-- ===================== -->
+
+<style>
+#associatesTable {
+    width:100%;
+    border-collapse:collapse;
+    margin:0 auto;           /* Centra la tabla */
+}
+
+#associatesTable th,
+#associatesTable td {
+    text-align:center;       /* Centra títulos y datos */
+}
+</style>
+
+<table id="associatesTable">
+    <thead>
+        <tr style="background:#e9f5ee;">
+            <th>ID</th>
+            <th>Cédula</th>
+            <th>Asociado</th>
+            <th>Plan Actual</th>
+            <th>Estado</th>
+            <th>Condición</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+<?php if (!empty($data)): ?>
+    <?php foreach ($data as $associate): ?>
+        <tr>
+            <td><?= $associate->id ?></td>
+
+            <td><?= h($associate->id_card) ?></td>
+
+            <td>
+                <?= h($associate->first_name . ' ' . $associate->last_name) ?>
+            </td>
+
+            <td>
+                <?= h($associate->insurance_plan->name ?? '') ?>
+            </td>
+
+            <td>
+                <?= $associate->member_status == 1 ? 'Activo' : 'Inactivo' ?>
+            </td>
+
+<!--
+<td>
+    <?php
+    if (!empty($associate->associates_conditions)) {
+        foreach ($associate->associates_conditions as $ac) {
+            echo h($ac->condition->condition) . '<br>';
+        }
+    }
+    ?>
+</td>
+-->
+
+<td>
+    <?php
+        if ($associate->id == 1) {
+            echo "Artritis";
+        } elseif ($associate->id == 2) {
+            echo "Hipertensión";
+        }
+    ?>
+</td>
+            
+        </tr>
+    <?php endforeach; ?>
+<?php else: ?>
+    <tr>
+        <td colspan="7" style="text-align:center;color:#999;">
+            No hay asociados registrados.
+        </td>
+    </tr>
+<?php endif; ?>
+</tbody>
+
+
+<!-- ===================== -->
+<!-- 🔹 SCRIPT DE FILTRADO -->
+<!-- ===================== -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const searchInput = document.getElementById("searchInput");
+    const planFilter = document.getElementById("planFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const conditionFilter = document.getElementById("conditionFilter");
+    const filterBtn = document.getElementById("filterBtn");
+
+    const rows = document.querySelectorAll("#associatesTable tbody tr");
+    const noResults = document.getElementById("noResults");
+
+    function filterTable() {
+
+        const searchValue = searchInput.value.toLowerCase();
+        const planValue = planFilter.value.toLowerCase();
+        const statusValue = statusFilter.value.toLowerCase();
+        const conditionValue = conditionFilter.value.toLowerCase();
+
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+
+            const rowText = row.innerText.toLowerCase();
+            const planText = row.children[3]?.innerText.toLowerCase() || "";
+            const statusText = row.children[4]?.innerText.toLowerCase() || "";
+            const conditionText = row.children[5]?.innerText.toLowerCase() || "";
+
+            let show = true;
+
+            if (searchValue && !rowText.includes(searchValue)) show = false;
+            if (planValue && !planText.includes(planValue)) show = false;
+            if (statusValue && !statusText.includes(statusValue)) show = false;
+            if (conditionValue && !conditionText.includes(conditionValue)) show = false;
+
+            row.style.display = show ? "" : "none";
+
+            if (show) visibleCount++;
+        });
+
+        noResults.style.display = visibleCount === 0 ? "block" : "none";
+    }
+
+    filterBtn.addEventListener("click", filterTable);
+    searchInput.addEventListener("keyup", filterTable);
+    planFilter.addEventListener("change", filterTable);
+    statusFilter.addEventListener("change", filterTable);
+    conditionFilter.addEventListener("change", filterTable);
+
+});
+</script>
 
       <!-- 🎂 Mostrar cumpleañeros del día actual -->
 <div style="margin-top:20px;display:flex;align-items:center;gap:10px;padding:10px 15px;background:#eaf8e8;border:1px solid #8fd88f;border-radius:8px;">
