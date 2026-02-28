@@ -5,10 +5,10 @@ namespace Users\Test\Fixture;
 
 use Cake\TestSuite\Fixture\TestFixture;
 
-class RolesFixture extends TestFixture
+class UsersFixture extends TestFixture
 {
-    // Importa la estructura de la tabla real 'roles'
-    public $import = ['table' => 'roles'];
+    // Importa la estructura de la tabla real 'users'
+    public $import = ['table' => 'users'];
 
     // Registros de ejemplo para los tests
     public function init(): void
@@ -16,13 +16,19 @@ class RolesFixture extends TestFixture
         $this->records = [
             [
                 'id' => 1,
-                'name' => 'Administrator',
+                'username' => 'admin',
+                'email' => 'admin@example.com',
+                'password' => '$2y$10$examplehash', // hash de contraseña de prueba
+                'role_id' => 1,
                 'created' => '2026-01-01 00:00:00',
                 'modified' => '2026-01-01 00:00:00',
             ],
             [
                 'id' => 2,
-                'name' => 'User',
+                'username' => 'jose',
+                'email' => 'jose@example.com',
+                'password' => '$2y$10$examplehash2',
+                'role_id' => 2,
                 'created' => '2026-01-01 00:00:00',
                 'modified' => '2026-01-01 00:00:00',
             ],
