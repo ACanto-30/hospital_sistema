@@ -58,55 +58,53 @@ class UsersTable extends Table
     }
 
     public function validationDefault(Validator $validator): Validator
-    {
-        $validator
-            ->integer('id')
-            ->allowEmptyString('id', null, 'create');
+{
+    $validator
+        ->integer('id')
+        ->allowEmptyString('id', null, 'create');
 
-        $validator
-            ->integer('role_id')
-            ->requirePresence('role_id', 'create')
-            ->notEmptyString('role_id');
+    $validator
+        ->integer('role_id')
+        ->requirePresence('role_id', 'create', 'Debe seleccionar un rol')
+        ->notEmptyString('role_id', 'Debe seleccionar un rol');
 
-        $validator
-            ->scalar('full_name') // nombre_completo -> full_name
-            ->maxLength('full_name', 100)
-            ->requirePresence('full_name', 'create')
-            ->notEmptyString('full_name');
+    $validator
+        ->scalar('full_name')
+        ->maxLength('full_name', 100, 'El nombre completo no puede exceder 100 caracteres')
+        ->requirePresence('full_name', 'create', 'El nombre completo es obligatorio')
+        ->notEmptyString('full_name', 'El nombre completo no puede estar vacío');
 
-        $validator
-            ->scalar('username') // nombre_usuario -> username
-            ->maxLength('username', 50)
-            ->requirePresence('username', 'create')
-            ->notEmptyString('username');
+    $validator
+        ->scalar('username')
+        ->maxLength('username', 50, 'El nombre de usuario no puede exceder 50 caracteres')
+        ->requirePresence('username', 'create', 'El nombre de usuario es obligatorio')
+        ->notEmptyString('username', 'El nombre de usuario no puede estar vacío');
 
-        $validator
-            ->email('email') // correo -> email
-            ->maxLength('email', 100)
-            ->requirePresence('email', 'create')
-            ->notEmptyString('email');
+    $validator
+        ->email('email', false, 'Ingrese un correo electrónico válido')
+        ->maxLength('email', 100, 'El correo electrónico no puede exceder 100 caracteres')
+        ->requirePresence('email', 'create', 'El correo electrónico es obligatorio')
+        ->notEmptyString('email', 'El correo electrónico no puede estar vacío');
 
-        // Validamos 'password' que viene del Form
-        $validator
-            ->scalar('password')
-            ->maxLength('password', 255)
-            ->requirePresence('password', 'create')
-            ->notEmptyString('password')
-            ->minLength('password', 6);
+    $validator
+        ->scalar('password')
+        ->maxLength('password', 255)
+        ->requirePresence('password', 'create', 'La contraseña es obligatoria')
+        ->notEmptyString('password', 'La contraseña no puede estar vacía')
+        ->minLength('password', 6, 'La contraseña debe tener al menos 6 caracteres');
 
-        $validator
-            ->scalar('status') // estado_usuario -> status
-            ->maxLength('status', 20)
-            ->requirePresence('status', 'create')
-            ->notEmptyString('status');
+    $validator
+        ->scalar('status')
+        ->maxLength('status', 20, 'El estado no puede exceder 20 caracteres')
+        ->requirePresence('status', 'create', 'El estado es obligatorio')
+        ->notEmptyString('status', 'El estado no puede estar vacío');
 
-        $validator
-            ->dateTime('created_at') // fecha_creacion -> created_at
-            ->allowEmptyDateTime('created_at');
+    $validator
+        ->dateTime('created_at')
+        ->allowEmptyDateTime('created_at');
 
-        return $validator;
-    }
-
+    return $validator;
+}
     public function buildRules(RulesChecker $rules): RulesChecker
     {
         $rules->add($rules->isUnique(['email']), ['errorField' => 'email']);
