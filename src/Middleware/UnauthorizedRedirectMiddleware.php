@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
-use Cake\Http\Response;
 use Cake\Http\Exception\ForbiddenException;
 use Authorization\Exception\ForbiddenException as AuthForbiddenException;
 use Psr\Http\Message\ResponseInterface;
@@ -21,12 +20,15 @@ class UnauthorizedRedirectMiddleware implements MiddlewareInterface
 
             $path = $request->getUri()->getPath();
 
+        
+            if ($path === '/' || str_starts_with($path, '/pages')) {
+                throw $e;
+            }
 
-
-            return (new Response())
+            
+            return (new \Cake\Http\Response())
                 ->withHeader('Location', '/')
                 ->withStatus(302);
         }
     }
 }
-

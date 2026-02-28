@@ -62,47 +62,33 @@ class Application extends BaseApplication implements
         }
     }
 
-    public function middleware(MiddlewareQueue $middlewareQueue): MiddlewareQueue
-    {
+ public function middleware(MiddlewareQueue $middlewareQueue): MiddlewareQueue
+{
+    $middlewareQueue
+        ->add(new ErrorHandlerMiddleware(Configure::read('Error'), $this))
+        ->add(new AssetMiddleware([
+            'cacheTime' => Configure::read('Asset.cacheTime'),
+        ]))
+        ->add(new RoutingMiddleware($this))
+     
+        ->add(new AuthenticationMiddleware($this));
+
+    if (PHP_SAPI !== 'cli') {
         $middlewareQueue
-            ->add(new ErrorHandlerMiddleware(Configure::read('Error'), $this))
-            ->add(new AssetMiddleware([
-                'cacheTime' => Configure::read('Asset.cacheTime'),
-            ]))
-            ->add(new RoutingMiddleware($this))
-
-
-            ->add(new AuthenticationMiddleware($this))
-
-
-
-
-            /**
-             * RoleAccessMiddleware (bypass temporal)
-             */
             ->add(new RoleAccessMiddleware())
-
-
             ->add(new \App\Middleware\UnauthorizedRedirectMiddleware())
-
-            /**
-             * AuthorizationMiddleware (bypass temporal)
-             */
             ->add(new AuthorizationMiddleware($this))
-
-            /**
-             * RequestAuthorizationMiddleware (bypass temporal)
-             */
-            ->add(new RequestAuthorizationMiddleware())
-
-
-            ->add(new BodyParserMiddleware())
-            ->add(new CsrfProtectionMiddleware([
-                'httponly' => true,
-            ]));
-
-        return $middlewareQueue;
+            ->add(new RequestAuthorizationMiddleware());
     }
+
+    $middlewareQueue
+        ->add(new BodyParserMiddleware())
+        ->add(new CsrfProtectionMiddleware([
+            'httponly' => true,
+        ]));
+
+    return $middlewareQueue;
+}
 
     public function services(ContainerInterface $container): void
     {
@@ -113,50 +99,52 @@ class Application extends BaseApplication implements
     }
 
     public function getAuthenticationService(
-        ServerRequestInterface $request
-    ): AuthenticationServiceInterface {
-        $service = new AuthenticationService();
+    ServerRequestInterface $request
+): AuthenticationServiceInterface {
+    $service = new AuthenticationService();
 
-        $fields = [
-            'username' => 'email',
-            'password' => 'password',
-        ];
+    $fields = [
+        'username' => 'email',
+        'password' => 'password',
+    ];
 
-        $service->setConfig([
-            'unauthenticatedRedirect' => Router::url([
-                'plugin' => 'Users',
-                'controller' => 'Users',
-                'action' => 'login',
-            ]),
-            'queryParam' => 'redirect',
-        ]);
+   
+    $service->setConfig([
+        'unauthenticatedRedirect' => Router::url([
+            'plugin' => 'Users',
+            'controller' => 'Users',
+            'action' => 'login',
+        ]),
+        'queryParam' => 'redirect',
+    ]);
 
-        $service->loadAuthenticator('Authentication.Session');
+    $service->loadAuthenticator('Authentication.Session');
 
-        $service->loadAuthenticator('Authentication.Form', [
-            'fields' => $fields,
-            'loginUrl' => ['/login', '/'],
-        ]);
+    $service->loadAuthenticator('Authentication.Form', [
+        'fields' => $fields,
+        'loginUrl' => ['/login', '/'],
+    ]);
 
-        $service->loadAuthenticator('Authentication.Jwt', [
-            'secretKey' => Configure::read('JWT.key'),
-            'algorithm' => 'HS256',
-            'header' => 'Authorization',
-            'tokenPrefix' => 'Bearer',
-            'returnPayload' => true,
-        ]);
+    $service->loadAuthenticator('Authentication.Jwt', [
+        'secretKey' => Configure::read('JWT.key'),
+        'algorithm' => 'HS256',
+        'header' => 'Authorization',
+        'tokenPrefix' => 'Bearer',
+        'returnPayload' => true,
+    ]);
 
-        $service->loadIdentifier('Authentication.Password', [
-            'fields' => $fields,
-            'resolver' => [
-                'className' => 'Authentication.Orm',
-                'userModel' => 'Users.Users',
-                'finder' => 'auth',
-            ],
-        ]);
+    
+    $service->loadIdentifier('Authentication.Password', [
+        'fields' => $fields,
+        'resolver' => [
+            'className' => 'Authentication.Orm',
+            'userModel' => 'Users.Users',
+            'finder' => 'auth',
+        ],
+    ]);
 
-        return $service;
-    }
+    return $service;
+}
 
     public function getAuthorizationService(
         ServerRequestInterface $request

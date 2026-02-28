@@ -16,9 +16,14 @@ class RequestPolicy
         $path = $request->getUri()->getPath();
 
         // 1. Rutas públicas base
-        if ($path === '/' || ($plugin === 'Users' && $controller === 'Users' && in_array($action, ['login', 'register', 'logout'], true))) {
-            return true;
-        }
+        // 1. Rutas públicas base
+if (
+    $path === '/' ||
+    str_starts_with($path, '/pages') ||
+    ($plugin === 'Users' && $controller === 'Users' && in_array($action, ['login', 'register', 'logout'], true))
+) {
+    return true;
+}
 
         // Si no hay identidad después de las rutas públicas, denegar
         if (!$identity) {
@@ -26,12 +31,10 @@ class RequestPolicy
         }
 
         // 2. LÓGICA DE USUARIOS AUTENTICADOS
-        // Obtenemos el role_name de la identidad
         $user = $identity->getOriginalData();
         $roleName = $identity->role_name ?? ($user->role_name ?? ($user->role->name ?? null));
 
         // Dashboard genérico (Pages::dashboard): permitir a cualquier autenticado.
-        // Evita loop de redirección cuando RoleAccessMiddleware no redirige (ej. rol desconocido).
         if ($controller === 'Pages' && $action === 'dashboard') {
             return true;
         }
@@ -56,12 +59,12 @@ class RequestPolicy
             'Users' => ['Administrador', 'Cajero', 'Asociado', 'Medico', 'Médico']
         ];
 
-        if ($plugin && isset($zoneAccess[$plugin]) && in_array($roleName, $zoneAccess[$plugin])) {
+        if ($plugin && isset($zoneAccess[$plugin]) && in_array($roleName, $zoneAccess[$plugin], true)) {
             return true;
         }
 
-        // Caso especial: Si el plugin es null pero la ruta empieza con /payments (a veces pasa por routing manual)
-        if (!$plugin && strpos($path, '/payments') === 0 && in_array($roleName, ['Administrador', 'Cajero'])) {
+      
+        if (!$plugin && strpos($path, '/payments') === 0 && in_array($roleName, ['Administrador', 'Cajero'], true)) {
             return true;
         }
 

@@ -5,12 +5,16 @@
          stopOnFailure="false"
          bootstrap="tests/bootstrap.php"
          cacheDirectory=".phpunit.cache"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd">
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd">
 
   <php>
     <ini name="memory_limit" value="-1"/>
     <ini name="apc.enable_cli" value="1"/>
   </php>
+
+  <extensions>
+    <bootstrap class="Cake\TestSuite\Fixture\Extension\PHPUnitExtension"/>
+  </extensions>
 
   <testsuites>
     <testsuite name="app">
@@ -20,11 +24,11 @@
     <testsuite name="Payments">
       <directory>plugins/Payments/tests/TestCase/</directory>
     </testsuite>
-  </testsuites>
 
-  <extensions>
-    <bootstrap class="Cake\TestSuite\Fixture\Extension\PHPUnitExtension"/>
-  </extensions>
+    <testsuite name="Associates">
+      <directory>plugins/Associates/tests/TestCase/</directory>
+    </testsuite>
+  </testsuites>
 
   <source>
     <include>
