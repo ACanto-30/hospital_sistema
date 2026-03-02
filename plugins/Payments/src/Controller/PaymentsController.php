@@ -194,13 +194,13 @@ class PaymentsController extends AppController
                             try {
                                 $file->moveTo($targetPath);
 
-                               
+
                                 $detailData = [
                                     'payment_id' => $paymentId,
                                     'payment_method_id' => $data['payment_method_id'],
                                     'amount' => $amountToPay,
                                     'payment_date' => date('Y-m-d H:i:s'),
-                                    'payment_status_id' => 1, 
+                                    'payment_status_id' => 1,
                                     'proof_image' => 'resources/receipts/' . $safeName,
                                     'processed_by_user_id' => null
                                 ];
@@ -242,18 +242,18 @@ class PaymentsController extends AppController
         $paymentDetailsTable = $this->fetchTable('Payments.PaymentDetails');
 
         // Resumen Estadístico (Dashboard Header)
-        $today = date('Y-m-d');
+        $currentYear = date('Y');
 
-        // 1. Total Cobrado Hoy (Solo Detalle Aprobados)
+        // 1. Total Cobrado este Año (Solo Detalle Aprobados)
         $querySum = $paymentDetailsTable->find();
         $sumResult = $querySum->select(['total' => $querySum->func()->sum('amount')])
-            ->where(['DATE(payment_date)' => $today, 'payment_status_id' => 2]) // 2 = Aprobado
+            ->where(['YEAR(payment_date)' => $currentYear, 'payment_status_id' => 2]) // 2 = Aprobado
             ->first();
 
-        // 2. Pagos (Detalles) Procesados Hoy (Aprobados o Rechazados)
-        $procesadosHoy = $paymentDetailsTable->find()
+        // 2. Pagos (Detalles) Procesados este Año (Aprobados o Rechazados)
+        $procesadosAnio = $paymentDetailsTable->find()
             ->where([
-                'DATE(payment_date)' => $today,
+                'YEAR(payment_date)' => $currentYear,
                 'payment_status_id IN' => [2, 3]
             ])
             ->count();
@@ -264,8 +264,8 @@ class PaymentsController extends AppController
             ->count();
 
         $resumen = [
-            'cobrado_hoy' => $sumResult ? (float) $sumResult->total : 0,
-            'pagos_procesados_hoy' => $procesadosHoy,
+            'cobrado_anio' => $sumResult ? (float) $sumResult->total : 0,
+            'pagos_procesados_anio' => $procesadosAnio,
             'pendientes_totales' => $pendientesTotales,
         ];
 
