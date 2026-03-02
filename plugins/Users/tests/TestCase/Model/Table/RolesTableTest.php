@@ -55,21 +55,39 @@ class RolesTableTest extends TestCase
      * Test validationDefault method
      *
      * @return void
-     * @link \Users\Model\Table\RolesTable::validationDefault()
      */
     public function testValidationDefault(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $validator = $this->Roles->getValidator('default');
+
+        // Test missing name
+        $errors = $validator->validate(['description' => 'Only desc']);
+        $this->assertArrayHasKey('name', $errors);
+
+        // Test valid data
+        $data = [
+            'name' => 'Support',
+            'description' => 'Support role',
+        ];
+        $errors = $validator->validate($data);
+        $this->assertEmpty($errors);
     }
 
     /**
      * Test buildRules method
      *
      * @return void
-     * @link \Users\Model\Table\RolesTable::buildRules()
      */
     public function testBuildRules(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $role = $this->Roles->newEntity([
+            'name' => 'Test Role',
+            'description' => 'Test description',
+            'access_level' => 1,
+            'active' => 1,
+        ]);
+        $success = $this->Roles->save($role);
+        $this->assertNotFalse($success);
     }
+
 }

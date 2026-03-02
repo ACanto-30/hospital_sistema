@@ -19,7 +19,7 @@ class Role extends Entity
     protected array $_accessible = [
         'name' => true,
         'description' => true,
-        'level' => true,
+        'access_level' => true,
         'active' => true,
         'created_at' => true,
     ];

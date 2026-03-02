@@ -17,12 +17,18 @@ class RolesFixture extends TestFixture
             [
                 'id' => 1,
                 'name' => 'Administrator',
+                'description' => 'Admin role',
+                'access_level' => 100,
+                'active' => 1,
                 'created' => '2026-01-01 00:00:00',
                 'modified' => '2026-01-01 00:00:00',
             ],
             [
                 'id' => 2,
                 'name' => 'User',
+                'description' => 'User role',
+                'access_level' => 10,
+                'active' => 1,
                 'created' => '2026-01-01 00:00:00',
                 'modified' => '2026-01-01 00:00:00',
             ],

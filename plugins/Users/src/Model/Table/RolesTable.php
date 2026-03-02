@@ -47,8 +47,8 @@ class RolesTable extends Table
             ->allowEmptyString('description');
 
         $validator
-            ->integer('level')
-            ->allowEmptyString('level');
+            ->integer('access_level')
+            ->allowEmptyString('access_level');
 
         $validator
             ->boolean('active')

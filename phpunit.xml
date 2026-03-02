@@ -28,7 +28,12 @@
     <testsuite name="Associates">
       <directory>plugins/Associates/tests/TestCase/</directory>
     </testsuite>
+
+    <testsuite name="Users">
+      <directory>plugins/Users/tests/TestCase/</directory>
+    </testsuite>
   </testsuites>
+
 
   <source>
     <include>
