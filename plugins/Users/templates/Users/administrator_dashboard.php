@@ -33,8 +33,7 @@ $adminNombre = $currentUser->full_name ?? $currentUser->username ?? 'Administrad
          TABS (USERS / ASSOCIATES)
     ========================== -->
     <div class="summary-grid">
-      <div class="summary-card <?= $listType === 'users' ? 'active-tab' : '' ?>"
-           onclick="window.location='?type=users'" style="cursor:pointer;">
+      <div class="summary-card <?= $listType === 'users' ? 'active-tab' : '' ?>" onclick="window.location='?type=users'" style="cursor:pointer;">
         <div class="card-content">
           <div class="card-info">
             <strong class="section-title">Usuarios</strong>
@@ -44,8 +43,7 @@ $adminNombre = $currentUser->full_name ?? $currentUser->username ?? 'Administrad
         </div>
       </div>
 
-      <div class="summary-card <?= $listType === 'associates' ? 'active-tab' : '' ?>"
-           onclick="window.location='?type=associates'" style="cursor:pointer;">
+      <div class="summary-card <?= $listType === 'associates' ? 'active-tab' : '' ?>" onclick="window.location='?type=associates'" style="cursor:pointer;">
         <div class="card-content">
           <div class="card-info">
             <strong class="section-title">Asociados</strong>
@@ -78,313 +76,209 @@ $adminNombre = $currentUser->full_name ?? $currentUser->username ?? 'Administrad
       <hr class="divider">
 
       <!-- ===================== -->
-<!-- 🔹 FILTROS ASOCIADOS -->
-<!-- ===================== -->
-<?php if ($listType === 'associates'): ?>
+      <!-- 🔹 FILTROS ASOCIADOS -->
+      <!-- ===================== -->
+      <?php if ($listType === 'associates'): ?>
 
-  <h3 style="margin-bottom:12px;font-weight:600;color:#222;">🎯 Panel de Asociados</h3>
+        <h3 style="margin-bottom:12px;font-weight:600;color:#222;">🎯 Panel de Asociados</h3>
 
-  <?php
-    $selectedMonth = $this->request->getQuery('birth_month');
-    $showAllMonths = $this->request->getQuery('all_birthdays');
-    $monthNames = [
-      '01' => 'Enero', '02' => 'Febrero', '03' => 'Marzo', '04' => 'Abril',
-      '05' => 'Mayo', '06' => 'Junio', '07' => 'Julio', '08' => 'Agosto',
-      '09' => 'Septiembre', '10' => 'Octubre', '11' => 'Noviembre', '12' => 'Diciembre'
-    ];
-    $currentMonth = date('m');
-  ?>
+        <?php
+        $selectedMonth = $this->request->getQuery('birth_month');
+        $showAllMonths = $this->request->getQuery('all_birthdays');
+        $monthNames = [
+          '01' => 'Enero',
+          '02' => 'Febrero',
+          '03' => 'Marzo',
+          '04' => 'Abril',
+          '05' => 'Mayo',
+          '06' => 'Junio',
+          '07' => 'Julio',
+          '08' => 'Agosto',
+          '09' => 'Septiembre',
+          '10' => 'Octubre',
+          '11' => 'Noviembre',
+          '12' => 'Diciembre'
+        ];
+        $currentMonth = date('m');
+        ?>
 
- <!-- 💬 Mensaje informativo -->
-<?php
-  $infoMessage = '';
-  $infoStyle = '';
+        <!-- 💬 Mensaje informativo -->
+        <?php
+        $infoMessage = '';
+        $infoStyle = '';
 
-  if (!empty($selectedMonth)) {
-      $infoMessage = "🎉 Cumpleañeros del mes de <strong>{$monthNames[$selectedMonth]}</strong>.";
-      $infoStyle = "background:#e7f3ff;border-left:4px solid #1e90ff;";
-  } else {
-      $infoMessage = "🎂 Este mes hay <strong>{$birthdayCount}</strong> cumpleañero" . ($birthdayCount == 1 ? '' : 's') . " registrados.";
-      $infoStyle = "background:#f9f9f9;border-left:4px solid #aaa;";
-  }
-?>
-<div style="<?= $infoStyle ?>padding:10px 15px;border-radius:6px;margin-bottom:15px;">
-  <?= $infoMessage ?>
-</div>
-
-<!-- ===================== -->
-<!-- 🔹 FILTRO DE BÚSQUEDA -->
-<!-- ===================== -->
-
-<div class="search-container" style="margin-bottom:25px;background:#fafafa;border:1px solid #ddd;border-radius:10px;padding:20px;">
-
-<form id="filterForm" onsubmit="return false;">
-
-<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:15px;align-items:end;">
-
-    <!-- 🔍 Buscar -->
-    <div>
-        <label style="font-weight:600;">🔍 Buscar</label>
-        <input type="text" id="searchInput" placeholder="Nombre, cédula o teléfono..."
-            style="border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;">
-    </div>
-
-    <!-- 📋 Plan -->
-    <div>
-        <label style="font-weight:600;">Plan</label>
-        <select id="planFilter"
-            style="border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;">
-            <option value="">Todos</option>
-            <?php foreach ($insurancePlans as $id => $name): ?>
-                <option value="<?= strtolower($name) ?>"><?= $name ?></option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-
-    <!-- 🔵 Estado -->
-    <div>
-        <label style="font-weight:600;">Estado</label>
-        <select id="statusFilter"
-            style="border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;">
-            <option value="">Todos</option>
-            <option value="activo">Activo</option>
-            <option value="inactivo">Inactivo</option>
-        </select>
-    </div>
-
-    <!-- 📌 Condición -->
-    <div>
-        <label style="font-weight:600;">Condición</label>
-        <select id="conditionFilter"
-            style="border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;">
-            <option value="">Todas</option>
-            <?php foreach ($conditionsList as $id => $name): ?>
-                <option value="<?= strtolower($name) ?>"><?= $name ?></option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-
-    <!-- Botón -->
-    <div>
-        <button type="button" id="filterBtn"
-            style="background:#1e90ff;color:#fff;border:none;border-radius:6px;padding:7px 12px;cursor:pointer;">
-            Buscar
-        </button>
-    </div>
-
-</div>
-</form>
-</div>
-
-
-<!-- ===================== -->
-<!-- 🔹 TABLA -->
-<!-- ===================== -->
-
-<style>
-#associatesTable {
-    width:100%;
-    border-collapse:collapse;
-    margin:0 auto;           /* Centra la tabla */
-}
-
-#associatesTable th,
-#associatesTable td {
-    text-align:center;       /* Centra títulos y datos */
-}
-</style>
-
-<table id="associatesTable">
-    <thead>
-        <tr style="background:#e9f5ee;">
-            <th>ID</th>
-            <th>Cédula</th>
-            <th>Asociado</th>
-            <th>Plan Actual</th>
-            <th>Estado</th>
-            <th>Condición</th>
-        </tr>
-    </thead>
-
-    <tbody>
-
-<?php if (!empty($data)): ?>
-    <?php foreach ($data as $associate): ?>
-        <tr>
-            <td><?= $associate->id ?></td>
-
-            <td><?= h($associate->id_card) ?></td>
-
-            <td>
-                <?= h($associate->first_name . ' ' . $associate->last_name) ?>
-            </td>
-
-            <td>
-                <?= h($associate->insurance_plan->name ?? '') ?>
-            </td>
-
-            <td>
-                <?= $associate->member_status == 1 ? 'Activo' : 'Inactivo' ?>
-            </td>
-
-<!--
-<td>
-    <?php
-    if (!empty($associate->associates_conditions)) {
-        foreach ($associate->associates_conditions as $ac) {
-            echo h($ac->condition->condition) . '<br>';
+        if (!empty($selectedMonth)) {
+          $infoMessage = "🎉 Cumpleañeros del mes de <strong>{$monthNames[$selectedMonth]}</strong>.";
+          $infoStyle = "background:#e7f3ff;border-left:4px solid #1e90ff;";
+        } else {
+          $infoMessage = "🎂 Este mes hay <strong>{$birthdayCount}</strong> cumpleañero" . ($birthdayCount == 1 ? '' : 's') . " registrados.";
+          $infoStyle = "background:#f9f9f9;border-left:4px solid #aaa;";
         }
-    }
-    ?>
-</td>
--->
+        ?>
+        <div style="<?= $infoStyle ?>padding:10px 15px;border-radius:6px;margin-bottom:15px;">
+          <?= $infoMessage ?>
+        </div>
 
-<td>
-    <?php
-        if ($associate->id == 1) {
-            echo "Artritis";
-        } elseif ($associate->id == 2) {
-            echo "Hipertensión";
-        }
-    ?>
-</td>
-            
-        </tr>
-    <?php endforeach; ?>
-<?php else: ?>
-    <tr>
-        <td colspan="7" style="text-align:center;color:#999;">
-            No hay asociados registrados.
-        </td>
-    </tr>
-<?php endif; ?>
-</tbody>
+        <!-- ===================== -->
+        <!-- 🔹 FILTRO DE BÚSQUEDA -->
+        <!-- ===================== -->
+
+        <div class="search-container" style="margin-bottom:25px;background:#fafafa;border:1px solid #ddd;border-radius:10px;padding:20px;">
+
+          <form id="filterForm" onsubmit="return false;">
+
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:15px;align-items:end;">
+
+              <!-- 🔍 Buscar -->
+              <div>
+                <label style="font-weight:600;">🔍 Buscar</label>
+                <input type="text" id="searchInput" placeholder="Nombre, cédula o teléfono..." style="border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;">
+              </div>
+
+              <!-- 📋 Plan -->
+              <div>
+                <label style="font-weight:600;">Plan</label>
+                <select id="planFilter" style="border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;">
+                  <option value="">Todos</option>
+                  <?php foreach ($insurancePlans as $id => $name): ?>
+                    <option value="<?= strtolower($name) ?>"><?= $name ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+
+              <!-- 🔵 Estado -->
+              <div>
+                <label style="font-weight:600;">Estado</label>
+                <select id="statusFilter" style="border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;">
+                  <option value="">Todos</option>
+                  <option value="activo">Activo</option>
+                  <option value="inactivo">Inactivo</option>
+                </select>
+              </div>
+
+              <!-- 📌 Condición -->
+              <div>
+                <label style="font-weight:600;">Condición</label>
+                <select id="conditionFilter" style="border-radius:6px;border:1px solid #ccc;padding:6px;width:100%;">
+                  <option value="">Todas</option>
+                  <?php foreach ($conditionsList as $id => $name): ?>
+                    <option value="<?= strtolower($name) ?>"><?= $name ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+
+              <!-- Botón -->
+              <div>
+                <button type="button" id="filterBtn" style="background:#1e90ff;color:#fff;border:none;border-radius:6px;padding:7px 12px;cursor:pointer;">
+                  Buscar
+                </button>
+              </div>
+
+            </div>
+          </form>
+        </div>
 
 
-<!-- ===================== -->
-<!-- 🔹 SCRIPT DE FILTRADO -->
-<!-- ===================== -->
+        <!-- ===================== -->
+        <!-- 🔹 TABLA -->
+        <!-- ===================== -->
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
+        <!-- ===================== -->
+        <!-- 🔹 SCRIPT DE FILTRADO -->
+        <!-- ===================== -->
 
-    const searchInput = document.getElementById("searchInput");
-    const planFilter = document.getElementById("planFilter");
-    const statusFilter = document.getElementById("statusFilter");
-    const conditionFilter = document.getElementById("conditionFilter");
-    const filterBtn = document.getElementById("filterBtn");
+        <script>
+          document.addEventListener("DOMContentLoaded", function () {
 
-    const rows = document.querySelectorAll("#associatesTable tbody tr");
-    const noResults = document.getElementById("noResults");
+            const searchInput = document.getElementById("searchInput");
+            const planFilter = document.getElementById("planFilter");
+            const statusFilter = document.getElementById("statusFilter");
+            const conditionFilter = document.getElementById("conditionFilter");
+            const filterBtn = document.getElementById("filterBtn");
 
-    function filterTable() {
+            // Seleccionar las filas de la tabla de abajo (dash-table)
+            const rows = document.querySelectorAll(".dash-table tbody tr:not(.edit-row)");
 
-        const searchValue = searchInput.value.toLowerCase();
-        const planValue = planFilter.value.toLowerCase();
-        const statusValue = statusFilter.value.toLowerCase();
-        const conditionValue = conditionFilter.value.toLowerCase();
+            function filterTable() {
+              const searchValue = searchInput.value.toLowerCase();
+              const planValue = planFilter.value.toLowerCase();
+              const statusValue = statusFilter.value.toLowerCase();
+              const conditionValue = conditionFilter.value.toLowerCase();
 
-        let visibleCount = 0;
+              let visibleCount = 0;
 
-        rows.forEach(row => {
+              rows.forEach(row => {
+                // Saltamos filas que no sean de datos (por si acaso)
+                if (row.id && (row.id.startsWith('edit-') || row.id.startsWith('charge-'))) return;
 
-            const rowText = row.innerText.toLowerCase();
-            const planText = row.children[3]?.innerText.toLowerCase() || "";
-            const statusText = row.children[4]?.innerText.toLowerCase() || "";
-            const conditionText = row.children[5]?.innerText.toLowerCase() || "";
+                const rowText = row.innerText.toLowerCase();
+                const planText = row.children[3]?.innerText.toLowerCase() || "";
+                const statusText = row.children[4]?.innerText.toLowerCase() || "";
+                const conditionText = row.children[5]?.innerText.toLowerCase() || "";
 
-            let show = true;
+                let show = true;
 
-            if (searchValue && !rowText.includes(searchValue)) show = false;
-            if (planValue && !planText.includes(planValue)) show = false;
-            if (statusValue && !statusText.includes(statusValue)) show = false;
-            if (conditionValue && !conditionText.includes(conditionValue)) show = false;
+                if (searchValue && !rowText.includes(searchValue)) show = false;
+                if (planValue && !planText.includes(planValue)) show = false;
+                if (statusValue && !statusText.includes(statusValue)) show = false;
+                if (conditionValue && !conditionText.includes(conditionValue)) show = false;
 
-            row.style.display = show ? "" : "none";
+                row.style.display = show ? "" : "none";
 
-            if (show) visibleCount++;
-        });
+                if (show) visibleCount++;
+              });
+            }
 
-        noResults.style.display = visibleCount === 0 ? "block" : "none";
-    }
+            if (filterBtn) filterBtn.addEventListener("click", filterTable);
+            if (searchInput) searchInput.addEventListener("keyup", filterTable);
+            if (planFilter) planFilter.addEventListener("change", filterTable);
+            if (statusFilter) statusFilter.addEventListener("change", filterTable);
+            if (conditionFilter) conditionFilter.addEventListener("change", filterTable);
 
-    filterBtn.addEventListener("click", filterTable);
-    searchInput.addEventListener("keyup", filterTable);
-    planFilter.addEventListener("change", filterTable);
-    statusFilter.addEventListener("change", filterTable);
-    conditionFilter.addEventListener("change", filterTable);
+          });
+        </script>
 
-});
-</script>
+        <!-- 🎂 Mostrar cumpleañeros del día actual -->
+        <div style="margin-top:20px;display:flex;align-items:center;gap:10px;padding:10px 15px;background:#eaf8e8;border:1px solid #8fd88f;border-radius:8px;">
+          <?= $this->Form->checkbox('today_birthdays', [
+            'hiddenField' => false,
+            'checked' => (bool) $this->request->getQuery('today_birthdays'),
+            'label' => false,
+            'id' => 'showTodayBirthdaysCheckbox'
+          ]) ?>
+          <label for="showTodayBirthdaysCheckbox" style="cursor:pointer;font-weight:600;color:#0b7a0b;">
+            🎉 Mostrar cumpleañeros de hoy
+          </label>
+        </div>
+        <?= $this->Form->end() ?>
+        <!-- Removed extra </div> that closed summary-card too early -->
 
-      <!-- 🎂 Mostrar cumpleañeros del día actual -->
-<div style="margin-top:20px;display:flex;align-items:center;gap:10px;padding:10px 15px;background:#eaf8e8;border:1px solid #8fd88f;border-radius:8px;">
-  <?= $this->Form->checkbox('today_birthdays', [
-    'hiddenField' => false,
-    'checked' => (bool)$this->request->getQuery('today_birthdays'),
-    'label' => false,
-    'id' => 'showTodayBirthdaysCheckbox'
-  ]) ?>
-  <label for="showTodayBirthdaysCheckbox" style="cursor:pointer;font-weight:600;color:#0b7a0b;">
-    🎉 Mostrar cumpleañeros de hoy
-  </label>
-</div>
-<?= $this->Form->end() ?>
-</div>
+        <!-- ===================== -->
+        <!-- 🔹 SCRIPT -->
+        <!-- ===================== -->
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            const todayCheckbox = document.getElementById('showTodayBirthdaysCheckbox');
+            todayCheckbox.addEventListener('change', function () {
+              const url = new URL(window.location.href);
+              if (todayCheckbox.checked) {
+                url.searchParams.set('today_birthdays', '1');
+              } else {
+                url.searchParams.delete('today_birthdays');
+              }
+              window.location.href = url.toString();
+            });
+          });
+        </script>
 
-<!-- ===================== -->
-<!-- 🔹 SCRIPT -->
-<!-- ===================== -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const todayCheckbox = document.getElementById('showTodayBirthdaysCheckbox');
-  todayCheckbox.addEventListener('change', function() {
-    const url = new URL(window.location.href);
-    if (todayCheckbox.checked) {
-      url.searchParams.set('today_birthdays', '1');
-    } else {
-      url.searchParams.delete('today_birthdays');
-    }
-    window.location.href = url.toString();
-  });
-});
-</script>
-
-<?php endif; ?>
-<?php if (!empty($todayBirthdaysList)): ?>
-  <div style="margin-top:25px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:15px;">
-    <h4 style="margin:0 0 10px 0;color:#166534;">🎉 Cumpleañeros de hoy (<?= date('d/m/Y') ?>)</h4>
-    <table style="width:100%;border-collapse:collapse;">
-      <thead>
-        <tr style="background:#dcfce7;color:#166534;text-align:left;">
-          <th style="padding:6px;">#</th>
-          <th style="padding:6px;">Nombre</th>
-          <th style="padding:6px;">Fecha de Nacimiento</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php $n = 1; foreach ($todayBirthdaysList as $person): ?>
-          <tr style="border-bottom:1px solid #d1fae5;">
-            <td style="padding:6px;"><?= $n++ ?></td>
-            <td style="padding:6px;"><?= h($person->first_name . ' ' . $person->last_name) ?></td>
-            <td style="padding:6px;"><?= date('d/m/Y', strtotime($person->birth_date)) ?></td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-  </div>
-<?php elseif ($this->request->getQuery('today_birthdays')): ?>
-  <div style="margin-top:20px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:15px;color:#b91c1c;">
-    🚫 No hay cumpleañeros registrados para hoy (<?= date('d/m/Y') ?>).
-  </div>
-<?php endif; ?>
+      <?php endif; ?>
 
       <!-- ============================================================
            TABLA PRINCIPAL (USERS / ASSOCIATES) - 
       ============================================================= -->
       <div class="table-responsive">
         <table class="dash-table">
-          <thead>
+          <thead <?= $listType === 'associates' ? 'style="background:#e9f5ee;"' : '' ?>>
             <tr>
               <?php if ($listType === 'users'): ?>
                 <th><?= $this->Paginator->sort('id', 'ID') ?></th>
@@ -400,6 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <th>Asociado</th>
                 <th>Plan Actual</th>
                 <th>Estado</th>
+                <th>Condición</th>
                 <th>Acciones</th>
               <?php endif; ?>
             </tr>
@@ -428,10 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   <td class="actions">
 
                     <!-- 📝 Editar usuario -->
-                    <button type="button"
-                            class="action-icon"
-                            onclick="toggleEdit('edit-user-row-<?= $item->id ?>')"
-                            title="Editar Usuario">📝</button>
+                    <button type="button" class="action-icon" onclick="toggleEdit('edit-user-row-<?= $item->id ?>')" title="Editar Usuario">📝</button>
 
                     <!-- Activar / Desactivar -->
                     <?php if (($item->status ?? '') === 'activo'): ?>
@@ -485,25 +377,25 @@ document.addEventListener('DOMContentLoaded', function() {
                             'type' => 'email'
                           ]) ?>
                         </div>
-                       <div>
-  <label class="muted small">Rol</label>
+                        <div>
+                          <label class="muted small">Rol</label>
 
-  <?php
-    
-    $roleName = $item->role->name ?? 'Sin rol';
-  ?>
+                          <?php
 
-  <?= $this->Form->control('role_show', [
-    'label' => false,
-    'value' => $roleName,
-    'class' => 'form-input',
-    'disabled' => true
-  ]) ?>
+                          $roleName = $item->role->name ?? 'Sin rol';
+                          ?>
 
-  <?php
-    echo $this->Form->hidden('role_id', ['value' => $item->role_id]);
-  ?>
-</div>
+                          <?= $this->Form->control('role_show', [
+                            'label' => false,
+                            'value' => $roleName,
+                            'class' => 'form-input',
+                            'disabled' => true
+                          ]) ?>
+
+                          <?php
+                          echo $this->Form->hidden('role_id', ['value' => $item->role_id]);
+                          ?>
+                        </div>
                       </div>
 
                       <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
@@ -535,7 +427,7 @@ document.addEventListener('DOMContentLoaded', function() {
                       </div>
 
                       <!-- Extra si es asociado -->
-                      <?php if ((int)($item->role_id ?? 0) === 4): ?>
+                      <?php if ((int) ($item->role_id ?? 0) === 4): ?>
                         <hr class="divider" style="margin:18px 0;">
                         <h4 style="margin:0 0 12px 0;">🤝 Datos de Asociado</h4>
 
@@ -620,6 +512,17 @@ document.addEventListener('DOMContentLoaded', function() {
                       <?= h($item->member_status ?? 'inactivo') ?>
                     </span>
                   </td>
+                  <td>
+                    <?php
+                    if (!empty($item->associates_conditions)) {
+                      foreach ($item->associates_conditions as $ac) {
+                        echo '<span class="dash-badge" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a; margin-right:4px;">' . h($ac->condition->condition) . '</span>';
+                      }
+                    } else {
+                      echo '<span class="muted small">-</span>';
+                    }
+                    ?>
+                  </td>
                   <td class="actions">
                     <button type="button" class="action-icon" onclick="toggleEdit('edit-row-<?= $item->id ?>')" title="Editar Asociado">📝</button>
                     <button type="button" class="action-icon" onclick="toggleEdit('charge-row-<?= $item->id ?>')" title="Generar Cobro Manual">💵</button>
@@ -644,7 +547,7 @@ document.addEventListener('DOMContentLoaded', function() {
                      FILA EXPANDIBLE: EDIT ASSOCIATE
                 ========================== -->
                 <tr id="edit-row-<?= $item->id ?>" class="edit-row" style="display:none;">
-                  <td colspan="6">
+                  <td colspan="7">
                     <div class="edit-container">
                       <?= $this->Form->create(null, [
                         'url' => ['plugin' => 'Users', 'controller' => 'Users', 'action' => 'editAssociatePlan', $item->id]
@@ -731,7 +634,7 @@ document.addEventListener('DOMContentLoaded', function() {
                      FILA EXPANDIBLE: COBRO MANUAL
                 ========================== -->
                 <tr id="charge-row-<?= $item->id ?>" class="edit-row" style="display:none; background-color:#f0fdf4;">
-                  <td colspan="6">
+                  <td colspan="7">
                     <div class="edit-container" style="border-left-color:#059669;">
                       <h4 style="margin-top:0; color:#059669; font-size:1rem; margin-bottom:15px;">
                         💰 Generar Cobro Manual (Simulación Mensualidad)
@@ -787,149 +690,171 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <style>
   /* Botones mini */
-  .action-icon{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    width:32px;
-    height:32px;
-    background:#f3f4f6;
-    border:1px solid #d1d5db;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:1.1em;
+  .action-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
     transition: all 0.2s;
-    text-decoration:none;
-    line-height:1;
-    padding:0;
+    text-decoration: none;
+    line-height: 1;
+    padding: 0;
   }
-  .action-icon:hover{
-    background:#e5e7eb;
-    border-color:#9ca3af;
+
+  .action-icon:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
   }
-  .action-icon.active{ color:#059669; }
-  .action-icon.active:hover{
-    background:#ecfdf5;
-    border-color:#10b981;
+
+  .action-icon.active {
+    color: #059669;
+  }
+
+  .action-icon.active:hover {
+    background: #ecfdf5;
+    border-color: #10b981;
   }
 
   /* Filas expandibles */
-  .edit-row{
-    background-color:#f9fafb;
+  .edit-row {
+    background-color: #f9fafb;
     transition: all 0.3s ease;
   }
-  .edit-container{
-    padding:20px;
-    border-left:4px solid #4f46e5;
-    margin:10px;
-    background:white;
-    border-radius:8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+  .edit-container {
+    padding: 20px;
+    border-left: 4px solid #4f46e5;
+    margin: 10px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 
   /* Inputs */
   .form-select,
-  .form-input{
-    width:100%;
-    padding:8px 12px;
-    border:1px solid #d1d5db;
-    border-radius:6px;
-    font-size:0.9em;
+  .form-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9em;
   }
 
   /* Botones guardar/cancelar */
-  .btn-save{
-    background:#4f46e5;
-    color:white;
-    border:none;
-    padding:9px 15px;
-    border-radius:6px;
-    cursor:pointer;
-    font-weight:600;
+  .btn-save {
+    background: #4f46e5;
+    color: white;
+    border: none;
+    padding: 9px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
   }
-  .btn-cancel{
-    background:white;
-    color:#6b7280;
-    border:1px solid #d1d5db;
-    padding:8px 15px;
-    border-radius:6px;
-    cursor:pointer;
-    margin-left:5px;
+
+  .btn-cancel {
+    background: white;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 5px;
   }
 
   /* Para que acciones no bajen línea */
-  .actions{ white-space:nowrap; }
+  .actions {
+    white-space: nowrap;
+  }
 
   /* Tabs bonitos */
-  .summary-grid .summary-card{
+  .summary-grid .summary-card {
     position: relative;
     overflow: visible;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border:2px solid transparent;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    min-height:110px;
-    margin-top:0 !important;
-    padding:20px !important;
-    background:#fff;
-    box-sizing:border-box;
+    border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 110px;
+    margin-top: 0 !important;
+    padding: 20px !important;
+    background: #fff;
+    box-sizing: border-box;
   }
-  .summary-grid .card-content{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    width:100%;
+
+  .summary-grid .card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
   }
-  .summary-grid .card-info{ flex: 1; }
-  .summary-grid .card-icon{
-    font-size:2rem;
-    opacity:0.6;
-    margin-left:15px;
+
+  .summary-grid .card-info {
+    flex: 1;
   }
-  .summary-grid .summary-card.active-tab{
-    background:#ffffff;
-    border-color:#157347;
+
+  .summary-grid .card-icon {
+    font-size: 2rem;
+    opacity: 0.6;
+    margin-left: 15px;
+  }
+
+  .summary-grid .summary-card.active-tab {
+    background: #ffffff;
+    border-color: #157347;
     box-shadow: 0 20px 35px rgba(21, 115, 71, 0.2);
     transform: scale(1.1);
     z-index: 5;
   }
-  .summary-grid .summary-card:not(.active-tab):not(.stats-card){
-    opacity:0.8;
+
+  .summary-grid .summary-card:not(.active-tab):not(.stats-card) {
+    opacity: 0.8;
     transform: scale(0.94);
   }
-  .summary-grid .summary-card.active-tab::after{
-    content:"";
-    position:absolute;
-    top:0; left:0;
-    width:100%;
-    height:6px;
+
+  .summary-grid .summary-card.active-tab::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
     background: linear-gradient(90deg, #157347, #34d399);
   }
-  .summary-grid .summary-card.active-tab .section-title{
-    color:#157347;
-    font-size:1.1em;
+
+  .summary-grid .summary-card.active-tab .section-title {
+    color: #157347;
+    font-size: 1.1em;
   }
-  .summary-grid .summary-card:hover:not(.stats-card):not(.active-tab){
-    opacity:1;
+
+  .summary-grid .summary-card:hover:not(.stats-card):not(.active-tab) {
+    opacity: 1;
     transform: scale(1);
     border-color: rgba(21, 115, 71, 0.3);
   }
-  .stats-card{
-    background:#f8fafc !important;
-    border:1px solid #e2e8f0 !important;
-    opacity:0.9;
+
+  .stats-card {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    opacity: 0.9;
   }
-  .summary-grid .summary-card .muted{
-    font-size:0.85rem;
-    margin-top:4px;
-    margin-bottom:0;
+
+  .summary-grid .summary-card .muted {
+    font-size: 0.85rem;
+    margin-top: 4px;
+    margin-bottom: 0;
   }
 </style>
 
 <script>
   // Mostrar/ocultar filas expandibles
-  function toggleEdit(rowId){
+  function toggleEdit(rowId) {
     const row = document.getElementById(rowId);
     if (!row) return;
     row.style.display = (row.style.display === 'none' || row.style.display === '') ? 'table-row' : 'none';
